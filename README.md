@@ -14,7 +14,7 @@ Date: 1/26/2016
 
 #### 1) Detection
 
-##### `Edetect.m`
+##### Edetect.m
 
 	`Edetect` is a basic energy detector designed for use with xwav files.
 
@@ -48,7 +48,7 @@ Date: 1/26/2016
 
 #### 2) Make LTSA snippets
 
-##### `mkLTSAsessions.m`
+##### mkLTSAsessions.m
 
 	`mkLTSAsessions` prepares small LTSAs for each detection bout.
 
@@ -80,7 +80,7 @@ Date: 1/26/2016
 
 #### 3) Edit detections
 
-##### `detEdit.m`
+##### detEdit.m
 
 	##### Input:
 
@@ -106,7 +106,7 @@ Date: 1/26/2016
 
 #### 4) Update detections
 
-##### `modDet.m`
+##### modDet.m
 
 	##### Input
 

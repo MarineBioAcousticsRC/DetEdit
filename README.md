@@ -18,7 +18,7 @@ Date: 1/26/2016
 
 	`Edetect` is a basic energy detector designed for use with xwav files.
 
-	#####Input:
+	**Input:**
 
 	User is prompted to supply inputs including:
 
@@ -27,7 +27,7 @@ Date: 1/26/2016
 	b) A directory containing xwavs.
 	
 
-	#####Output:
+	**Output:**
 
 	A `*_TPWS.mat` file containing matrices of detected signal parameters.
 
@@ -52,7 +52,7 @@ Date: 1/26/2016
 
 	`mkLTSAsessions` prepares small LTSAs for each detection bout.
 
-	##### Input:
+	**Input:**
 
 	a) User is prompted to input a code to identify the detected species. 
 
@@ -73,7 +73,7 @@ Date: 1/26/2016
 	b) User is prompted to select transfer function file
 	
 
-	##### Output:
+	**Output:**
 
 	A `*_LTSA.mat` file is produced.
 
@@ -82,7 +82,7 @@ Date: 1/26/2016
 
 ##### detEdit.m
 
-	##### Input:
+	**Input:**
 
 	User is prompted to:
 
@@ -96,11 +96,11 @@ Date: 1/26/2016
 
 	e) Starting session (use `1` to start with first bout)
 
-	##### Editing tools & codes:
+	**Editing tools & codes:**
 
 	TODO
 
-	##### Output
+	**Output**
 
 	TODO
 
@@ -108,10 +108,10 @@ Date: 1/26/2016
 
 ##### modDet.m
 
-	##### Input
+	**Input**
 
 	TODO
 
-	##### Output
+	**Output**
 
 	TODO

@@ -14,7 +14,7 @@ Date: 1/26/2016
 
 #### 1) Detection
 
-- `Edetect.m`
+##### `Edetect.m`
 
 	`Edetect` is a basic energy detector designed for use with xwav files.
 
@@ -39,7 +39,7 @@ Date: 1/26/2016
 
 		- MSP = spectrum (bandpassed)
 
-		_Optional_:
+		*Optional*:
 
 		- MUSN = unfiltered timeseries
 
@@ -48,7 +48,7 @@ Date: 1/26/2016
 
 #### 2) Make LTSA snippets
 
-- `mkLTSAsessions.m`
+##### `mkLTSAsessions.m`
 
 	`mkLTSAsessions` prepares small LTSAs for each detection bout.
 
@@ -58,17 +58,17 @@ Date: 1/26/2016
 
 	Current options include:
 
-	`Ko` or `k`: Kogia
+		`Ko` or `k`: Kogia
 
-	`Zc` or `z`: Cuvier's beaked whale
+		`Zc` or `z`: Cuvier's beaked whale
 
-	`Me` or `m`: Gervais' beaked whale
+		`Me` or `m`: Gervais' beaked whale
 
-	`BWG` or `g`: Unidentified beaked whale BWG
+		`BWG` or `g`: Unidentified beaked whale BWG
 
-	`Md` or `d`: Beaked whale BW31
-
-	`De` or `de`: Delphinid
+		`Md` or `d`: Beaked whale BW31
+	
+		`De` or `de`: Delphinid
 
 	b) User is prompted to select transfer function file
 	
@@ -80,7 +80,7 @@ Date: 1/26/2016
 
 #### 3) Edit detections
 
-- `detEdit.m`
+##### `detEdit.m`
 
 	##### Input:
 
@@ -106,7 +106,7 @@ Date: 1/26/2016
 
 #### 4) Update detections
 
-- `modDet.m`
+##### `modDet.m`
 
 	##### Input
 

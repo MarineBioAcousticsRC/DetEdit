@@ -21,7 +21,7 @@ p1low = 100; p1high = 170; % PP plot window
 % get user input and set up file names
 stn = input('Enter Project Name (MC GC DT SOCAL): ','s'); % site name
 dpn = input('Enter Deployment number + site (01 02 ...): ','s'); % deployment number
-itnum = input('Enter Iteration number (1 2 ...): ','s');  
+itnum = input('Enter Iteration number (1 2 ...): ','s');
 srate = input('Enter sample rate in kHz (eg 200 or 320): ');
 sp = input('Enter Species: Zc Me BWG Md Ko De ','s');
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
@@ -92,7 +92,7 @@ end
 % Get Directory with Detections
 disp('Select Directory with Detections');
 sdir = uigetdir('I:\','Select Directory with Detections');
-%  
+%
 % detpn = [sdir,['\',stn,'_',spe],'\'];
 detpn = [sdir,'\'];
 detfn = [stn,dpn,'_',spe,'_TPWS',itnum,'.mat'];
@@ -143,7 +143,7 @@ else
 end
 csp = MSP(ia,:);
 cl = cl + tf;
-% remove low amplitude 
+% remove low amplitude
 ib = find(cl > thres);
 disp([' Removed too low:',num2str(length(ia)-length(ib))]);
 ct = ct(ib);
@@ -414,7 +414,7 @@ while (k <= nb)
                 L = [];
                 L = find(dt(I-1) < dtTH);
                 if ~isempty(L)
-                    Ndt(bin) = length(L);   
+                    Ndt(bin) = length(L);
                     % number of InterDetection Interval under threshold
                     mdt(bin) = mean(dt(I(L)-1));
                 end
@@ -542,7 +542,7 @@ while (k <= nb)
 %     xmpp = []; xmsp = [];
 %     title(['Based on ',num2str(length(i)),' clicks']);
 % %     hold off
-% 
+%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % plots stuff now
     warning('off')
@@ -565,7 +565,7 @@ while (k <= nb)
         datestr(sb(k)),' Detect = ',num2str(nd)]};
     title(tstr);
     ylabel('RL [dB re 1\muPa]')
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     subplot(3,1,2)  % middle panel LTSA
     c = (contrast/100) .* pwr1 + bright;
@@ -590,7 +590,7 @@ while (k <= nb)
         set(H1,'Marker','.','MarkerFaceColor','b','LineStyle','none')
         set(H2,'Marker','o','MarkerFaceColor','c','LineStyle','none',...
             'Markersize',4.5)
-        
+
         if ff2 > 0
             hold on
             plot(AX(1),tfd(2:end),dtfd,'.r') % no need to double FD
@@ -603,10 +603,10 @@ while (k <= nb)
         datetick(AX(2),'x',15,'keeplimits')
         Ytick = 0:.05:dl; % make 0.05 Kogia, 0.2 BW
         set(AX(1),'YTick',Ytick)
-        
+
         Ytick2 = [.1 1 10 100 1000 10000];
         set(AX(2),'YTick',Ytick2)
-        
+
         ylabel('Time between detections [s]')
         ylabel(AX(2),'Det/bin')
         xlabel('Time [GMT]')

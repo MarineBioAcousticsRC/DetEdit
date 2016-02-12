@@ -16,7 +16,7 @@ gt = gth*60*60;    % gap time in sec
 % get user input and set up file names
 stn = input('Enter Project Name (MC GC DT HH JAX SOCAL): ','s'); % site name
 dpn = input('Enter Deployment number (01 02 11D ...): ','s'); % deployment number
-itnum = input('Enter Iteration number (1 2 ...): ','s');  
+itnum = input('Enter Iteration number (1 2 ...): ','s');
 sdn = [stn,dpn];    % site name and deployment number
 sp = input('Enter Species: Zc Me BWG Md Ko De ','s');
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
@@ -75,7 +75,7 @@ if (tfselect > 0)
     tffreq = A(1,:);
     tfuppc = A(2,:);
     fclose(fid);
-    
+
     tf = interp1(tffreq,tfuppc,tfselect,'linear','extrap');
     disp(['TF @',num2str(tfselect),' Hz =',num2str(tf)]);
 else
@@ -130,7 +130,7 @@ for k = 1:nltsas
     read_ltsahead_GoM
     sTime(k) = PARAMS.ltsa.start.dnum + doff;  % start time of ltsa files
     eTime(k) = PARAMS.ltsa.end.dnum + doff;    % end time of ltsa files
-   
+
     rfTime{k,:} = PARAMS.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
 end
 % hack fix
@@ -141,7 +141,7 @@ disp('done reading ltsa headers')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % find edges (start and end times) of bouts or sessions
-dt = diff(ct)*24*60*60; % time between detections 
+dt = diff(ct)*24*60*60; % time between detections
 %                           convert from days to seconds
 I = [];
 I = find(dt>gt);  % find start of gaps
@@ -169,7 +169,7 @@ while ib <= nb
             sb(ib+iadd) = sb(ib) + blim*iadd;
             %disp(['iadd-sb',num2str(iadd)])
         end
-        for imove = nb : -1 : ib 
+        for imove = nb : -1 : ib
             eb(imove+nadd) = eb(imove);
         end
         for iadd = 0 : 1 : (nadd - 1)
@@ -232,7 +232,7 @@ while (k <= nb)
         disp('K is empty - session spans two LTSAs')
         disp(['bout start time is ',datestr(sb(k))])
         disp(['bout end time is ',datestr(eb(k))])
-        
+
         Ks = [];
         Ks = find(sTime <= sb(k) & eTime >= sb(k));
         Ke = [];
@@ -242,7 +242,7 @@ while (k <= nb)
             k = k+1;
             continue
         end
-        
+
         Ls = [];
         Ls = find(rfTime{Ks,:} >= sb(k));
         Le = [];
@@ -282,7 +282,7 @@ while (k <= nb)
             dt = datenum([0 0 0 0 0 5]);
             ptLe = [t1:dt:t1 + (nbin-1)*dt];
         end
-        
+
         if isempty(Ls) || isempty(Le)
             disp('Error: Ls or Le are empty ')
             k = k + 1;
@@ -296,10 +296,10 @@ while (k <= nb)
                 disp(['bout start time is ',datestr(sb(k))])
         disp(['bout end time is ',datestr(eb(k))])
     end
-    
+
     disp(['Session: ',num2str(k),'  Start: ',datestr(sb(k)),'  End:',datestr(eb(k)),...
         '   Duration: ',num2str(24*60*60*bd(k)),' sec'])
-    
+
     k = k+1;
 end
 % save(fn2,'pwr','pt')

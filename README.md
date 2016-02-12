@@ -68,7 +68,12 @@ Date: 1/26/2016
      * Starting session (use **1** to start with first bout).  
 
    - **Editing tools & shortcuts:**
-  ToDo
+  Brushing - Matlab's paintbrush tool is used to label detections.
+  Colors have different meanings:
+     Red:
+     Green:
+     
+    
 
    - **Output:**
   ToDo

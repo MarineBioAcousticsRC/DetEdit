@@ -10,7 +10,7 @@ Copyright: J. A. Hildebrand 2016
 Date: 1/26/2016
 
 
-### Workflow
+### Workflow - really
 
 #### 1. Detect
 

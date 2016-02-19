@@ -1,4 +1,3 @@
-<img src="http://www.cetus.ucsd.edu/detEdit/GratefuldetEdit.jpg" data-canonical-src="http://www.cetus.ucsd.edu/detEdit/GratefuldetEdit.jpg" width="200" height="200" /> 
 # DetEdit
 
 Visual user-interface for acoustic detection annotation designed for use with HARP data (x.wav files).
@@ -10,7 +9,7 @@ Copyright: J. A. Hildebrand 2016
 Date: 1/26/2016
 
 
-### Workflow 
+### Workflow
 
 #### 1. Detect
 
@@ -77,7 +76,9 @@ Date: 1/26/2016
     
 
    - **Output:**
-  ToDo
+     *ID.mat - This file contains a 2xn matrix in which the first column contains the detection time, and the second column contains an ID number associated with that detection. The ID number is given by the brush color used by the analyste to identify that detection type.
+     *FD.mat - This file contains a 1Xn vector consisting of the times of all detections marked as false positives by the user.
+     NOTE: ID.mat and FD.mat files are updated each time a bout is edited.
 
 #### 4. Update detections
 

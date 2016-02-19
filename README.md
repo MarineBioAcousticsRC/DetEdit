@@ -1,3 +1,4 @@
+<img src="http://www.cetus.ucsd.edu/detEdit/GratefuldetEdit.jpg" data-canonical-src="http://www.cetus.ucsd.edu/detEdit/GratefuldetEdit.jpg" width="200" height="200" /> 
 # DetEdit
 
 Visual user-interface for acoustic detection annotation designed for use with HARP data (x.wav files).
@@ -9,7 +10,7 @@ Copyright: J. A. Hildebrand 2016
 Date: 1/26/2016
 
 
-### Workflow
+### Workflow 
 
 #### 1. Detect
 

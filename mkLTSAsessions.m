@@ -12,7 +12,8 @@ tic % start timer
 % set some parameters
 gth = .5;    % gap time in hrs between sessions
 gt = gth*60*60;    % gap time in sec
-
+ltsamax = 6; % length of ltsa window
+thres = 80;
 % get user input and set up file names
 stn = input('Enter Project Name (MC GC DT HH JAX SOCAL): ','s'); % site name
 dpn = input('Enter Deployment number (01 02 11D ...): ','s'); % deployment number
@@ -25,6 +26,7 @@ if (strcmp(sp,'Ko') || strcmp(sp,'k'))
 elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
     specchar = 'Z'; %Simone abbreviations for BW species
     spe = 'Cuviers';  tfselect = 40200; % freq used for transfer function
+        thres = 121;
 elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
     specchar = 'M'; %Simone abbreviations for BW species
     spe = 'Gervais'; tfselect = 40200; % freq used for transfer function
@@ -37,6 +39,14 @@ elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
 elseif (strcmp(sp,'De') || strcmp(sp,'de'))
     %specchar = 'D'; %Simone abbreviations for BW species
     spe = 'Delphin';  tfselect = 0; % freq used for transfer function
+elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
+    %specchar = 'D'; %Simone abbreviations for BW species
+    spe = 'Porpoise';  tfselect = 0; % freq used for transfer function
+    thres = 100;
+elseif (strcmp(sp,'MFA') || strcmp(sp,'mfa'))
+    spe = 'MFA';  tfselect = 4000; % freq used for transfer function
+    ltsamax = .5; % length of ltsa window
+    thres = 80;
 else
     disp(' Bad Species type')
     return
@@ -101,10 +111,16 @@ if (length(uMTT) ~= length(MTT))
     disp([' TimeLevel Data NOT UNIQUE - removed:   ', ...
         num2str(length(ic) - length(ia))]);
 end
-ct0 = MTT(ia)';
-cl0 = tf + MPP(ia)';
+[r,c] = size(MTT); %get shape of array
+if (r > c)
+    ct = MTT(ia);
+else
+    ct = MTT(ia)';
+end
+ct0 = ct;
+cl0 = tf + ct;
 % remove low amplitude clicks
-ib = find(cl0 > 109);
+ib = find(cl0 > thres);
 ct = ct0(ib);
 cl = cl0(ib);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,9 +168,9 @@ nb = length(sb);        % number of bouts
 bd = (eb - sb);      % duration of bout in days
 %find bouts > 10 sec long
 % bd10 = find(bd > 1 / (60*60*24)); % for Kogia 10 sec
-disp(['Number Bouts: ',num2str(length(bd))])
+% disp(['Number Bouts: ',num2str(length(bd))])
 % limit the length of a bout
-blim = 6/24;       % 6 hr bout length limit
+blim = ltsamax/24;       % 6 hr bout length limit
 ib = 1;
 while ib <= nb
     %disp([' ib = ',num2str(ib)]);
@@ -181,7 +197,7 @@ while ib <= nb
     ib = ib + 1;
 end
 bd = (eb - sb);   %duration bout in sec
-
+disp(['Number Bouts : ',num2str(nb)])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 k = 1;

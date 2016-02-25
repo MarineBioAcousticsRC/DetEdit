@@ -67,17 +67,21 @@ Date: 1/26/2016
      * select directory containing `_TPWS.mat` and `_LTSA.mat` files.  
      * Starting session (use **1** to start with first bout).  
 
-   - **Editing tools & shortcuts:**
-  Brushing - Matlab's paintbrush tool is used to label detections.
-  Colors have different meanings:
-     Red:
-     Green:
+   - **Editing tools & shortcuts:**  
+  Brushing - Matlab's paintbrush tool is used to label detections.  
+  Colors have different meanings:  
+     Red:  
+     Green:  
+
+   Keyboard Shortcuts:  
+
      
     
 
    - **Output:**
      *ID.mat - This file contains a 2xn matrix in which the first column contains the detection time, and the second column contains an ID number associated with that detection. The ID number is given by the brush color used by the analyste to identify that detection type.
-     *FD.mat - This file contains a 1Xn vector consisting of the times of all detections marked as false positives by the user.
+
+     *FD.mat - This file contains a 1Xn vector consisting of the times of all detections marked as false positives by the user.  
      NOTE: ID.mat and FD.mat files are updated each time a bout is edited.
 
 #### 4. Update detections

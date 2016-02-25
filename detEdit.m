@@ -12,6 +12,7 @@
 % modified for BW 140308 jah 140320 jah for small ici
 % 140311 smw detection editor based on evalSessions.m
 clear all
+%utSetDesktopTitle('detEdit');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set some parameters
 gth = .5;    % gap time in hrs between sessions
@@ -20,14 +21,11 @@ contrast = 282; bright = 50; % for LTSA
 rll = 110; rlh = 170; % PP plot window
 specploton = 1; %1 = yes spec plot 0 = no spec plot
 ltsamax = 6; % length of ltsa window
-
-giffy = 0; % set to 1 if you want to make a demo video that shows keystrokes
-
 %df = 100;   LTSA step size Now caLculated from srate and pwr1 (#ltsa sample)
 % get user input and set up file names
 stn = input('Enter Project Name (MC GC DT SOCAL): ','s'); % site name
 dpn = input('Enter Deployment number + site (01 02 ...): ','s'); % deployment number
-itnum = input('Enter Iteration number (1 2 ...): ','s');  
+itnum = input('Enter Iteration number (1 2 ...): ','s');
 srate = input('Enter sample rate in kHz (eg 200 or 320): ');
 sp = input('Enter Species: Zc Me BWG Md Ko De Po ','s');
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
@@ -114,7 +112,7 @@ end
 % Get Directory with Detections
 disp('Select Directory with Detections');
 sdir = uigetdir('I:\','Select Directory with Detections');
-%  
+%
 % detpn = [sdir,['\',stn,'_',spe],'\'];
 detpn = [sdir,'\'];
 detfn = [stn,dpn,'_',spe,'_TPWS',itnum,'.mat'];
@@ -136,7 +134,7 @@ fn6 = fullfile(f1pn,tfn);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % load detections and false detections
 % MTT = time MPP= peak-peak % MSN = waveform %MSP = spectra
-load(fn)    
+load(fn)
 % test that MTT is unique
 ia = []; ic = [];
 [uMTT,ia,ic] = unique(MTT);
@@ -162,7 +160,7 @@ if (specploton == 1) % only if spec plot
 else
     disp('No Waveform or Spectra');
 end
-% apply tf and remove low amplitude 
+% apply tf and remove low amplitude
 cl = cl + tf;
 ib = find(cl >= thres);
 disp([' Removed too low:',num2str(length(ia)-length(ib))]);
@@ -486,7 +484,7 @@ while (k <= nb)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Number detection per Spectral bin in LTSA
     % make a spectra in figure 50
-    PT = pt{1,k};   % LTSA session time vector 
+    PT = pt{1,k};   % LTSA session time vector
     pwr1 = pwr{1,k};  % LTSA power vector
     nbinS = length(PT);
     if (nbinS == 0)
@@ -640,16 +638,7 @@ while (k <= nb)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % get key stroke
     cc = get(201,'CurrentCharacter');
-    if giffy
-        figure(301);clf;
-        set(301, 'menubar', 'none','name','keystroke');
-        ha = annotation('textbox',[.4 .5 .1 .1],'Units','normalized','String',cc,...
-            'FitBoxToText','on','FontSize',50, 'BackgroundColor', 'w',...
-            'VerticalAlignment','middle','linestyle','none','HorizontalAlignment','center');
-        axis off
-    end
     if (strcmp(cc,'u') || ...
-            strcmp(cc,'1') || strcmp(cc,'2') || strcmp(cc,'5') || ...
             strcmp(cc,'g') || strcmp(cc,'y') ||  strcmp(cc,'r') || ...
             strcmp(cc,'z') || strcmp(cc,'x') || strcmp(cc,'w'));
         disp(' Update Display') % Stay on same bout
@@ -697,8 +686,8 @@ while (k <= nb)
                 end
             end
         end
-end
-if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
+    end
+    if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
         if (~isempty(XFD))
             zTD(k,2) = 0;
             for inxfd = 1 : zTD(k,1)
@@ -709,7 +698,7 @@ if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
                     'ro','MarkerSize',10);
                 hold off;
                 disp(['Showing #: ',num2str(inxfd),' click']);
-                if (specploton == 0)
+                if (specploton == 1)
                     figure(50)  % add click to spec plot in BLACK
                     %meanspec;
                     plot(ft,SPEC(fimint:fimaxt),'Linewidth',4);

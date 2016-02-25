@@ -2,7 +2,7 @@
 % 2/21/2016 modified for version 1.1
 % For Kogia JAH 5/22/15
 % Estimate the number of False Detections
-%JAH 10-19-2014
+% JAH 10-19-2014
 % spec2 uses the LTSA for the click spectra
 % spec3 uses the TPWS file for the click spectra  JAH 9-26-14
 % spcc4 used the TPWS2 file JAH 10-12-14

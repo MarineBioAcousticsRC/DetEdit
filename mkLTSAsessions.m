@@ -1,13 +1,10 @@
 % mkLTSAsessions.m
-%modified for Kogia - JAH 5-19-15
-% 7-7-14 uses Simone bouts with Sean Detector JAH
+% 2/21/15 version 1.1 
 % use individual click detections to define session/bout
 % get and save ltsa pixel data for each session
-%
 % 140310 smw
 clear all
 tic % start timer
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set some parameters
 gth = .5;    % gap time in hrs between sessions
@@ -100,9 +97,8 @@ fn2 = fullfile(lspn,lsfn);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % load detections
-%
-% Pm vectors: ct = click detection time, cl = click received level (dB counts)
-% BW vectors: MTT = click detection time, MPP = click RL level (dBpp counts)
+% MTT = click detection time, MPP = click RL level (dBpp counts)
+% MSN = Nclicks x length snip, MSP = Nclicks x spectra
 load(fn)
 % test that MTT is unique
 ia = []; ic = [];
@@ -114,15 +110,17 @@ end
 [r,c] = size(MTT); %get shape of array
 if (r > c)
     ct = MTT(ia);
+    cl = MPP(ia);
 else
     ct = MTT(ia)';
+    cl = MPP(ia)';
 end
-ct0 = ct;
-cl0 = tf + ct;
-% remove low amplitude clicks
-ib = find(cl0 > thres);
-ct = ct0(ib);
-cl = cl0(ib);
+% apply tf and remove low amplitude 
+cl = cl + tf;
+ib = find(cl >= thres);
+disp([' Removed too low:',num2str(length(ia)-length(ib))]);
+ct = ct(ib);
+cl = cl(ib);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get ltsa file names for a specific site name and deployment number
 %d = dir([lpn,'GofMX_',sdn,'*']);
@@ -308,7 +306,7 @@ while (k <= nb)
             pt{k} = [ptLs ptLe];
         end
     else
-        disp(['K = ',num2str(K)])
+        disp(['K = ',num2str(K')])
                 disp(['bout start time is ',datestr(sb(k))])
         disp(['bout end time is ',datestr(eb(k))])
     end

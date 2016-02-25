@@ -709,7 +709,7 @@ if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
                     'ro','MarkerSize',10);
                 hold off;
                 disp(['Showing #: ',num2str(inxfd),' click']);
-                if (specploton == 0)
+                if (specploton == 1)
                     figure(50)  % add click to spec plot in BLACK
                     %meanspec;
                     plot(ft,SPEC(fimint:fimaxt),'Linewidth',4);

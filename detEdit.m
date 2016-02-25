@@ -20,6 +20,9 @@ contrast = 282; bright = 50; % for LTSA
 rll = 110; rlh = 170; % PP plot window
 specploton = 1; %1 = yes spec plot 0 = no spec plot
 ltsamax = 6; % length of ltsa window
+
+giffy = 0; % set to 1 if you want to make a demo video that shows keystrokes
+
 %df = 100;   LTSA step size Now caLculated from srate and pwr1 (#ltsa sample)
 % get user input and set up file names
 stn = input('Enter Project Name (MC GC DT SOCAL): ','s'); % site name
@@ -637,6 +640,14 @@ while (k <= nb)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % get key stroke
     cc = get(201,'CurrentCharacter');
+    if giffy
+        figure(301);clf;
+        set(301, 'menubar', 'none','name','keystroke');
+        ha = annotation('textbox',[.4 .5 .1 .1],'Units','normalized','String',cc,...
+            'FitBoxToText','on','FontSize',50, 'BackgroundColor', 'w',...
+            'VerticalAlignment','middle','linestyle','none','HorizontalAlignment','center');
+        axis off
+    end
     if (strcmp(cc,'u') || ...
             strcmp(cc,'1') || strcmp(cc,'2') || strcmp(cc,'5') || ...
             strcmp(cc,'g') || strcmp(cc,'y') ||  strcmp(cc,'r') || ...

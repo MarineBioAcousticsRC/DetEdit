@@ -1,5 +1,6 @@
+function mkLTSAsessions(~)
 % mkLTSAsessions.m
-% 2/21/15 version 1.1 
+% 2/21/15 version 1.1
 % use individual click detections to define session/bout
 % get and save ltsa pixel data for each session
 % 140310 smw
@@ -14,7 +15,7 @@ thres = 80;
 % get user input and set up file names
 stn = input('Enter Project Name (MC GC DT HH JAX SOCAL): ','s'); % site name
 dpn = input('Enter Deployment number (01 02 11D ...): ','s'); % deployment number
-itnum = input('Enter Iteration number (1 2 ...): ','s');  
+itnum = input('Enter Iteration number (1 2 ...): ','s');
 sdn = [stn,dpn];    % site name and deployment number
 sp = input('Enter Species: Zc Me BWG Md Ko De ','s');
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
@@ -23,7 +24,7 @@ if (strcmp(sp,'Ko') || strcmp(sp,'k'))
 elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
     specchar = 'Z'; %Simone abbreviations for BW species
     spe = 'Cuviers';  tfselect = 40200; % freq used for transfer function
-        thres = 121;
+    thres = 121;
 elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
     specchar = 'M'; %Simone abbreviations for BW species
     spe = 'Gervais'; tfselect = 40200; % freq used for transfer function
@@ -44,6 +45,8 @@ elseif (strcmp(sp,'MFA') || strcmp(sp,'mfa'))
     spe = 'MFA';  tfselect = 4000; % freq used for transfer function
     ltsamax = .5; % length of ltsa window
     thres = 80;
+elseif (strcmp(sp,'Dl') || strcmp(sp,'dl'))
+    spe = 'Beluga'; tfselect = 45000; %freq used for tf
 else
     disp(' Bad Species type')
     return
@@ -115,7 +118,7 @@ else
     ct = MTT(ia)';
     cl = MPP(ia)';
 end
-% apply tf and remove low amplitude 
+% apply tf and remove low amplitude
 cl = cl + tf;
 ib = find(cl >= thres);
 disp([' Removed too low:',num2str(length(ia)-length(ib))]);
@@ -144,7 +147,7 @@ for k = 1:nltsas
     read_ltsahead_GoM
     sTime(k) = PARAMS.ltsa.start.dnum + doff;  % start time of ltsa files
     eTime(k) = PARAMS.ltsa.end.dnum + doff;    % end time of ltsa files
-   
+    
     rfTime{k,:} = PARAMS.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
 end
 % hack fix
@@ -153,9 +156,11 @@ if strcmp(sdn,'GC02')
 end
 disp('done reading ltsa headers')
 
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % find edges (start and end times) of bouts or sessions
-dt = diff(ct)*24*60*60; % time between detections 
+dt = diff(ct)*24*60*60; % time between detections
 %                           convert from days to seconds
 I = [];
 I = find(dt>gt);  % find start of gaps
@@ -183,7 +188,7 @@ while ib <= nb
             sb(ib+iadd) = sb(ib) + blim*iadd;
             %disp(['iadd-sb',num2str(iadd)])
         end
-        for imove = nb : -1 : ib 
+        for imove = nb : -1 : ib
             eb(imove+nadd) = eb(imove);
         end
         for iadd = 0 : 1 : (nadd - 1)
@@ -199,13 +204,15 @@ disp(['Number Bouts : ',num2str(nb)])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 k = 1;
+% for debugging only
+% k = 200;fprintf('DEBUGGING VARIABLE IN PLACE, STARTING AT SESSIONS %d\n',k);
 % loop over the number of bouts (sessions)
 while (k <= nb)
-%      if eb(k) - sb(k) < 1 / (60*60*24)
-%         disp('Session less than 1s, so skip it')
-%         k = k + 1;
-%         continue
-%     end
+    %      if eb(k) - sb(k) < 1 / (60*60*24)
+    %         disp('Session less than 1s, so skip it')
+    %         k = k + 1;
+    %         continue
+    %     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % find which ltsa to use and get pwr and pt vectors
     K = [];
@@ -234,7 +241,9 @@ while (k <= nb)
             % make time vector
             t1 = rfTime{K}(L(1));
             dt = datenum([0 0 0 0 0 5]);
-            pt{k} = [t1:dt:t1 + (nbin-1)*dt];
+            [ pt{k}, pwr{k} ] = padLTSAGaps(PARAMS, L,pwr{k});
+            %   pt{k} = [t1:dt:t1 + (nbin-1)*dt]; % does not account for duty
+            %   cycle
         else
             rfT = rfTime{K,:};
             disp('L is empty')
@@ -306,8 +315,8 @@ while (k <= nb)
             pt{k} = [ptLs ptLe];
         end
     else
-        disp(['K = ',num2str(K')])
-                disp(['bout start time is ',datestr(sb(k))])
+        disp(['K = ',num2str(K)])
+        disp(['bout start time is ',datestr(sb(k))])
         disp(['bout end time is ',datestr(eb(k))])
     end
     
@@ -322,3 +331,70 @@ disp(['Done with file ',fn])
 tc = toc;
 disp(['Elasped Time : ',num2str(tc),' s'])
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%                   Subroutines                           %%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [ pt, pwr ] = padLTSAGaps(PARAMS,L,pwr)
+%
+% Takes LTSA raw file start times and returns a vector of start times for
+% the individual spectral averages.  Accounts for duty cycle
+%
+% pt = vector containing start times of spectral averages
+%
+% PARAMS = Struct containing LTSA metadata
+% L = vector of raw file indexes
+%
+
+pt = [];
+mnum2secs = 24*60*60;
+Y2K = datenum([ 2000 0 0 0 0 0 ]);
+date_fmt = 'mm/dd/yy HH:MM:SS';
+
+rfStarts = PARAMS.ltsa.dnumStart(L) + Y2K;
+diffRF_s = round(diff(rfStarts)*mnum2secs);
+rfDurs = unique(diffRF_s);
+nbin = length(L) * PARAMS.ltsa.nave(L(1));
+t1 = rfStarts(1);
+dt_dnum = datenum([ 0 0 0 0 0 PARAMS.ltsa.tave ]);
+fs = PARAMS.ltsa.fs;
+
+if fs == 200e3
+    rfdt = 75; % 75 second raw file duration
+else
+    fprintf('Unsupported sample rate of %d\n', fs);
+    mfn = mfilename('fullpath');
+    fprintf('Add raw file duration [seconds] for sample rate to %s\n', mfn);
+    fprintf('Or ask JAH...definitely ask JAH\n');
+end
+
+
+nfreq = size(pwr,1);
+totalaves = size(pwr,2);
+gapsidx = find(diffRF_s~=rfdt);
+rfdt_dnum = datenum([ 0 0 0 0 0 rfdt-5 ]);
+if size(rfDurs, 2) > 1
+    fprintf('Duty cycle or gap encountered!\n')
+    fprintf('\tBout starting at %s\n', datestr(rfStarts(1),date_fmt));
+    pt = t1:dt_dnum:t1+rfdt_dnum; % make first raw file's part of pt;
+    rf = 2;
+    while rf <= length(L)
+        if ismember(rf,gapsidx+1) % if there's a duty cycle or gap, pad pwr for later
+            tdt = round((rfStarts(rf) - rfStarts(rf-1))*mnum2secs-rfdt);
+            numaves2pad = ceil(tdt/PARAMS.ltsa.tave);
+            pwrpad = ones(nfreq,numaves2pad).*-128;
+            gaveidx = length(pt); % last average before gap
+            pwr = [ pwr(:,1:gaveidx), pwrpad, pwr(:,gaveidx+1:end)];
+            padavetimes = pt(end)+dt_dnum:dt_dnum:rfStarts(rf)-dt_dnum;
+            pt = [ pt, padavetimes ];
+        end
+        
+        tpt = rfStarts(rf):dt_dnum:rfStarts(rf)+rfdt_dnum;
+        pt = [ pt, tpt ];
+        rf = rf+1;
+    end
+else
+    pt = [t1:dt_dnum:t1 + (nbin-1)*dt_dnum];
+end
+
+end

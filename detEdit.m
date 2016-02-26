@@ -2,7 +2,7 @@
 % 2/21/2016 modified for version 1.1
 % For Kogia JAH 5/22/15
 % Estimate the number of False Detections
-% JAH 10-19-2014
+%JAH 10-19-2014
 % spec2 uses the LTSA for the click spectra
 % spec3 uses the TPWS file for the click spectra  JAH 9-26-14
 % spcc4 used the TPWS2 file JAH 10-12-14
@@ -81,6 +81,13 @@ elseif (strcmp(sp,'MFA') || strcmp(sp,'mfa'))
     rll = thres - 5; rlh = 180;
     ltsamax = 0.5;
     df = 10;    % LTSA step size in 10 [Hz] bins
+elseif (strcmp(sp,'Dl') || strcmp(sp,'dl'))
+    spe = 'Beluga'; tfselect = 45000; %freq used for tf
+    dl = 0.5; % scale for IPI display in sec
+    flow = 20;   % 20 kHz boundary for spec plot
+    thres = 110; % dB threshold
+    p1low = thres - 5; p1high = 170;
+    contrast = 200; bright = 70; % for LTSA
 else
     disp(' Bad Species type')
     return
@@ -536,7 +543,7 @@ while (k <= nb)
         Ndetpp = length(Jtrue);
         xmpp = cl(Jtrue);
         xmsp0 = csp(Jtrue,:) + ones(Ndetpp,1) *  Ptfpp;
-        [xmsp,im] = max(xmsp0(:,flowt:fimaxt)');  % maximum value between 70 - 100 kHz
+        [xmsp,im] = max(xmsp0(:,flowt:fimaxt)');  % maximum value
         for imax = 1 : 1 : length(im)
             Pmax = Ptfpp(im(imax) + flowt-1);
             xmpp(imax) = xmpp(imax) - tf + Pmax;
@@ -546,9 +553,9 @@ while (k <= nb)
             Ndetppf = length(Jfandm);
             xmppf = cl(Jfandm);
             xmspf0 = csp(Jfandm,:) + ones(Ndetppf,1) *  Ptfpp;
-            [xmspf,imf] = max(xmspf0(:,71:101)');  % maximum value between 70 - 100 kHz
+            [xmspf,imf] = max(xmspf0(:,flowt:fimaxt)');  % maximum value
             for imax = 1 : 1 : length(imf)
-                Pmax = Ptfpp(imf(imax) + 70);
+                Pmax = Ptfpp(imf(imax) + flowt-1);
                 xmppf(imax) = xmppf(imax) - tf + Pmax;
             end
             plot(xmspf,xmppf,'ro')

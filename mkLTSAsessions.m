@@ -156,7 +156,6 @@ if strcmp(sdn,'GC02')
 end
 disp('done reading ltsa headers')
 
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % find edges (start and end times) of bouts or sessions
@@ -315,7 +314,7 @@ while (k <= nb)
             pt{k} = [ptLs ptLe];
         end
     else
-        disp(['K = ',num2str(K)])
+        disp(['K = ',num2str(K')])
         disp(['bout start time is ',datestr(sb(k))])
         disp(['bout end time is ',datestr(eb(k))])
     end
@@ -331,6 +330,7 @@ disp(['Done with file ',fn])
 tc = toc;
 disp(['Elasped Time : ',num2str(tc),' s'])
 
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%                   Subroutines                           %%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,10 +1,10 @@
-function mkLTSAsessions(~)
+function mkLTSAsessions(varargin)
 % mkLTSAsessions.m
 % 2/21/15 version 1.1
 % use individual click detections to define session/bout
 % get and save ltsa pixel data for each session
 % 140310 smw
-clear all
+%clear all
 tic % start timer
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set some parameters
@@ -13,11 +13,43 @@ gt = gth*60*60;    % gap time in sec
 ltsamax = 6; % length of ltsa window
 thres = 80;
 % get user input and set up file names
-stn = input('Enter Project Name (MC GC DT HH JAX SOCAL): ','s'); % site name
-dpn = input('Enter Deployment number (01 02 11D ...): ','s'); % deployment number
-itnum = input('Enter Iteration number (1 2 ...): ','s');
-sdn = [stn,dpn];    % site name and deployment number
-sp = input('Enter Species: Zc Me BWG Md Ko De ','s');
+
+n = 1; 
+while n <= length(varargin)
+    switch varargin{n}
+        case 'stn'
+            stn = varargin{n+1}; n=n+2;
+        case  'dpn'
+            dpn = varargin{n+1}; n=n+2;
+        case 'itnum'
+            itnum = varargin{n+1}; n=n+2;
+        case 'sp'
+            sp = varargin{n+1}; n=n+2;
+        case 'lpn'
+            lpn = varargin{n+1}; n=n+2;
+        case 'sdir'
+            sdir = varargin{n+1}; n=n+2;
+        otherwise
+            error(sprintf('Bad optional argument: "%s"', varargin{n}));
+    end
+end
+
+
+if ~exist('stn','var')
+    stn = input('Enter Project Name (MC GC DT HH JAX SOCAL): ','s'); % site name
+end
+if ~exist('dpn','var')
+    dpn = input('Enter Deployment number (01 02 11D ...): ','s'); % deployment number
+end
+if ~exist('itnum','var')
+    itnum = input('Enter Iteration number (1 2 ...): ','s');
+end
+if ~exist('sdn','var')
+    sdn = [stn,dpn];    % site name and deployment number
+end
+if ~exist('sp','var')
+    sp = input('Enter Species: Zc Me BWG Md Ko De ','s');
+end
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
     specchar = 'K'; %Simone abbreviation for species
     spe = 'Kogia';  tfselect = 80000; % freq used for transfer function
@@ -51,16 +83,22 @@ else
     disp(' Bad Species type')
     return
 end
-disp('Select Directory with LTSA');
-lpn = uigetdir('I:\','Select Directory with LTSAs');
+
+
+if ~exist('lpn','var')
+    disp('Select Directory with LTSA');
+    lpn = uigetdir('I:\','Select Directory with LTSAs');
+end
 lpn = [lpn,'\'];
 % lpn = ['I:\JAH\ltsa\',stn,'\'];  % ltsa pathname
 % detection file
-disp('Select Directory with Detections');
-sdir = uigetdir('I:\','Select Directory with Detections');
-%
+if ~exist('sdir','var')
+    disp('Select Directory with Detections');
+    sdir = uigetdir('I:\','Select Directory with Detections');
+end
 % detpn = [sdir,['\',stn,'_',spe],'\'];
 detpn = [sdir,'\'];
+
 % detfn = [stn,dpn,'_',spe,'_TPWS2.mat'];
 detfn = [stn,dpn,'_',spe,'_TPWS',itnum,'.mat'];
 fn = fullfile(detpn,detfn);
@@ -128,7 +166,7 @@ cl = cl(ib);
 % get ltsa file names for a specific site name and deployment number
 %d = dir([lpn,'GofMX_',sdn,'*']);
 if (strcmp(stn,'MC')|| strcmp(stn,'GC') || strcmp(stn,'DC') || ...
-        strcmp(stn,'DT') || strcmp(stn,'HH'))
+        strcmp(stn,'DT') || strcmp(stn,'HH'))|| strcmp(stn,'MP')
     d = dir([lpn,'GofMX_',sdn,'*']);
 else
     d = dir([lpn,sdn,'*']);
@@ -136,25 +174,36 @@ end
 fnames = char(d.name);
 nltsas = length(d);
 % load up rawfile start times
-disp('reading ltsa headers, please be patient ...')
 doff = datenum([2000 0 0 0 0 0]);   % convert ltsa time to millenium time
 global PARAMS
-sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
-for k = 1:nltsas
-    % for k = 1:2
-    PARAMS.ltsa.inpath = lpn;
-    PARAMS.ltsa.infile = fnames(k,:);
-    read_ltsahead_GoM
-    sTime(k) = PARAMS.ltsa.start.dnum + doff;  % start time of ltsa files
-    eTime(k) = PARAMS.ltsa.end.dnum + doff;    % end time of ltsa files
+
+% make the variables that hold the ltsa header info persistent, in case
+% you are running itr_mkLTSA.m, this way you don't have to read the header
+% info every time.
+persistent sTime eTime rfTime
+
+if isempty(sTime)
+    sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
+    disp('reading ltsa headers, please be patient ...')
     
-    rfTime{k,:} = PARAMS.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
+    for k = 1:nltsas
+        % for k = 1:2
+        PARAMS.ltsa.inpath = lpn;
+        PARAMS.ltsa.infile = fnames(k,:);
+        read_ltsahead_GoM
+        sTime(k) = PARAMS.ltsa.start.dnum + doff;  % start time of ltsa files
+        eTime(k) = PARAMS.ltsa.end.dnum + doff;    % end time of ltsa files
+        
+        rfTime{k} = PARAMS.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
+    end
+    
+    % hack fix
+    if strcmp(sdn,'GC02')
+        eTime(2) = sTime(3);
+    end
+    disp('done reading ltsa headers')
 end
-% hack fix
-if strcmp(sdn,'GC02')
-    eTime(2) = sTime(3);
-end
-disp('done reading ltsa headers')
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -220,9 +269,9 @@ while (k <= nb)
     if ~isempty(K) && length(K) == 1
         L = [];
         if eb(k) -sb(k) < 75/ (60*60*24)
-            L = find(rfTime{K,:} >= sb(k),1,'first');
+            L = find(rfTime{K} >= sb(k),1,'first');
         else
-            L = find(rfTime{K,:} >= sb(k) & rfTime{K,:} <= eb(k));
+            L = find(rfTime{K} >= sb(k) & rfTime{K} <= eb(k));
         end
         if ~isempty(L)
             L = [L(1)-1,L]; % get rawfile from before sb(k)
@@ -244,7 +293,7 @@ while (k <= nb)
             %   pt{k} = [t1:dt:t1 + (nbin-1)*dt]; % does not account for duty
             %   cycle
         else
-            rfT = rfTime{K,:};
+            rfT = rfTime{K};
             disp('L is empty')
             %             disp(datestr(rfT))
             disp(['bout start time is ',datestr(sb(k))])
@@ -266,9 +315,9 @@ while (k <= nb)
         end
         
         Ls = [];
-        Ls = find(rfTime{Ks,:} >= sb(k));
+        Ls = find(rfTime{Ks} >= sb(k));
         Le = [];
-        Le = find(rfTime{Ke,:} <= eb(k));
+        Le = find(rfTime{Ke} <= eb(k));
         if ~isempty(Ls)
             Ls = [Ls(1)-1,Ls]; % get rawfile from before sb(k)
             % grab the ltsa pwr matrix to plot
@@ -359,14 +408,15 @@ t1 = rfStarts(1);
 dt_dnum = datenum([ 0 0 0 0 0 PARAMS.ltsa.tave ]);
 fs = PARAMS.ltsa.fs;
 
-if fs == 200e3
-    rfdt = 75; % 75 second raw file duration
-else
-    fprintf('Unsupported sample rate of %d\n', fs);
-    mfn = mfilename('fullpath');
-    fprintf('Add raw file duration [seconds] for sample rate to %s\n', mfn);
-    fprintf('Or ask JAH...definitely ask JAH\n');
-end
+rfdt = (PARAMS.ltsa.dnumEnd(1) - PARAMS.ltsa.dnumStart(1))*(24*60*60);
+% if fs == 200e3
+%     rfdt = 75; % 75 second raw file duration
+% else
+%     fprintf('Unsupported sample rate of %d\n', fs);
+%     mfn = mfilename('fullpath');
+%     fprintf('Add raw file duration [seconds] for sample rate to %s\n', mfn);
+%     fprintf('Or ask JAH...definitely ask JAH\n');
+% end
 
 
 nfreq = size(pwr,1);

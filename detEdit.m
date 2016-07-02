@@ -2,7 +2,7 @@
 % 2/21/2016 modified for version 1.1
 % For Kogia JAH 5/22/15
 % Estimate the number of False Detections
-%JAH 10-19-2014
+% JAH 10-19-2014
 % spec2 uses the LTSA for the click spectra
 % spec3 uses the TPWS file for the click spectra  JAH 9-26-14
 % spcc4 used the TPWS2 file JAH 10-12-14
@@ -11,28 +11,39 @@
 % Brushing only works in MATLAB ver 2013b, not 2013a or 2012b
 % modified for BW 140308 jah 140320 jah for small ici
 % 140311 smw detection editor based on evalSessions.m
-clear all
+clearvars
+% utSetDesktopTitle('detEdit');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set some parameters
-gth = .5;    % gap time in hrs between sessions
+detEdit_settings
+
 gt = gth*60*60;    % gap time in sec
 contrast = 282; bright = 50; % for LTSA
 rll = 110; rlh = 170; % PP plot window
-specploton = 1; %1 = yes spec plot 0 = no spec plot
-ltsamax = 6; % length of ltsa window
 
-giffy = 0; % set to 1 if you want to make a demo video that shows keystrokes
+% get user input and set up file names, if not provided by settings
+if ~exist('stn','var')
+    stn = input('Enter Project Name (MC GC DT SOCAL): ','s'); % site name
+elseif~exist('dpn','var')
+    dpn = input('Enter Deployment number + site (01 02 ...): ','s'); % deployment number
+elseif~exist('itnum','var')
+    itnum = input('Enter Iteration number (1 2 ...): ','s');
+elseif~exist('srate','var')
+    srate = input('Enter sample rate in kHz (eg 200 or 320): ');
+elseif ~exist('sp','var')
+    sp = input('Enter Species: Zc Me BWG Md Ko De Po ','s');
+elseif ~exist('c4fd','var')
+    c4fd = input('Enter Interval to test for False Detections: ') ; %check 4 fd
+elseif ~exist('sdir','var')% Get Directory with Detections
+    disp('Select Directory with Detections');
+    sdir = uigetdir('I:\','Select Directory with Detections');
+end
 
-%df = 100;   LTSA step size Now caLculated from srate and pwr1 (#ltsa sample)
-% get user input and set up file names
-stn = input('Enter Project Name (MC GC DT SOCAL): ','s'); % site name
-dpn = input('Enter Deployment number + site (01 02 ...): ','s'); % deployment number
-itnum = input('Enter Iteration number (1 2 ...): ','s');  
-srate = input('Enter sample rate in kHz (eg 200 or 320): ');
-sp = input('Enter Species: Zc Me BWG Md Ko De Po ','s');
+% TODO: move this to settings - not sure how to streamline it
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
     specchar = 'K'; %Simone abbreviation for species
-    spe = 'Kogia';  tfselect = 80000; % freq used for transfer function
+    spe = 'Kogia';  
+    tfselect = 80000; % freq used for transfer function
     dl = 0.5;  % scale for IPI display in sec
     flow = 70;   % 70 kHz boundary for spec plot
     thres = 116; % dB threshold
@@ -45,7 +56,8 @@ elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
     contrast = 200; bright = 30; % for LTSA
 elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
     specchar = 'M'; %Simone abbreviations for BW species
-    spe = 'Gervais';  tfselect = 40200; % freq used for transfer function
+    spe = 'Gervais';  
+    tfselect = 40200;% freq used for transfer function
     dl = 1.0; % scale for IPI display in sec
     flow = 25;   % 25 kHz boundary for spec plot
     thres = 121; % dB threshold
@@ -65,7 +77,7 @@ elseif (strcmp(sp,'De') || strcmp(sp,'de'))
     spe = 'Delphin';  tfselect = 0; % already in dB no correction
     dl = 0.5; % scale for IPI display in sec
     flow = 25;   % 25 kHz boundary for spec plot
-    thres = 136.9; % dB threshold
+    thres = 80; % dB threshold
     rll = thres - 6.9; rlh = 190;
 elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
     spe = 'Porpoise';  tfselect = 0; % already in dB no correction
@@ -81,40 +93,50 @@ elseif (strcmp(sp,'MFA') || strcmp(sp,'mfa'))
     dl = 2; % scale for IPI display in sec
     flow = 2;   % 2 kHz boundary for spec plot
     rll = thres - 5; rlh = 180;
-    ltsamax = 0.5;
     df = 10;    % LTSA step size in 10 [Hz] bins
+elseif (strcmp(sp,'Dl') || strcmp(sp,'dl'))
+    spe = 'Beluga'; tfselect = 45000; %freq used for tf
+    dl = 0.5; % scale for IPI display in sec
+    flow = 20;   % 20 kHz boundary for spec plot
+    thres = 110; % dB threshold
+    p1low = thres - 5; p1high = 170;
+    contrast = 200; bright = 70; % for LTSA
 else
     disp(' Bad Species type')
     return
 end
-c4fd = input('Enter Interval to test for False Detections: ') ; %check 4 fd
+     
 sdn = [stn,dpn];    % site name and deployment number
-% user interface to get TF file
-disp('Load Transfer Function File');
-[fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
-tffn = fullfile(pname,fname);
-if strcmp(num2str(fname),'0')
-    disp('Cancelled TF File');
-    return
-else %give feedback
-    disp(['TF File: ',tffn]);
-end
-fid = fopen(tffn);
-[A,count] = fscanf(fid,'%f %f',[2,inf]);
-tffreq = A(1,:);
-tfuppc = A(2,:);
-fclose(fid);
-if (tfselect > 0)
+
+% add in transfer function if desired
+if (tfselect > 0) 
+    if ~exist('tfName','var')% user interface to get TF file
+        disp('Load Transfer Function File');
+        [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
+    else % or get it from filename provided in settings
+        [pname,fname] = fileparts(tfName);
+        fname = [fname,'.tf'];
+    end
+    tffn = fullfile(pname,fname);
+    if strcmp(num2str(fname),'0')
+        disp('Cancelled TF File');
+        return
+    else %give feedback
+        disp(['TF File: ',tffn]);
+    end
+    fid = fopen(tffn);
+    [A,count] = fscanf(fid,'%f %f',[2,inf]);
+    tffreq = A(1,:);
+    tfuppc = A(2,:);
+    fclose(fid);
+    
     tf = interp1(tffreq,tfuppc,tfselect,'linear','extrap');
     disp(['TF @',num2str(tfselect),' Hz =',num2str(tf)]);
 else
     tf = 0;
     disp('No TF Applied');
 end
-% Get Directory with Detections
-disp('Select Directory with Detections');
-sdir = uigetdir('I:\','Select Directory with Detections');
-%  
+
 % detpn = [sdir,['\',stn,'_',spe],'\'];
 detpn = [sdir,'\'];
 detfn = [stn,dpn,'_',spe,'_TPWS',itnum,'.mat'];
@@ -127,7 +149,7 @@ A2 = exist(fn2,'file');
 if (A2 ~= 2)
     zFD(1,1) = 1;
     save(fn2,'zFD');    % create new FD
-    disp([' Make new FD file']);
+    disp('Make new FD file');
 end
 % Test false Detection file
 lf1pn = detpn;
@@ -136,42 +158,62 @@ fn6 = fullfile(f1pn,tfn);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % load detections and false detections
 % MTT = time MPP= peak-peak % MSN = waveform %MSP = spectra
-load(fn)    
+load(fn,'MTT','MPP')
 % test that MTT is unique
-ia = []; ic = [];
-[uMTT,ia,ic] = unique(MTT);
-if (length(uMTT) ~= length(MTT))
-    disp([' TimeLevel Data NOT UNIQUE - removed:   ', ...
-        num2str(length(ic) - length(ia))]);
+
+% if you have more than "maxDetLoad" detections, don't load all spectra and
+% time series into memory. You can access them from the disk instead.
+% Note: Can't remove duplicates in that case, because matlab won't let you select
+% non-contiguous sets from files stored on disk.
+nDets = length(MTT);
+
+loadMSP = nDets <= maxDetLoad; % true/false, if you have more detections than
+% the maximum load this becomes false.
+ic1 = [];
+if loadMSP
+    [uMTT,ia1,ic1] = unique(MTT);
+    if (length(uMTT) ~= length(MTT))
+        disp([' TimeLevel Data NOT UNIQUE - removed:   ', ...
+            num2str(length(ic1) - length(ia1))]);
+    end
+    load(fn,'MSP','MSN')
+else
+    ia1 = [1:length(MTT)]';
 end
+
 [r,c] = size(MTT); %get shape of array
 if (r > c)
-    ct = MTT(ia);
-    cl = MPP(ia);
+    ct = MTT(ia1);
+    cl = MPP(ia1);
 else
-    ct = MTT(ia)';
-    cl = MPP(ia)';
+    ct = MTT(ia1)';
+    cl = MPP(ia1)';
 end
-if (specploton == 1) % only if spec plot
+
+if (specploton == 1) && loadMSP % only if spec plot
     if (strcmp(spe,'Delphin'))% set length of waveform plot to 1 ms
-        csn = MSN(ia,100:100+(srate+2));
+        csn = MSN(ia1,100:100+(srate+2));
     else
-        csn = MSN(ia,:);
+        csn = MSN(ia1,:);
     end
-    csp = MSP(ia,:);
+    csp = MSP(ia1,:);
 else
     disp('No Waveform or Spectra');
 end
-% apply tf and remove low amplitude 
+
+% apply tf and remove low amplitude
 cl = cl + tf;
-ib = find(cl >= thres);
-disp([' Removed too low:',num2str(length(ia)-length(ib))]);
-ct = ct(ib);
-cl = cl(ib);
-if (specploton == 1) % do this only if spec plot
-    csn = csn(ib,:);
-    csp = csp(ib,:);
+ib1 = find(cl >= thres);
+
+disp([' Removed too low:',num2str(length(ia1)-length(ib1))]);
+ct = ct(ib1);
+cl = cl(ib1);
+keepers = ia1(ib1);
+if (specploton == 1) && loadMSP % do this only if spec plot
+    csn = csn(ib1,:);
+    csp = csp(ib1,:);
 end
+
 % Make FD file intersect with MTT
 load(fn2)  % false detection times zFD
 jFD = []; ia = []; ic = [];
@@ -179,6 +221,9 @@ if (~isempty(zFD))
     [jFD,ia,ic] = intersect(MTT,zFD);
     rFD = length(zFD) - length(jFD);
     disp([' Removed ',num2str(rFD),' False Det']);
+    if size(jFD,1)<size(jFD,2)
+        jFD = jFD';
+    end
     zFD = jFD;
     if (isempty(zFD))
         zFD(1,1) = 1;  % keep from blowing up later
@@ -197,9 +242,9 @@ eb = [ct(I);ct(end)];   % end time of bout
 dd = ct(end)-ct(1);     % deployment duration [d]
 nb = length(sb);        % number of bouts
 bd = (eb - sb);      % duration of bout in days
-%find bouts > 10 sec long
+% find bouts > 10 sec long
 % bd10 = find(bd > 1 / (60*60*24)); % for Kogia 10 sec
-%disp(['Number Bouts : ',num2str(length(bd))])
+% disp(['Number Bouts : ',num2str(length(bd))])
 % limit the length of a bout
 blim = ltsamax/24;       % 6 hr bout length limit in days
 ib = 1;
@@ -224,7 +269,7 @@ while ib <= nb
     end
     ib = ib + 1;
 end
-bd = (eb - sb);   %duration bout in days
+
 disp(['Number Bouts : ',num2str(nb)])
 % LTSA session file
 lspn = detpn;
@@ -250,7 +295,7 @@ A6 = exist(fn6,'file');
 if (A6 ~= 2)
     zTD = -1.*ones(nb,4);
     save(fn6,'zTD');    % create new FD
-    disp([' Make new TD2 file']);
+    disp(' Make new TD2 file');
 else
     load(fn6)
     if (length(zTD(:,1)) ~= nb)
@@ -262,12 +307,18 @@ end
 fimin = 0;
 fimax = srate/2 ; % in kHz 100 or 160 kHz
 % set ltsa step size
-df = 1000*fimax/(length(pwr{1,1})-1);
+df = 1000*fimax/(size(pwr{1,1},1)-1);
 % for LTSA PLOT
-f = [1000*fimin:df:1000*fimax];
-Ptf = interp1(tffreq,tfuppc,f,'linear','extrap'); % add to LTSA vector
+f = 1000*fimin:df:1000*fimax;
+if tfselect > 0
+    Ptf = interp1(tffreq,tfuppc,f,'linear','extrap'); % add to LTSA vector
+end
 if (specploton == 1) % do this only if spec plot
     % check length of MSP
+    inFileMat = matfile(fn);
+    if ~loadMSP
+        MSP = inFileMat.MSP(1,:);
+    end
     smsp = size(MSP);
     smsp2 = smsp(2); % 2nd element is num fft points
     for ift = 1 : 1: smsp2
@@ -291,8 +342,9 @@ kstart = input('Starting Session:  ');
 pause on
 disp('Press ''b'' key to go backward ')
 disp('Press any other key to go forward')
-cc = [' '];  % avoids crash when first bout too short
+cc = ' ';  % avoids crash when first bout too short
 k = kstart;
+%%
 % loop over the number of bouts (sessions)
 while (k <= nb)
     disp([' BEGIN SESSION: ',num2str(k)]);
@@ -304,20 +356,21 @@ while (k <= nb)
         zTD = [zTD,-1.*ones(length(zTD),2)];
         save(fn6,'zTD');
     end
-    % Make PP versus RMS plot for all clicks
-    if (specploton == 1)
+    % Make PP versus RMS plot for all clicks, if all time series are loaded
+    if (specploton == 1) && loadMSP
         figure(51)
         hold off;
         xmpp = cl;
-        i = find(xmpp > thres); % limit to high values
+        i = find(xmpp > thres); % limit to high values - Redundant?
         Ndet = length(i);
         xmpp = xmpp(i);
         xmsp0 = csp(i,:) + ones(Ndet,1) *  Ptfpp;
-        [xmsp,im] = max(xmsp0(:,flowt:fimaxt)'); % maximum between flow-100kHz
-        for imax = 1 : 1 : length(im)
-            Pmax = Ptfpp(im(imax) + flowt-1);
-            xmpp(imax) = xmpp(imax) - tf + Pmax;
-        end
+        [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2); % maximum between flow-100kHz
+%         for imax = 1 : 1 : length(im)
+%             Pmax = Ptfpp(im(imax) + flowt-1);
+%             xmpp(imax) = xmpp(imax) - tf + Pmax;
+%         end
+        xmpp = xmpp'-tf+ Ptfpp(im + flowt-1); % vectorized version
         plot(xmsp,xmpp,'co')
         hold on;  % keep figure(51) plot with hold on
         xmpp = []; xmsp = [];
@@ -327,6 +380,15 @@ while (k <= nb)
     % find detections and false detections within this bout (session)
     J = []; Jfandm =[]; Jtrue = []; XFD = [];
     J = find(ct >= sb(k) & ct <= eb(k));
+    if loadMSP % have to load consecutive detections if reading from disk
+        J = J(1):J(end);
+        csnJ = csn(J,:);
+        cspJ = csp(J,:);
+    else
+        csnJ = inFileMat.MSP(keepers(J),:);
+        cspJ = inFileMat.MSP(keepers(J),:);
+    end
+    
     XFD = find(ct(ixfd) >= sb(k) & ct(ixfd) <= eb(k));
     zTD(k,1) = length(XFD);
     % Test for XFD and strcmp('x or z or w') - if no test points skip
@@ -352,7 +414,7 @@ while (k <= nb)
         nd = length(J);     % number of detections in this session
         % get false detection times that intersect with detection times
         K2 = [];
-        ff2 = [0];
+        ff2 = 0;
         tfd = [];
         if (~isempty(zFD))
             [Cfd,K2,kfd] = intersect(ct(J),zFD(:,1));
@@ -363,13 +425,8 @@ while (k <= nb)
             yfd = cl(J(K2));
             ndS2 = length(K2);
             if (specploton == 1)
-                if (ndS2 > 1)
-                    wfd = sum(csn(J(K2),:))/ndS2;
-                    sfd = sum(csp(J(K2),:))/ndS2;
-                else   % must be one
-                    wfd = csn(J(K2),:)/ndS2;
-                    sfd = csp(J(K2),:)/ndS2;
-                end
+                wfd = mean(csnJ(K2,:),1);
+                sfd = mean(cspJ(K2,:),1);
             end
             disp([' False detections:',num2str(ndS2)])
         else
@@ -377,20 +434,16 @@ while (k <= nb)
             disp(' No False Det')
             ndS2 = 0;
         end
-        Jfandm = [J(K2)];
-        Jtrue = setxor(J,Jfandm);
+        Jfandm = J(K2);
+        [Jtrue,iJ,~]= setxor(J,Jfandm); % find all true detections
         true = ct(Jtrue);
         ndS = length(true);
+        
         if (specploton == 1)
-            if (ndS > 1)
-                wtrue = sum(csn(Jtrue,:))/ndS;
-                strue = sum(csp(Jtrue,:))/ndS;
-            else
-                if (ndS == 1)
-                    wtrue = csn(Jtrue,:);
-                    strue = csp(Jtrue,:);
-                end
-            end
+            cspJtrue = cspJ(iJ,:);
+            csnJtrue = csnJ(iJ,:);
+            wtrue = nanmean(csnJtrue,1);
+            strue = nanmean(cspJtrue,1);
         end
         disp([' True Detections: ',num2str(ndS)])
     else
@@ -423,7 +476,7 @@ while (k <= nb)
     Ndt = zeros(nbin,1);
     mdt = zeros(nbin,1);
     while kb <= nd
-        %     while kb <= nbin
+        % while kb <= nbin
         tv = datevec(t(kb));     % put time(kb)in vector format
         tbin = floor(tv(5)/binDur);  % define time bin of time(kb)
         t0 = datenum([tv(1:4) tbin*binDur 00]); % lower bound
@@ -437,7 +490,6 @@ while (k <= nb)
             RL(bin) = max(y(I));    % max RL in time bin
             T(bin) = t0;        % time for time bin
             if I > 1
-                L = [];
                 L = find(dt(I-1) < dtTH);
                 if ~isempty(L)
                     Ndt(bin) = length(L);
@@ -464,9 +516,9 @@ while (k <= nb)
     KBX = find(CX >= minNdet);
     if isempty(KB)
         disp(['No bins with at least ',num2str(minNdet),' detections'])
-        binT = [0];
-        binRL = [0];
-        binC = [0];
+        binT = 0;
+        binRL = 0;
+        binC = 0;
         k = k + 1;  % go to next
         continue
     else
@@ -486,7 +538,7 @@ while (k <= nb)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Number detection per Spectral bin in LTSA
     % make a spectra in figure 50
-    PT = pt{1,k};   % LTSA session time vector 
+    PT = pt{1,k};   % LTSA session time vector
     pwr1 = pwr{1,k};  % LTSA power vector
     nbinS = length(PT);
     if (nbinS == 0)
@@ -494,7 +546,7 @@ while (k <= nb)
         PT(1) = sb(k) ; PT(2) = eb(k); % start end times for plots
         pwr1(1:length(f)) = ones; % make uniform LTSA
     else
-        pwr1 = pwr1((1000*fimin/df)+1:(1000*fimax/df)+1,:); % limit plot range LTSA
+        pwr1 = pwr1((1000*fimin/df)+1:round(1000*fimax/df)+1,:); % limit plot range LTSA
     end
     durS = PT(end) - PT(1);
     minNdet = 1;        % minimum number of detections per bin
@@ -537,8 +589,12 @@ while (k <= nb)
         figure(51)
         Ndetpp = length(Jtrue);
         xmpp = cl(Jtrue);
-        xmsp0 = csp(Jtrue,:) + ones(Ndetpp,1) *  Ptfpp;
-        [xmsp,im] = max(xmsp0(:,flowt:fimaxt)');  % maximum value between 70 - 100 kHz
+%         if loadMSP
+%             xmsp0 = csp(Jtrue,:) + ones(Ndetpp,1) *  Ptfpp;
+%         else
+            xmsp0 = cspJtrue + ones(Ndetpp,1) *  Ptfpp;
+        
+        [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2);  % maximum value
         for imax = 1 : 1 : length(im)
             Pmax = Ptfpp(im(imax) + flowt-1);
             xmpp(imax) = xmpp(imax) - tf + Pmax;
@@ -547,13 +603,19 @@ while (k <= nb)
         if (ndS2 > 0)  % add false click to figure (51) Jfandm
             Ndetppf = length(Jfandm);
             xmppf = cl(Jfandm);
-            xmspf0 = csp(Jfandm,:) + ones(Ndetppf,1) *  Ptfpp;
-            [xmspf,imf] = max(xmspf0(:,71:101)');  % maximum value between 70 - 100 kHz
+            if ~loadMSP
+                
+            end
+            cspJfandm = cspJ(K2,:);
+            xmspf0 = cspJfandm + ones(Ndetppf,1) *  Ptfpp;
+            [xmspf,imf] = max(xmspf0(:,flowt:fimaxt),[],2);  % maximum value
             for imax = 1 : 1 : length(imf)
-                Pmax = Ptfpp(imf(imax) + 70);
+                Pmax = Ptfpp(imf(imax) + flowt-1);
                 xmppf(imax) = xmppf(imax) - tf + Pmax;
             end
+            hold on
             plot(xmspf,xmppf,'ro')
+            hold off
         end
     end
     %
@@ -595,11 +657,11 @@ while (k <= nb)
     % make two copies of dt points for brush
     tdt2 = [];
     dt2 = [];
-    if (length(dt) > 0)
-        for idt = 1 : length(dt)
-            tdt2 = [tdt2; t(idt) ; t(idt+1)];
-            dt2 = [dt2 ; dt(idt) ; dt(idt) ];
-        end
+    ldt = length(dt);
+    if ldt > 0
+        tdt2 = reshape([t(1:ldt),t((1:ldt)+1)]',2*ldt,1);
+        dt2 = reshape([dt,dt]',2*ldt,1);
+        
         [AX,H1,H2] = plotyy(tdt2,dt2,binT,binC,'plot','semilogy');
         set(H1,'Marker','.','MarkerFaceColor','b','LineStyle','none')
         set(H2,'Marker','o','MarkerFaceColor','c','LineStyle','none',...
@@ -639,66 +701,43 @@ while (k <= nb)
     pause
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % get key stroke
-    cc = get(201,'CurrentCharacter');
-    if giffy
-        figure(301);clf;
-        set(301, 'menubar', 'none','name','keystroke');
-        ha = annotation('textbox',[.4 .5 .1 .1],'Units','normalized','String',cc,...
-            'FitBoxToText','on','FontSize',50, 'BackgroundColor', 'w',...
-            'VerticalAlignment','middle','linestyle','none','HorizontalAlignment','center');
-        axis off
-    end
+    cc = get(gcf,'CurrentCharacter');
     if (strcmp(cc,'u') || ...
-            strcmp(cc,'1') || strcmp(cc,'2') || strcmp(cc,'5') || ...
             strcmp(cc,'g') || strcmp(cc,'y') ||  strcmp(cc,'r') || ...
             strcmp(cc,'z') || strcmp(cc,'x') || strcmp(cc,'w'));
         disp(' Update Display') % Stay on same bout
-    else
-        if strcmp(cc,'s')
-            dl = input(' Update IPI scale (sec):  '); % Set IPI scale
-        else
-            if strcmp(cc,'d')
-                rll = input(' Update RL low (dB):  '); % Set RL low
-                rlh = input(' Update RL high (dB):  '); % Set RL high
-            else
-                if strcmp(cc,'a')
-                    contrast = input(' Update Contrast:  '); % Set RL high
-                    bright = input(' Update Brightness:  '); % Set RL low
-                else
-                    if strcmp(cc,'b') % Move back one bout
-                        if k ~= 1
-                            k = k-1;
-                        end
-                    else
-                        if strcmp(cc,'f') %assign as false
-                            % False Detecctions
-                            disp(['Number of False Detections = ',num2str(length(true))])
-                            zFD = [zFD; true];   % cummulative False Detection matrix
-                            save(fn2,'zFD')
-                        else
-                            if strcmp(cc,'t') %assign all as true
-                                [C,iC] = setdiff(zFD(:,1),t);
-                                disp(['Remaining False Detections = ',num2str(length(iC))])
-                                zFD = zFD(iC,:);
-                                save(fn2,'zFD')
-                            else
-                                if strcmp(cc,'j')% jump to seession
-                                    prompt = 'Jump to Session: ';
-                                    kjump = input(prompt);
-                                    if (kjump > 0 && kjump < nb)
-                                        k = kjump;
-                                    end
-                                else
-                                    k = k+1;  % move forward one bout
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+    elseif strcmp(cc,'s')
+        dl = input(' Update IPI scale (sec):  '); % Set IPI scale
+    elseif strcmp(cc,'d')
+        rll = input(' Update RL low (dB):  '); % Set RL low
+        rlh = input(' Update RL high (dB):  '); % Set RL high
+    elseif strcmp(cc,'a')
+        contrast = input(' Update Contrast:  '); % Set RL high
+        bright = input(' Update Brightness:  '); % Set RL low
+    elseif strcmp(cc,'b') % Move back one bout
+        if k ~= 1
+            k = k-1;
         end
-end
-if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
+    elseif strcmp(cc,'f') %assign as false
+        % False Detecctions
+        disp(['Number of False Detections = ',num2str(length(true))])
+        zFD = [zFD; true];   % cummulative False Detection matrix
+        save(fn2,'zFD')
+    elseif strcmp(cc,'t') %assign all as true
+        [C,iC] = setdiff(zFD(:,1),t);
+        disp(['Remaining False Detections = ',num2str(length(iC))])
+        zFD = zFD(iC,:);
+        save(fn2,'zFD')
+    elseif strcmp(cc,'j')% jump to seession
+        prompt = 'Jump to Session: ';
+        kjump = input(prompt);
+        if (kjump > 0 && kjump < nb)
+            k = kjump;
+        end
+    else
+        k = k+1;  % move forward one bout
+    end
+    if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
         if (~isempty(XFD))
             zTD(k,2) = 0;
             for inxfd = 1 : zTD(k,1)
@@ -714,16 +753,24 @@ if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
                     %meanspec;
                     plot(ft,SPEC(fimint:fimaxt),'Linewidth',4);
                     hold on;
-                    tmnSPEC = min(csp(ixfd(XFD(inxfd)),fimint+5:flowt));
+                    if loadMSP
+                        tmnSPEC = min(csp(ixfd(XFD(inxfd)),fimint+5:flowt));
+                        tSPEC = csp(ixfd(XFD(inxfd)),:) - tmnSPEC;
+                        csnTemp = csn(ixfd(XFD(inxfd)),:);
+                    else
+                        cspTemp = inFileMat.MSP(keepers(ixfd(XFD(inxfd))),:);
+                        csnTemp = inFileMat.MSN(keepers(ixfd(XFD(inxfd))),:);
+                        tmnSPEC = min(cspTemp(fimint+5:flowt));
+                        tSPEC = cspTemp - tmnSPEC;
+                    end
                     % make low freq part = 0
-                    tSPEC = csp(ixfd(XFD(inxfd)),:) - tmnSPEC;
                     tmxSPEC = max(tSPEC(flowt:fimaxt));
                     tSPEC = tSPEC ./ tmxSPEC;  % make high freq part = 1
                     plot(ft,tSPEC(fimint:fimaxt),'k','Linewidth',4);
                     hold off;
                     %
                     figure(52) % add click to waveform plot in BLACK
-                    plot(csn(ixfd(XFD(inxfd)),:),'k');
+                    plot(csnTemp,'k');
                     hold off;
                     pause
                     cc = get(52,'CurrentCharacter');
@@ -734,7 +781,7 @@ if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
                 end
             end
             disp([' Tested: ',num2str(zTD(k,1)),' False: ',...
-                num2str(zTD(k,2))]);
+                num2str(zTD(k,2))]); 
             save(fn6,'zTD');
             save(fn2,'zFD')
         end
@@ -792,29 +839,30 @@ if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
                     disp(['       Year              Month          Day           Hour', ...
                         '          Min          Sec']);
                     disp(['Datevec ',num2str(datevec(Bc(1)))]);
-                    yell = find(ct(J) == Bc(1));
-                    if (specploton == 1)
+                    [~,yell] = intersect(ct(J), Bc);
+                    if (specploton == 1) && ~isempty(yell) && ~isempty(csnJ)
                         figure(52) % add click to waveform plot in BLACK
                         hold off;
                         plot(wtrue + 2*min(wtrue),'c');
                         hold on;
-                        plot(csn(J(yell),:),'k');
+                        plot(mean(csnJ(yell,:),1)','k');
                         figure(50)  % add click to spec plot in BLACK
-                        hold off
                         %meanspec;
                         plot(ft,SPEC(fimint:fimaxt),'Linewidth',4);
                         hold on
-                        tmnSPEC = min(csp(J(yell),fimint+5:flowt));
+                        cspJy = mean(cspJ(yell,:),1);
+                        tmnSPEC = min(cspJy(:,fimint+5:flowt),[],2);
                         % make low freq part = 0
-                        tSPEC = csp(J(yell),:) - tmnSPEC;
-                        tmxSPEC = max(tSPEC(flowt:fimaxt));
-                        tSPEC = tSPEC ./ tmxSPEC;  % make high freq part = 1
-                        plot(ft,tSPEC(fimint:fimaxt),'k','Linewidth',4);
+
+                        tSPEC = cspJy - repmat(tmnSPEC,1,size(cspJy,2));
+                        tmxSPEC = max(tSPEC(:,flowt:fimaxt),[],2);
+                        tSPEC = tSPEC ./ repmat(tmxSPEC,1,size(tSPEC,2));  % make high freq part = 1
+                        plot(ft,tSPEC(:,fimint:fimaxt),'k','Linewidth',4);
                     end
                 else
                     C =[];C2 = []; iC = []; iC2 = [];
                     disp(['Number of Detections Selected = ',num2str(length(Bc))])
-                    if exist('zFD')
+                    if exist('zFD','var')
                         [C,iC] = setdiff(zFD(:,1),Bc(:,1));
                         disp(['Remaining Number of False Detections = ',num2str(length(iC))])
                         zFD = zFD(iC,:);
@@ -849,6 +897,7 @@ if (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
             zFD = [zFD; Bc];   % cummulative False Detection matrix
             save(fn2,'zFD')
         end
+        clf
     end
     % don't end if you used paintbrush on last record
     if (k == nb && ~isempty(Bc))

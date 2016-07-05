@@ -21,6 +21,12 @@ diskList = dir(fullfile(tpwsPath,[stn,dpn,'_*TPWS',num2str(itnum),'.mat']));
 
 % for each TPWS file found, make LTSA.mat file
 for iD = 1:length(diskList);
-    mkLTSAsessions('stn', stn, 'dpn', dpn, 'itnum', num2str(itnum),...
+    % if there's any extra info in your file name, between the deployment
+    % code and species name (eg. disk number in dolphin detections), parse that out here. 
+    extraTextLoc = strfind(diskList.name,dpn)+length(dpn)+1;
+    nextUscore = strfind(diskList.name(extraTextLoc:end),'_');
+    dsk = diskList.name(extraTextLoc:(extraTextLoc+nextUscore(1)-1));
+    
+    mkLTSAsessions('stn', stn, 'dpn', dpn, 'disk',dsk,'itnum', num2str(itnum),...
        'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath)
 end

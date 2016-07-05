@@ -4,7 +4,7 @@ function mkLTSAsessions(varargin)
 % use individual click detections to define session/bout
 % get and save ltsa pixel data for each session
 % 140310 smw
-%clear all
+% clear all
 tic % start timer
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set some parameters
@@ -12,8 +12,9 @@ gth = .5;    % gap time in hrs between sessions
 gt = gth*60*60;    % gap time in sec
 ltsamax = 6; % length of ltsa window
 thres = 80;
-% get user input and set up file names
 
+% get user input and set up file names
+dsk = [];
 n = 1; 
 while n <= length(varargin)
     switch varargin{n}
@@ -27,6 +28,8 @@ while n <= length(varargin)
             sp = varargin{n+1}; n=n+2;
         case 'lpn'
             lpn = varargin{n+1}; n=n+2;
+        case 'disk'
+            dsk = varargin{n+1}; n=n+2;
         case 'sdir'
             sdir = varargin{n+1}; n=n+2;
         otherwise
@@ -100,7 +103,7 @@ end
 detpn = [sdir,'\'];
 
 % detfn = [stn,dpn,'_',spe,'_TPWS2.mat'];
-detfn = [stn,dpn,'_',spe,'_TPWS',itnum,'.mat'];
+detfn = [stn,dpn,'_',dsk,spe,'_TPWS',itnum,'.mat'];
 fn = fullfile(detpn,detfn);
 A1 = exist(fn,'file');
 if A1 ~= 2
@@ -183,28 +186,30 @@ global PARAMS
 persistent sTime eTime rfTime
 
 if isempty(sTime)
-    sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
-    disp('reading ltsa headers, please be patient ...')
-    
-    for k = 1:nltsas
-        % for k = 1:2
-        PARAMS.ltsa.inpath = lpn;
-        PARAMS.ltsa.infile = fnames(k,:);
-        read_ltsahead_GoM
-        sTime(k) = PARAMS.ltsa.start.dnum + doff;  % start time of ltsa files
-        eTime(k) = PARAMS.ltsa.end.dnum + doff;    % end time of ltsa files
+    if nltsas > 0
+        sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
+        disp('reading ltsa headers, please be patient ...')
         
-        rfTime{k} = PARAMS.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
+        for k = 1:nltsas
+            % for k = 1:2
+            PARAMS.ltsa.inpath = lpn;
+            PARAMS.ltsa.infile = fnames(k,:);
+            read_ltsahead_GoM
+            sTime(k) = PARAMS.ltsa.start.dnum + doff;  % start time of ltsa files
+            eTime(k) = PARAMS.ltsa.end.dnum + doff;    % end time of ltsa files
+            rfTime{k} = PARAMS.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
+        end
+        
+        % hack fix
+        if strcmp(sdn,'GC02')
+            eTime(2) = sTime(3);
+        end
+        disp('done reading ltsa headers')
+    else
+        disp(['No LTSAs found, to match wildcard: ', [lpn,sdn,'*']])
+        return
     end
-    
-    % hack fix
-    if strcmp(sdn,'GC02')
-        eTime(2) = sTime(3);
-    end
-    disp('done reading ltsa headers')
 end
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % find edges (start and end times) of bouts or sessions

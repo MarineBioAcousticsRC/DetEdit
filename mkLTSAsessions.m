@@ -15,7 +15,7 @@ thres = 80;
 
 % get user input and set up file names
 dsk = [];
-n = 1; 
+n = 1;
 while n <= length(varargin)
     switch varargin{n}
         case 'stn'
@@ -33,7 +33,7 @@ while n <= length(varargin)
         case 'sdir'
             sdir = varargin{n+1}; n=n+2;
         otherwise
-            error(sprintf('Bad optional argument: "%s"', varargin{n}));
+            error('Bad optional argument: "%s"', varargin{n});
     end
 end
 
@@ -69,19 +69,23 @@ elseif (strcmp(sp,'BWG') || strcmp(sp,'g'))
 elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
     specchar = 'D'; %Simone abbreviations for BW species
     spe = 'BW31';  tfselect = 40200; % freq used for transfer function
-elseif (strcmp(sp,'De') || strcmp(sp,'de'))
+elseif strcmpi(sp,'De')
     %specchar = 'D'; %Simone abbreviations for BW species
     spe = 'Delphin';  tfselect = 0; % freq used for transfer function
 elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
     %specchar = 'D'; %Simone abbreviations for BW species
     spe = 'Porpoise';  tfselect = 0; % freq used for transfer function
     thres = 100;
-elseif (strcmp(sp,'MFA') || strcmp(sp,'mfa'))
+elseif strcmpi(sp,'MFA')
     spe = 'MFA';  tfselect = 4000; % freq used for transfer function
     ltsamax = .5; % length of ltsa window
     thres = 80;
-elseif (strcmp(sp,'Dl') || strcmp(sp,'dl'))
+elseif strcmpi(sp,'Dl')
     spe = 'Beluga'; tfselect = 45000; %freq used for tf
+elseif strcmpi(sp,'whs')
+    spe = 'whs';  tfselect = 0; % freq used for transfer function
+    ltsamax = .5; % length of ltsa window
+    thres = 0;
 else
     disp(' Bad Species type')
     return
@@ -122,7 +126,7 @@ if (tfselect > 0)
         disp(['TF File: ',tffn]);
     end
     fid = fopen(tffn);
-    [A,count] = fscanf(fid,'%f %f',[2,inf]);
+    [A,~] = fscanf(fid,'%f %f',[2,inf]);
     tffreq = A(1,:);
     tfuppc = A(2,:);
     fclose(fid);
@@ -135,7 +139,7 @@ else
 end
 % LTSA session output file
 lspn = detpn;
-lsfn = [sdn,'_',spe,'_LTSA',itnum,'.mat'];
+lsfn = [sdn,'_',dsk,spe,'_LTSA',itnum,'.mat'];
 %lsfn = [sdn,'_',spe,'_LTSA.mat'];
 fn2 = fullfile(lspn,lsfn);
 
@@ -170,9 +174,9 @@ cl = cl(ib);
 %d = dir([lpn,'GofMX_',sdn,'*']);
 if (strcmp(stn,'MC')|| strcmp(stn,'GC') || strcmp(stn,'DC') || ...
         strcmp(stn,'DT') || strcmp(stn,'HH'))|| strcmp(stn,'MP')
-    d = dir([lpn,'GofMX_',sdn,'*']);
+    d = dir([lpn,'GofMX_',sdn,'*.ltsa']);
 else
-    d = dir([lpn,sdn,'*']);
+    d = dir([lpn,sdn,'*.ltsa']);
 end
 fnames = char(d.name);
 nltsas = length(d);
@@ -183,7 +187,7 @@ global PARAMS
 % make the variables that hold the ltsa header info persistent, in case
 % you are running itr_mkLTSA.m, this way you don't have to read the header
 % info every time.
-persistent sTime eTime rfTime
+global sTime eTime rfTime
 
 if isempty(sTime)
     if nltsas > 0
@@ -215,11 +219,11 @@ end
 % find edges (start and end times) of bouts or sessions
 dt = diff(ct)*24*60*60; % time between detections
 %                           convert from days to seconds
-I = [];
+% I = [];
 I = find(dt>gt);  % find start of gaps
 sb = [ct(1);ct(I+1)];   % start time of bout
 eb = [ct(I);ct(end)];   % end time of bout
-dd = ct(end)-ct(1);     % deployment duration [d]
+% dd = ct(end)-ct(1);     % deployment duration [d]
 nb = length(sb);        % number of bouts
 bd = (eb - sb);      % duration of bout in days
 %find bouts > 10 sec long
@@ -229,7 +233,7 @@ bd = (eb - sb);      % duration of bout in days
 blim = ltsamax/24;       % 6 hr bout length limit
 ib = 1;
 while ib <= nb
-    %disp([' ib = ',num2str(ib)]);
+    % disp([' ib = ',num2str(ib)]);
     bd = (eb - sb);   %duration bout in sec
     if (bd(ib) > blim)      % find long bouts
         nadd = ceil(bd(ib)/blim) - 1; % number of bouts to add
@@ -356,7 +360,7 @@ while (k <= nb)
             % make time vector
             t1 = rfTime{Ke}(Le(1));
             dt = datenum([0 0 0 0 0 5]);
-            ptLe = [t1:dt:t1 + (nbin-1)*dt];
+            ptLe = t1:dt:t1 + (nbin-1)*dt;
         end
         
         if isempty(Ls) || isempty(Le)
@@ -388,7 +392,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%                   Subroutines                           %%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%
 function [ pt, pwr ] = padLTSAGaps(PARAMS,L,pwr)
 %
 % Takes LTSA raw file start times and returns a vector of start times for

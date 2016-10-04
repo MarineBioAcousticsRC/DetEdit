@@ -26,7 +26,7 @@ PARAMS.ltsa.nfft = fread(fid,1,'uint32');      % 4 bytes - number of samples per
 if PARAMS.ltsa.ver == 1 || PARAMS.ltsa.ver == 2
     PARAMS.ltsa.nrftot = fread(fid,1,'uint16');    % 2 bytes - total number of raw files from all xwavs
     sk = 27;
-elseif PARAMS.ltsa.ver == 3
+elseif PARAMS.ltsa.ver == 3 || PARAMS.ltsa.ver == 4
     PARAMS.ltsa.nrftot = fread(fid,1,'uint32');    % 4 bytes - total number of raw files from all xwavs
     sk = 25;
 else
@@ -72,12 +72,15 @@ for k = 1 : PARAMS.ltsa.nrftot
     % 8 bytes up to here
     %
     PARAMS.ltsa.byteloc(k) = fread(fid,1,'uint32');     % 4 byte - Byte location in ltsa file of the spectral averages for this rawfile
-    if PARAMS.ltsa.ver == 3     % ARP data type = ltsa version 3
+    if PARAMS.ltsa.ver == 3   % ARP data type = ltsa version 3
         PARAMS.ltsa.nave(k) = fread(fid,1,'uint32');          % 2 byte - number of spectral averages for this raw file
         sk = 7;
     elseif PARAMS.ltsa.ver == 1 || PARAMS.ltsa.ver == 2
         PARAMS.ltsa.nave(k) = fread(fid,1,'uint16');          % 2 byte - number of spectral averages for this raw file
         sk = 9;
+    elseif  PARAMS.ltsa.ver == 4  
+        PARAMS.ltsa.nave(k) = fread(fid,1,'uint32');          % 2 byte - number of spectral averages for this raw file
+        sk = 47;
     else
         disp_msg(['Error: incorrect version number ',num2str(PARAMS.ltsa.ver)])
         return
@@ -85,7 +88,8 @@ for k = 1 : PARAMS.ltsa.nrftot
     % 14 or 16 bytes up to here
     PARAMS.ltsahd.fname(k,:) = fread(fid,40,'uchar');        % 40 byte - xwav file name for this raw file header
     PARAMS.ltsahd.rfileid(k) = fread(fid,1,'uint8');       % 1 byte - raw file id / number for this xwav
-    fseek(fid,sk,0);
+    testout = fread(fid,sk);
+    % fseek(fid,sk,0);
     % 64 bytes for each directory listing for each raw file
     
     % calculate starting time [dnum => datenum in days] for each ltsa raw

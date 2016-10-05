@@ -99,98 +99,98 @@ else
 end
 
 %% apply default if user has not specified a value
-if ~exist('spParamsUser.specChar', 'var')
-    spParams.specchar = specChar;
-else
+if isfield(spParamsUser,'specChar')
     spParams.specchar = spParamsUser.specChar;
+else
+    spParams.specchar = specChar;
 end
 
-if ~exist('spParamsUser.speName', 'var')
-    spParams.speName = speName;
-else
+if isfield(spParamsUser,'speName')
     spParams.speName = spParamsUser.speName;
+else
+    spParams.speName = speName;
 end
 
-if ~exist('spParamsUser.tfSelect', 'var')
-    spParams.tfSelect = tfSelect;
-else
+if isfield(spParamsUser,'tfSelect')
     spParams.tfSelect = spParamsUser.tfSelect;
+else
+    spParams.tfSelect = tfSelect;
 end
 
-if ~exist('spParamsUser.dtHi', 'var')
-    spParams.dtHi = dtHi;
-else
+if isfield(spParamsUser,'dtHi')
     spParams.dtHi = spParamsUser.dtHi;
+else
+    spParams.dtHi = dtHi;
 end
 
-if ~exist('spParamsUser.fLow', 'var')
-    spParams.fLow = fLow;
-else
+if isfield(spParamsUser,'fLow')
     spParams.fLow = spParamsUser.fLow;
+else
+    spParams.fLow = fLow;
 end
 
-if ~exist('spParamsUser.thresRL', 'var')
+if isfield(spParamsUser,'thresRL')
+    spParams.thresRL = spParamsUser.thresRL; 
+else
     spParams.thresRL = thresRL;
-else
-    spParams.thresRL = spParamsUser.thresRL;
 end
 
-if ~exist('spParamsUser.ltsaContrast', 'var')
+if isfield(spParamsUser,'ltsaContrast')
+    spParams.ltsaContrast = spParamsUser.ltsaContrast;    
+else
     spParams.ltsaContrast = ltsaContrast;
-else
-    spParams.ltsaContrast = spParamsUser.ltsaContrast;
 end
 
-if ~exist('spParamsUser.ltsaBright', 'var')
-    spParams.ltsaBright = ltsaBright;
-else
+if isfield(spParamsUser,'ltsaBright')
     spParams.ltsaBright = spParamsUser.ltsaBright;
+else
+    spParams.ltsaBright = ltsaBright;
 end
 
-if ~exist('spParamsUser.ltsaLims', 'var')
-    spParams.ltsaLims = ltsaLims;
-else
+if isfield(spParamsUser,'ltsaLims')
     spParams.ltsaLims = spParamsUser.ltsaLims;
+else
+    spParams.ltsaLims = ltsaLims;
 end
 
-if ~exist('spParamsUser.ltsaMax', 'var')
+if isfield(spParamsUser,'ltsaMax')
+    spParams.ltsaMax = spParamsUser.ltsaMax;    
+else
     spParams.ltsaMax = ltsaMax;
-else
-    spParams.ltsaMax = spParamsUser.ltsaMax;
 end
 
-if ~exist('spParamsUser.rlLow', 'var')
-    spParams.rlLow = rlLow;
-else
+if isfield(spParamsUser,'rlLow')
     spParams.rlLow = spParamsUser.rlLow;
+else
+    spParams.rlLow = rlLow;
 end
 
-if ~exist('spParamsUser.rlHi', 'var')
+if isfield(spParamsUser,'rlHi')
+    spParams.rlHi = spParamsUser.rlHi;  
+else
     spParams.rlHi = rlHi;
-else
-    spParams.rlHi = spParamsUser.rlHi;
 end
 
-if ~exist('spParamsUser.dfManual', 'var')
+if isfield(spParamsUser,'dfManual')
+    spParams.dfManual = spParamsUser.dfManual;    
+else
     spParams.dfManual = dfManual;
-else
-    spParams.dfManual = spParamsUser.dfManual;
 end
 
-if ~exist('spParamsUser.dfManual', 'var')
+if isfield(spParamsUser,'dfManual')
+    spParams.dfManual = spParamsUser.dfManual;
+else
     spParams.dfManual = dfManual;
-else
-    spParams.dfManual = spParamsUser.dfManual;
 end
 
-if ~exist('spParamsUser.p1Low', 'var')
-    spParams.p1Low = p1Low;
-else
+if isfield(spParamsUser,'p1Low')
     spParams.p1Low = spParamsUser.p1Low;
+else
+    spParams.p1Low = p1Low;
 end
 
-if ~exist('spParamsUser.p1Hi', 'var')
-    spParams.p1Hi = p1Hi;
-else
+if isfield(spParamsUser,'p1Hi')
     spParams.p1Hi = spParamsUser.p1Hi;
+else
+    spParams.p1Hi = p1Hi;
 end

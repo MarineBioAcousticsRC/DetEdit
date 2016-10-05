@@ -570,7 +570,7 @@ while (k <= nb)
             
             % plot average ID'd click waveform(s)
             figure(52); hold on
-            hID2 = plot((wavID + 100*rand(size(hID))*min(wavID))');
+            hID2 = plot((wavID + 5*rand(size(hID))*min(wavID))');
             
             for iC = 1:length(hID) % set colors
                 set(hID(iC),'Color',colorTab(specIDs(iC),:))

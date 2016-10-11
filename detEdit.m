@@ -780,15 +780,19 @@ while (k <= nb)
     elseif strcmp(cc,'f') % assign ALL as false
         disp(['Number of False Detections Added = ',num2str(length(trueTimes))])
         [newFD,~] = setdiff(t,zID(:,1)); % remove from zID
-        [~,iCID] = setdiff(zID(:,1),t); % remove from zID
-        zID = zID(iCID,:);
+        if ~isempty(zID)
+            [~,iCID] = setdiff(zID(:,1),t); % remove from zID 
+            zID = zID(iCID,:);
+        end
         zFD = [zFD; newFD; trueTimes]; % Add everything to zFD
         
     elseif strcmp(cc,'t') %assign ALL as true
         [zFD,~] = setdiff(zFD(:,1),t);
-        [~,iCID] = setdiff(zID(:,1),t);
         disp(['Remaining False Detections = ',num2str(length(zFD))])
-        zID = zID(iCID,:);
+        if ~isempty(zID)
+            [~,iCID] = setdiff(zID(:,1),t);
+            zID = zID(iCID,:);
+        end
         
     elseif strcmp(cc,'j')% jump to non-consecutive session
         prompt = 'Jump to Session: ';

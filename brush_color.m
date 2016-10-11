@@ -46,8 +46,10 @@ if ~isempty(brushDataX)
                 % make sure you're not flagging something outside this session
                 [newTD,~] = intersect(t, brushDate);
                 [zFD,iC] = setdiff(zFD,newTD);
-                [~,zIDkeep] = setdiff(zID(:,1),newTD);
-                zID = zID(zIDkeep,:);
+                if ~isempty(zID)
+                    [~,zIDkeep] = setdiff(zID(:,1),newTD);
+                    zID = zID(zIDkeep,:);
+                end
                 disp(['Remaining Number of False Detections = ',num2str(length(iC))])
                 % save(fn2,'zFD')
             end

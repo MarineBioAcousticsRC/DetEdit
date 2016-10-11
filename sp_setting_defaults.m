@@ -10,7 +10,7 @@ speName = 'Unknown';  % Species code used in file names
 tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 dtHi = .5; % max yaxis value for IPI display in sec
 fLow = 5; % boundary for spectrum plot
-thresRL = 0; % minimum RL threshold in dB peak-to-peak
+threshRL = 0; % minimum RL threshold in dB peak-to-peak
 ltsaContrast = 250; % ltsa contrast
 ltsaBright = 100; % ltsa brightness
 ltsaLims = [0,100]; % max and min of LTSA plot
@@ -18,7 +18,7 @@ ltsaMax = 6; % ltsa maximum duration per session
 rlLow = 110; % PP plot window low limit
 rlHi = 170; % PP plot window high limit
 dfManual = []; % LTSA step size in 10 [Hz] bins
-p1Low = thresRL - 5;
+p1Low = threshRL - 5;
 p1Hi = 170; % ??
 
 
@@ -28,13 +28,13 @@ if (strcmp(sp,'Ko') || strcmp(sp,'k'))
     tfSelect = 80000; 
     dtHi = 0.5;  
     fLow = 70;   
-    thresRL = 116;
+    threshRL = 116;
 elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
     specChar = 'Z';
     speName = 'Cuviers';  tfSelect = 40200;
     dtHi = 1.0; 
     fLow = 25;  
-    thresRL = 121; 
+    threshRL = 121; 
     ltsaContrast = 200; ltsaBright = 30;
 elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
     specChar = 'M';
@@ -42,45 +42,45 @@ elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
     tfSelect = 40200;
     dtHi = 1.0; 
     fLow = 25; 
-    thresRL = 121;
+    threshRL = 121;
 elseif (strcmp(sp,'BWG') || strcmp(sp,'g'))
     specChar = 'G'; %Simone abbreviations for BW species
     speName = 'BWG';  tfSelect = 40200; % freq used for transfer function
     dtHi = 1.0; % scale for IPI display in sec
     fLow = 25;   % 25 kHz boundary for spec plot
-    thresRL = 121; % dB threshold
+    threshRL = 121; % dB threshold
 elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
     specChar = 'D'; 
     speName = 'BW31';  tfSelect = 40200; 
     dtHi = 1.0;
     fLow = 25; 
-    thresRL = 121;
+    threshRL = 121;
 elseif strcmpi(sp,'De')
     speName = 'Delphin';  
     tfSelect = 0; % already in dB no correction
     dtHi = 0.6; 
     fLow = 10;   
-    thresRL = 118;
-    rlLow = thresRL - 6.9; rlHi = 190;
+    threshRL = 118;
+    rlLow = threshRL - 6.9; rlHi = 190;
 elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
     speName = 'Porpoise';  tfSelect = 0; 
     dtHi = 0.5; 
     fLow = 25;  
-    thresRL = 100;
-    rlLow = thresRL - 5; rlHi = 190;
+    threshRL = 100;
+    rlLow = threshRL - 5; rlHi = 190;
     ltsaContrast = 250; ltsaBright = 100; 
 elseif strcmpi(sp,'MFA')
     speName = 'MFA';  tfSelect = 4000; 
     ltsaMax = .5; 
-    thresRL = 80;
+    threshRL = 80;
     dtHi = 2;
     fLow = 2;  
-    rlLow = thresRL - 5; rlHi = 180;
+    rlLow = threshRL - 5; rlHi = 180;
     dfManual = 10;   
 elseif strcmpi(sp,'whs')
     speName = 'whs';  tfSelect = 0; 
     ltsaMax = .5;
-    thresRL = 0;
+    threshRL = 0;
     dtHi = 2; 
     fLow = 5;   
     rlLow = 0; rlHi = 20;
@@ -91,8 +91,8 @@ elseif strcmpi(sp,'Dl')
     speName = 'Beluga'; tfSelect = 45000;
     dtHi = 0.5;
     fLow = 20;  
-    thresRL = 110;
-    rlLow = thresRL - 5; rlHi = 170;
+    threshRL = 110;
+    rlLow = threshRL - 5; rlHi = 170;
     ltsaContrast = 200; ltsaBright = 70; 
 else
     disp('CAUTION: Unknown Species Type!!!')
@@ -129,10 +129,10 @@ else
     spParams.fLow = fLow;
 end
 
-if isfield(spParamsUser,'thresRL')
-    spParams.thresRL = spParamsUser.thresRL; 
+if isfield(spParamsUser,'threshRL')
+    spParams.threshRL = spParamsUser.threshRL; 
 else
-    spParams.thresRL = thresRL;
+    spParams.threshRL = threshRL;
 end
 
 if isfield(spParamsUser,'ltsaContrast')

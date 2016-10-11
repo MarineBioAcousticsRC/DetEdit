@@ -10,7 +10,7 @@
 % use.
 
 stn = 'WAT_HZ_01_'; % site name
-dpn = 'disk01a'; % deployment number
+dpn = 'disk14'; % deployment number
 itnum = '1'; % iteration
 srate = 200; % sample rate
 sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
@@ -45,9 +45,9 @@ spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no a
 % spParamsUser.speName = 'Unknown';  % Species code used in file names 
 spParamsUser.dtHi = .4; % max yaxis value for IPI display in sec
 % spParamsUser.fLow = 5; % boundary for spectrum plot
-% spParamsUser.thresRL = 0; % minimum RL threshold in dB peak-to-peak
-spParamsUser.ltsaContrast = 113; % ltsa contrast
-spParamsUser.ltsaBright = 46; % ltsa brightness
+spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
+spParamsUser.ltsaContrast = 150; % ltsa contrast
+spParamsUser.ltsaBright = 55; % ltsa brightness
 % spParamsUser.ltsaLims = [0,100]; % max and min of LTSA plot
 % spParamsUser.rlLow = 110; % PP plot window low limit
 % spParamsUser.rlHi = 170; % PP plot window high limit

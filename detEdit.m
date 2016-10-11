@@ -156,11 +156,11 @@ end
 
 %% apply tf and remove low amplitude detections
 cl = cl + tf;
-ib1 = find(cl >= p.thresRL);
+ib1 = find(cl >= p.threshRL);
 
 if (size(ib1,1) ~= size(cl,1)) && ~loadMSP % catch for case where enforcing
     % min RL threshold on large dataset creates non-continuous indices.
-    error('detEdit:RLcheck',['Error: Re-run makeTPWS to enforce your minimum peak to peak RL threshold.\n',...
+    error('detEdit:RL',['Error: Re-run makeTPWS to enforce your minimum peak to peak RL threshold.\n',...
         'You cannot do it here because you have too many detections to load into memory.\n',...
         sprintf('TPWS minimum RL = %d \ndetEdit minimum RL = %d',min(cl),p.threshRL)])
 end
@@ -719,7 +719,7 @@ while (k <= nb)
         figure(201)
         subplot(3,1,1)
         hold on
-        plot(t(yell),RL(yell),'ko','MarkerSize',8,'UserData',t(yell));
+        plot(t(yell),RL(yell),'ko','MarkerSize',6,'UserData',t(yell));
         hold off;
         
         % for diffs, yell can't exceed length dt, which could happen if you
@@ -727,7 +727,7 @@ while (k <= nb)
         yellDT = yell(yell<length(dt));
         axes(AX(1))
         hold on
-        plot(t(yellDT),dt(yellDT),'ko','MarkerSize',8,'UserData',t(yell));
+        plot(t(yellDT),dt(yellDT),'ko','MarkerSize',6,'UserData',t(yell));
         hold off
         
         figure(51)
@@ -779,10 +779,12 @@ while (k <= nb)
         end
     elseif strcmp(cc,'f') % assign ALL as false
         disp(['Number of False Detections Added = ',num2str(length(trueTimes))])
-        [newFD,~] = setdiff(t,zID(:,1)); % remove from zID
         if ~isempty(zID)
+            [newFD,~] = setdiff(t,zID(:,1)); % remove from zID
             [~,iCID] = setdiff(zID(:,1),t); % remove from zID 
             zID = zID(iCID,:);
+        else
+            newFD = t;
         end
         zFD = [zFD; newFD; trueTimes]; % Add everything to zFD
         

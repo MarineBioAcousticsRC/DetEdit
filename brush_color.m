@@ -68,9 +68,10 @@ if ~isempty(brushDataX)
             end
         end
     end
-    [~,zIDkeep2] = setdiff(zID(:,1),zFD);
-    zID = zID(zIDkeep2,:);
-
+    if ~isempty(zID)
+        [~,zIDkeep2] = setdiff(zID(:,1),zFD);
+        zID = zID(zIDkeep2,:);
+    end
 else
     bFlag = 0;
 end

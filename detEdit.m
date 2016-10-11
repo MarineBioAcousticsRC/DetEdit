@@ -114,7 +114,7 @@ end
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
 load(fn,'MTT','MPP')
-% test that MTT is unique
+
 
 % if you have more than "maxDetLoad" detections, don't load all spectra and
 % time series into memory. You can access them from the disk instead.
@@ -125,7 +125,8 @@ nDets = length(MTT);
 loadMSP = nDets <= maxDetLoad; % true/false, if you have more detections than
 % the maximum load this becomes false.
 ic1 = [];
-if loadMSP
+if loadMSP 
+    % remove duplicates from MTT (can't do this if too many detections to load into memory).
     [uMTT,ia1,ic1] = unique(MTT);
     if (length(uMTT) ~= length(MTT))
         disp([' TimeLevel Data NOT UNIQUE - removed:   ', ...
@@ -145,12 +146,9 @@ else
     cl = MPP(ia1)';
 end
 
-if (specploton == 1) && loadMSP % only if spec plot
-    if (strcmp(p.speName,'Delphin1'))% set length of waveform plot to 1 ms
-        csn = MSN(ia1,100:100+(srate+2));
-    else
-        csn = MSN(ia1,:);
-    end
+if specploton && loadMSP
+    % if specploton and there aren't too many detections, load spectra 
+    csn = MSN(ia1,:); 
     csp = MSP(ia1,:);
 else
     disp('No Waveform or Spectra');
@@ -172,7 +170,7 @@ ct = ct(ib1);
 cl = cl(ib1);
 keepers = ia1(ib1);
 % prune by RL only if spectra & waveforms have been loaded
-if (specploton == 1) && loadMSP 
+if specploton && loadMSP 
     csn = csn(ib1,:);
     csp = csp(ib1,:);
 end
@@ -309,9 +307,12 @@ end
 % for LTSA PLOT
 f = 1000*fimin:df:1000*fimax;
 if p.tfSelect > 0 % tfParams isn't being used...
-    tfLTSA = interp1(tffreq,tfuppc,f,'linear','extrap'); % add to LTSA vector
+    tfLTSA = interp1(tffreq,tfuppc,f,'linear','extrap')'; % add to LTSA vector
+else
+    tfLTSA = zeros(size(f))';
 end
-if specploton == 1 % do this only if spec plot
+
+if specploton
     % check length of MSP
     inFileMat = matfile(fn);
     if ~loadMSP
@@ -323,7 +324,7 @@ if specploton == 1 % do this only if spec plot
     fmsp = inFileMat.f;
     if isempty(fmsp)
         fmsp = ((srate/2)/(smsp2-1))*ift - (srate/2)/(smsp2-1);
-        warning('no freq vector in TPWS file. Using JAH approximation.')
+        fprintf('No freq vector in TPWS file. Using approximation based on sample rate.\n')
     end
     % find the indices that are in the range of interest
     fi = find(fmsp > fimin & fmsp <= fimax);
@@ -349,6 +350,7 @@ disp('Press any other key to go forward')
 cc = ' ';  % avoids crash when first bout too short
 k = kstart;
 yell = [];
+blag = 0;
 %% Main Loop
 % loop over the number of bouts (sessions)
 while (k <= nb)
@@ -366,7 +368,7 @@ while (k <= nb)
     figure(51);clf
     h51 = gca;
     
-    if (specploton == 1) && loadMSP
+    if specploton && loadMSP
         xmsp0All = csp + repmat(Ptfpp,size(csp,1),1);
         [xmspAll,im] = max(xmsp0All(:,flowt:fimaxt),[],2); % maximum between flow-100kHz
         
@@ -381,11 +383,11 @@ while (k <= nb)
     % find detections and false detections within this bout (session)
     J = []; JFD =[]; Jtrue = []; XFD = []; JID = [];
     J = find(ct >= sb(k) & ct <= eb(k));
-    if loadMSP % have to load consecutive detections if reading from disk
+    if specploton && loadMSP % have to load consecutive detections if reading from disk
         J = J(1):J(end);
         csnJ = csn(J,:);
         cspJ = csp(J,:);
-    else % only load the ones you need for this session
+    elseif specploton % only load the ones you need for this session
         csnJ = inFileMat.MSN(keepers(J),:);
         cspJ = inFileMat.MSP(keepers(J),:);
     end
@@ -426,7 +428,7 @@ while (k <= nb)
         end
         if ~isempty(K2) % if this session contains false detections
             ff2 = 1; % set false flag to true
-            if (specploton == 1)
+            if specploton
                 wavFD = mean(csnJ(K2,:),1); % calculate mean false time series
                 specFD = cspJ(K2,:); % get set of false spectra
             end
@@ -449,7 +451,7 @@ while (k <= nb)
             ff3 = 1;
             spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
             specIDs = unique(spCodeSet); % get unique ID codes
-            if (specploton == 1) % get mean spectra for each ID'd type
+            if specploton % get mean spectra for each ID'd type
                 wavID = [];
                 specID = [];
                 for iSpID = 1:length(specIDs)
@@ -471,7 +473,7 @@ while (k <= nb)
         [Jtrue,iJ,~]= setxor(J,JFDandID); % find all true detections
         trueTimes = ct(Jtrue);% vector of true times in this session
         
-        if (specploton == 1)
+        if specploton
             cspJtrue = cspJ(iJ,:); % true spectra in this session
             csnJtrue = csnJ(iJ,:); % true time series in this session
             wtrue = nanmean(csnJtrue,1); % mean of true spectra in this session
@@ -526,11 +528,11 @@ while (k <= nb)
         PT(1) = sb(k) ; PT(2) = eb(k); % start end times for plots
         pwr1(1:length(f)) = ones; % make uniform LTSA
     else
-        pwr1 = pwr1((1000*fimin/df)+1:round(1000*fimax/df)+1,:); % limit plot range LTSA
+        pwr1 = pwr1((1000*fimin/df)+1:round(1000*fimax/df)+1,:)+ repmat(tfLTSA,1,size(pwr1,2)); % limit plot range LTSA
     end
     durS = PT(end) - PT(1);
     
-    if (specploton == 1)
+    if specploton
         % allSPEC = norm_spec(cspJ,flowt,fimint,fimaxt);
         figure(50);clf;set(50,'name','Frequency Spectra')
         h50 = gca;
@@ -579,6 +581,7 @@ while (k <= nb)
             hold off
         end
         xlabel(h50,'Frequency (kHz)');
+        grid(h50,'on')
         xlim(h50, 'manual');
         ylim(h50,[0 1]);
         
@@ -712,11 +715,11 @@ while (k <= nb)
     end
     
     % if you have items brushed in yellow, highlight those on each plot
-    if (specploton == 1) && ~isempty(yell) && ~isempty(csnJ)
+    if specploton && ~isempty(yell) && ~isempty(csnJ)
         figure(201)
         subplot(3,1,1)
         hold on
-        plot(t(yell),RL(yell),'ko','MarkerSize',10,'UserData',t(yell));
+        plot(t(yell),RL(yell),'ko','MarkerSize',8,'UserData',t(yell));
         hold off;
         
         % for diffs, yell can't exceed length dt, which could happen if you
@@ -724,12 +727,13 @@ while (k <= nb)
         yellDT = yell(yell<length(dt));
         axes(AX(1))
         hold on
-        plot(t(yellDT),dt(yellDT),'ko','MarkerSize',10,'UserData',t(yell));
+        plot(t(yellDT),dt(yellDT),'ko','MarkerSize',8,'UserData',t(yell));
         hold off
         
         figure(51)
         hold on
-        plot(xmsp(yell),xmpp(yell),'ko','MarkerSize',10,'UserData',ct(K2))
+        plot(xmsp(yell),xmpp(yell),'ko','MarkerSize',10,...
+            'LineWidth',2,'UserData',ct(K2))
         hold off
         
         figure(52); % add click to waveform plot in BLACK
@@ -808,18 +812,24 @@ while (k <= nb)
     end
     
     % after edits, remove duplicate labels and save updated vectors
-    zFD = unique(zFD);
-    [~,uniqueID] = unique(zID(:,1));
-    zID = zID(uniqueID,:);
+    if ~isempty(zFD)
+        zFD = unique(zFD);
+    end
+    if ~isempty(zID)
+        [~,uniqueID] = unique(zID(:,1));
+        zID = zID(uniqueID,:);
+    end
     save(fn2,'zFD')
     save(fnID,'zID')    
     save(fn6,'zTD');
     
     % don't end if you used paintbrush on last record
-    if (k == nb) && bFlag
-        k = k-1;
+    if (k > nb) && bFlag
+        k = nb;
         disp(' Last Record')
+        
     end
+    bFlag = 0;
 end
 pause off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -6,29 +6,19 @@
 %
 % eg. detEdit_settings_kogia.m
 % 
-% Then change line 18 of detEdit to match the settings file you want to
+% Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-% TODO: Ideally, species-specific preferences could also be moved into here
-
-stn = 'JAX11D_'; % site name
-dpn = 'disk01'; % deployment number
+stn = 'WAT_HZ_01_'; % site name
+dpn = 'disk01a'; % deployment number
 itnum = '1'; % iteration
 srate = 200; % sample rate
-sp = 'De'; % species code
-c4fd = 100; %Interval to check for false detections
-sdir = 'G:\JAX11D_TPWS_testingDetEdit'; %Directory with TPWS files
-% tfName = 'E:\Code\TF_files\TF Files\HARP\400_series\492_090309\492_090309_invSensit.tf';
-
-
-%%%%%%%% other preferences - modify with care %%%%%%%%%%
-specploton = 1; %1 = yes spec plot 0 = no spec plot
-gth = .5;    % gap time in hrs between sessions
-minNdet = 1; % minimum number of detections per bin
-maxDetLoad = 4e5; % the number of detections above which you want to 
-% read from disk instead of loading all spectra and timeseries into memory
-% this is for large files (e.g. dolphin click detections)
-
+sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
+% 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
+% 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
+c4fd = 100; % Interval to check for false detections
+sdir = 'I:\WAT_HZmetadata\TPWS\ready for detEdit'; %Directory with TPWS files
+% tfName = 'E:\Code\TF_files\Recalculated\tf files\707_130408\707_130408_invSensit.tf';
 
 % Colors to use for classification
 colorTab = [255, 153, 200; ... % type 1 pink
@@ -45,9 +35,32 @@ colorTab = [255, 153, 200; ... % type 1 pink
 colorTab = round(colorTab.*100)/100;
 
 
-% Settings preferences to override defaults:
+%% Settings preferences to override defaults
+% Comment these in as needed to override detEdit defaults
+
 spParamsUser.ltsaLims = [0,100]; % min and max ylimits in kHz for ltsa plot
-spParamsUser.ltsaMax = 3; % length of ltsa window
+spParamsUser.ltsaMax = 6; % ltsa maximum duration per session
+spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
+% spParamsUser.specChar = 'Unk';  %Simone abbreviation for species
+% spParamsUser.speName = 'Unknown';  % Species code used in file names 
+spParamsUser.dtHi = .4; % max yaxis value for IPI display in sec
+% spParamsUser.fLow = 5; % boundary for spectrum plot
+% spParamsUser.thresRL = 0; % minimum RL threshold in dB peak-to-peak
+spParamsUser.ltsaContrast = 113; % ltsa contrast
+spParamsUser.ltsaBright = 46; % ltsa brightness
+% spParamsUser.ltsaLims = [0,100]; % max and min of LTSA plot
+% spParamsUser.rlLow = 110; % PP plot window low limit
+% spParamsUser.rlHi = 170; % PP plot window high limit
+% spParamsUser.dfManual = []; % LTSA step size in 10 [Hz] bins
+% spParamsUser.p1Low = thresRL - 5;
+% spParamsUser.p1Hi = 170;
 
 
+%%%%%%%% other preferences - modify with care %%%%%%%%%%
+specploton = 1; %1 = yes spec plot 0 = no spec plot
+gth = .5;    % gap time in hrs between sessions
+minNdet = 1; % minimum number of detections per session. Sessions with fewer than this will be skipped
+maxDetLoad = 4e5; % the number of detections above which you want to 
+% read from disk instead of loading all spectra and timeseries into memory
+% this is for large files (e.g. dolphin click detections)
 

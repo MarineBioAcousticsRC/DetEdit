@@ -9,7 +9,7 @@ specChar = 'Unk';  %Simone abbreviation for species
 speName = 'Unknown';  % Species code used in file names 
 tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 dtHi = .5; % max yaxis value for IPI display in sec
-fLow = 100; % boundary for spectrum plot
+fLow = 5; % boundary for spectrum plot
 thresRL = 0; % minimum RL threshold in dB peak-to-peak
 ltsaContrast = 250; % ltsa contrast
 ltsaBright = 100; % ltsa brightness
@@ -92,7 +92,7 @@ elseif strcmpi(sp,'Dl')
     dtHi = 0.5;
     fLow = 20;  
     thresRL = 110;
-    p1Low = thresRL - 5; p1High = 170;
+    rlLow = thresRL - 5; rlHi = 170;
     ltsaContrast = 200; ltsaBright = 70; 
 else
     disp('CAUTION: Unknown Species Type!!!')

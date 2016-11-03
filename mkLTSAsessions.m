@@ -10,7 +10,7 @@ tic % start timer
 % set some parameters
 gth = .5;    % gap time in hrs between sessions
 gt = gth*60*60;    % gap time in sec
-ltsamax = 6; % length of ltsa window
+ltsamax = 3; % length of ltsa window
 thres = 80;
 
 % get user input and set up file names
@@ -210,7 +210,7 @@ if isempty(sTime)
         end
         disp('done reading ltsa headers')
     else
-        disp(['No LTSAs found, to match wildcard: ', [lpn,sdn,'*']])
+        disp(['No LTSAs found to match wildcard: ', [lpn,sdn,'*']])
         return
     end
 end

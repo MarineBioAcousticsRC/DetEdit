@@ -48,6 +48,15 @@ p = sp_setting_defaults(sp,spParamsUser);
 gt = gth*60*60;    % gap time in sec
 sdn = [stn,dpn];    % site name and deployment number
 
+%% Check if TPWS file exists
+
+detpn = [sdir,'\'];
+detfn = [stn,dpn,'_',p.speName,'_TPWS',itnum,'.mat'];
+fn = fullfile(detpn,detfn);
+if exist(fn,'file') == 0
+    fprintf('ERROR: No file named %s exists\n',fn)
+    break
+end
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
@@ -80,9 +89,7 @@ end
 
 %% Generate FD, TD, and ID files if needed
 % detpn = [sdir,['\',stn,'_',spe],'\'];
-detpn = [sdir,'\'];
-detfn = [stn,dpn,'_',p.speName,'_TPWS',itnum,'.mat'];
-fn = fullfile(detpn,detfn);
+
 
 % false Detection file1
 f1pn = detpn;
@@ -367,7 +374,7 @@ while (k <= nb)
     % Make PP versus RMS plot for all clicks, if all time series are loaded
     figure(51);clf
     h51 = gca;
-    
+        
     if specploton && loadMSP
         xmsp0All = csp + repmat(Ptfpp,size(csp,1),1);
         [xmspAll,im] = max(xmsp0All(:,flowt:fimaxt),[],2); % maximum between flow-100kHz
@@ -579,6 +586,7 @@ while (k <= nb)
                 set(hID2(iC),'Color',colorTab(specIDs(iC),:))
             end
             hold off
+            
         end
         xlabel(h50,'Frequency (kHz)');
         grid(h50,'on')
@@ -590,13 +598,14 @@ while (k <= nb)
         
         % for all detections in this session, calculate xmpp and xmsp
         xmsp0 = cspJ + ones(length(J),1) *  Ptfpp; % add transfer fun to session's spectra
-        
         [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2);  % maximum value
         xmpp = zeros(length(RL),1);
         for imax = 1 : nd % (over number of detections)
             Pmax = Ptfpp(im(imax) + flowt-1);
             xmpp(imax,1) = RL(imax) - tf + Pmax;
         end
+        
+        % peakFrkHz = fmsp(im)./1000;
         % Plot  PP versus RMS Plot for this session
         figure(51);set(51,'name','RL pp vs. RL rms')
         hold on
@@ -611,8 +620,8 @@ while (k <= nb)
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
         end
-        xlabel('dB RMS'); ylabel('dB PP');
-        hold off
+       
+        
     end
     %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -621,7 +630,8 @@ while (k <= nb)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     figure(201);clf
     set(201,'name','LTSA and time series')
-    subplot(3,1,1)  % Top panel, Figure 201: Received Level
+    hA201 = subplot_layout; % Top panel, Figure 201: Received Level
+    axes(hA201(1))
     plot(t,RL,'.','UserData',t)
     hold on
     plot(t,RL,'b.','UserData',t)
@@ -649,7 +659,7 @@ while (k <= nb)
     ylabel('RL [dB re 1\muPa]')
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    subplot(3,1,2)  % middle panel LTSA
+    axes(hA201(2))% middle panel LTSA
     c = (p.ltsaContrast/100) .* pwr1 + p.ltsaBright;
     image(PT,f/1000,c)
     axis([PT(1) PT(end) p.ltsaLims])%v2(4)
@@ -658,7 +668,7 @@ while (k <= nb)
     datetick('keeplimits')
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    subplot(3,1,3);  % Bottom panel, Figure 201: Inter-Detection Interval
+    axes(hA201(3)) % Bottom panel, Figure 201: Inter-Detection Interval
     % make two copies of dt points for brush
     tdt2 = [];
     dt2 = [];
@@ -717,7 +727,7 @@ while (k <= nb)
     % if you have items brushed in yellow, highlight those on each plot
     if specploton && ~isempty(yell) && ~isempty(csnJ)
         figure(201)
-        subplot(3,1,1)
+        axes(hA201(1))
         hold on
         plot(t(yell),RL(yell),'ko','MarkerSize',6,'UserData',t(yell));
         hold off;
@@ -740,7 +750,7 @@ while (k <= nb)
         hold on
         plot(mean(csnJ(yell,:),1)','k');
         hold off
-        
+     
         figure(50);  % add click to spec plot in BLACK
         hold on
         cspJy = mean(cspJ(yell,:),1);
@@ -780,12 +790,12 @@ while (k <= nb)
     elseif strcmp(cc,'f') % assign ALL as false
         disp(['Number of False Detections Added = ',num2str(length(trueTimes))])
         if ~isempty(zID)
-            [newFD,~] = setdiff(t,zID(:,1)); % remove from zID
+            %[newFD,~] = setdiff(t,zID(:,1)); % remove from zID
             [~,iCID] = setdiff(zID(:,1),t); % remove from zID 
             zID = zID(iCID,:);
-        else
-            newFD = t;
         end
+        newFD = t;
+        %end
         zFD = [zFD; newFD; trueTimes]; % Add everything to zFD
         
     elseif strcmp(cc,'t') %assign ALL as true

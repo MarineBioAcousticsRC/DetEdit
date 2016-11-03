@@ -51,7 +51,7 @@ PARAMS.ltsahd.ticks = zeros(1,PARAMS.ltsa.nrftot);
 PARAMS.ltsa.byteloc = zeros(1,PARAMS.ltsa.nrftot);
 PARAMS.ltsa.nave = zeros(1,PARAMS.ltsa.nrftot);
 
-PARAMS.ltsahd.fname = zeros(PARAMS.ltsa.nrftot,40);
+PARAMS.ltsahd.fname = zeros(PARAMS.ltsa.nrftot,80);
 
 PARAMS.ltsahd.rfileid = zeros(1,PARAMS.ltsa.nrftot);
 PARAMS.ltsa.dnumStart = zeros(1,PARAMS.ltsa.nrftot);
@@ -72,21 +72,22 @@ for k = 1 : PARAMS.ltsa.nrftot
     % 8 bytes up to here
     %
     PARAMS.ltsa.byteloc(k) = fread(fid,1,'uint32');     % 4 byte - Byte location in ltsa file of the spectral averages for this rawfile
-    if PARAMS.ltsa.ver == 3   % ARP data type = ltsa version 3
+    if PARAMS.ltsa.ver == 3  ||  PARAMS.ltsa.ver == 4   % ARP data type = ltsa version 3
         PARAMS.ltsa.nave(k) = fread(fid,1,'uint32');          % 2 byte - number of spectral averages for this raw file
         sk = 7;
     elseif PARAMS.ltsa.ver == 1 || PARAMS.ltsa.ver == 2
         PARAMS.ltsa.nave(k) = fread(fid,1,'uint16');          % 2 byte - number of spectral averages for this raw file
         sk = 9;
-    elseif  PARAMS.ltsa.ver == 4  
-        PARAMS.ltsa.nave(k) = fread(fid,1,'uint32');          % 2 byte - number of spectral averages for this raw file
-        sk = 47;
     else
         disp_msg(['Error: incorrect version number ',num2str(PARAMS.ltsa.ver)])
         return
     end
     % 14 or 16 bytes up to here
-    PARAMS.ltsahd.fname(k,:) = fread(fid,40,'uchar');        % 40 byte - xwav file name for this raw file header
+    if PARAMS.ltsa.ver == 4 
+    	PARAMS.ltsahd.fname(k,1:80) = fread(fid,80,'uchar');        % 80 byte - xwav file name for this raw file header
+    else
+        PARAMS.ltsahd.fname(k,1:40) = fread(fid,40,'uchar');        % 40 byte - xwav file name for this raw file header
+    end
     PARAMS.ltsahd.rfileid(k) = fread(fid,1,'uint8');       % 1 byte - raw file id / number for this xwav
     testout = fread(fid,sk);
     % fseek(fid,sk,0);

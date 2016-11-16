@@ -9,15 +9,15 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-stn = 'HAT_A_05_'; % site name
-dpn = 'disk01a'; % deployment number
+stn = 'GofMX_DC02_'; % site name
+dpn = 'disk01'; % deployment number
 itnum = '1'; % iteration
 srate = 200; % sample rate
 sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
-% 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
+% 'Zc' or 'z' (Cuvier's),'Me'10 or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
-sdir = 'D:\HAT05A_metadata\TPWS'; %Directory with TPWS files
+sdir = 'F:\GOM_clickTypePaper_detections\TPWS\DC02_03_TPWS'; %Directory with TPWS files
 % tfName = 'E:\Code\TF_files\Recalculated\tf files\707_130408\707_130408_invSensit.tf';
 
 % Colors to use for classification
@@ -39,7 +39,7 @@ colorTab = round(colorTab.*100)/100;
 % Comment these in as needed to override detEdit defaults
 
 spParamsUser.ltsaLims = [0,100]; % min and max ylimits in kHz for ltsa plot
-spParamsUser.ltsaMax = 3; % ltsa maximum duration per session
+spParamsUser.ltsaMax = 6; % ltsa maximum duration per session
 spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 % spParamsUser.specChar = 'Unk';  %Simone abbreviation for species
 % spParamsUser.speName = 'Unknown';  % Species code used in file names 
@@ -60,7 +60,7 @@ spParamsUser.rlHi = 165; % PP plot window high limit
 specploton = 1; %1 = yes spec plot 0 = no spec plot
 gth = .5;    % gap time in hrs between sessions
 minNdet = 1; % minimum number of detections per session. Sessions with fewer than this will be skipped
-maxDetLoad = 4e5; % the number of detections above which you want to 
+maxDetLoad = 1e5; % the number of detections above which you want to 
 % read from disk instead of loading all spectra and timeseries into memory
 % this is for large files (e.g. dolphin click detections)
 

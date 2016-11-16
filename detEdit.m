@@ -479,7 +479,7 @@ while (k <= nb)
         JFDandID = union(JFD,JID);
         [Jtrue,iJ,~]= setxor(J,JFDandID); % find all true detections
         trueTimes = ct(Jtrue);% vector of true times in this session
-        
+        trueRL = cl(Jtrue);% 
         if specploton
             cspJtrue = cspJ(iJ,:); % true spectra in this session
             csnJtrue = csnJ(iJ,:); % true time series in this session
@@ -632,9 +632,9 @@ while (k <= nb)
     set(201,'name','LTSA and time series')
     hA201 = subplot_layout; % Top panel, Figure 201: Received Level
     axes(hA201(1))
-    plot(t,RL,'.','UserData',t)
-    hold on
     plot(t,RL,'b.','UserData',t)
+    hold on
+    % plot(t,RL,'b.','UserData',t)
     if ff2 % plot False detections in red
         plot(tfd,fdRL,'r.','UserData',tfd)
         % disp([' false det plotted:',num2str(length(tfd))])

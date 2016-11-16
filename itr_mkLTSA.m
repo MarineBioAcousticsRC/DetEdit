@@ -5,12 +5,12 @@
 clearvars
 clear global
 % setup info - modify to fit your site, species and path
-stn = 'GofMX_MP'; % sitename
-dpn = '02'; % deployment code
-sp = 'De'; % your species code
+stn = 'HAT'; % sitename
+dpn = '03A'; % deployment code
+sp = 'whs'; % your species code
 itnum = 1; % which iteration you are looking for
-LTSApath = 'I:\MPmetadata\ltsa\MP01'; % directory containing all LTSAs   for this deployment
-tpwsPath = 'I:\MPmetadata\MP01\MP01_TPWS'; %directory of TPWS files
+LTSApath = 'D:\HAT_whs_over5'; % directory containing all LTSAs for this deployment
+tpwsPath = 'D:\HAT_whs_over5\TPWS'; %directory of TPWS files
 
 
 

@@ -15,9 +15,9 @@
 clearvars
 
 % Setup variables:
-baseDir = 'D:\MPmetadata\MP01'; % directory containing de_detector output
-outDir = 'D:\MPmetadata\MP01_TPWS'; % directory where you want to save your TTPP file
-siteName = 'GofMX_MP01'; % site name, used to name the output file
+baseDir = 'G:\DCL\'; % directory containing de_detector output
+outDir = 'G:\DCL\HAT04_TPWS'; % directory where you want to save your TTPP file
+siteName = 'HAT_04metadata'; % site name, used to name the output file
 ppThresh = 120; % minimum RL in dBpp. If detections have RL below this
 % threshold, they will be excluded from the output file. Useful if you have
 % an unmanageable number of detections.
@@ -49,8 +49,8 @@ for itr0 = 1:length(dirSet)
             thisFile = fileSet.mat(itr2);
             
             load(char(fullfile(inDir,thisFile)),'-mat','clickTimes','hdr',...
-                'ppSignal','specClickTfHR','yFiltBuff','fHR','durClick')
-            specClickTf = specClickTfHR;
+                'ppSignal','specClickTf','yFiltBuff','f','durClick')
+            specClickTf = specClickTf;
             if ~isempty(clickTimes)
                 keepers = find(ppSignal >= ppThresh);
                 
@@ -69,12 +69,11 @@ for itr0 = 1:length(dirSet)
                 ppSignalVec = [ppSignalVec; ppSignal];
                 tsWin = 200;
                 tsVec = zeros(length(keepers),tsWin);
-                f = fHR;
                 for iTS = 1:length(keepers(keepers2))
                     thisClick = yFiltBuff{keepers(keepers2(iTS))};
                     [~,maxIdx] = max(thisClick);
                     % want to align clicks by max cycle
-                    
+                    f = f;
                     dTs = (tsWin/2) - maxIdx; % which is bigger, the time series or the window?
                     dTe =  (tsWin/2)- (length(thisClick)-maxIdx); % is the length after the peak bigger than the window?
                     if dTs<=0 % if the signal starts more than N samples ahead of the peak

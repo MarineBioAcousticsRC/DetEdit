@@ -781,7 +781,7 @@ while (k <= nb)
         
     elseif strcmp(cc,'a')% change LTSA parameters
         p.ltsaContrast = input(sprintf('  Current Contrast %d. Update Contrast:  ',p.ltsaContrast)); 
-        p.ltsaBright = input(sprintf('  Current Contrast %d. Update Brightness:  ',p.ltsaBright));
+        p.ltsaBright = input(sprintf('  Current Brightness %d. Update Brightness:  ',p.ltsaBright));
         
     elseif strcmp(cc,'b') % Move backward one bout
         if k ~= 1

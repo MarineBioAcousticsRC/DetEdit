@@ -51,7 +51,7 @@ sdn = [stn,dpn];    % site name and deployment number
 %% Check if TPWS file exists
 
 detpn = [sdir,'\'];
-detfn = [stn,dpn,'_',p.speName,'_TPWS',itnum,'.mat'];
+detfn = [stn,dpn,p.speName,'_TPWS',itnum,'.mat'];
 fn = fullfile(detpn,detfn);
 if exist(fn,'file') == 0
     fprintf('ERROR: No file named %s exists\n',fn)
@@ -93,7 +93,7 @@ end
 
 % false Detection file1
 f1pn = detpn;
-f1fn = [stn,dpn,'_',p.speName,'_FD',itnum,'.mat'];
+f1fn = [stn,dpn,p.speName,'_FD',itnum,'.mat'];
 fn2 = fullfile(f1pn,f1fn);
 A2 = exist(fn2,'file');
 if (A2 ~= 2)
@@ -104,11 +104,11 @@ end
 
 % Test false Detection file
 lf1pn = detpn;
-tfn = [stn,dpn,'_',p.speName,'_TD',itnum,'.mat'];
+tfn = [stn,dpn,p.speName,'_TD',itnum,'.mat'];
 fn6 = fullfile(f1pn,tfn);
 
 % ID File
-fnID1 = [stn,dpn,'_',p.speName,'_ID',itnum,'.mat'];
+fnID1 = [stn,dpn,p.speName,'_ID',itnum,'.mat'];
 fnID = fullfile(f1pn,fnID1);
 A2 = exist(fnID,'file');
 if (A2 ~= 2)
@@ -172,14 +172,18 @@ if (size(ib1,1) ~= size(cl,1)) && ~loadMSP % catch for case where enforcing
         sprintf('TPWS minimum RL = %d \ndetEdit minimum RL = %d',min(cl),p.threshRL)])
 end
 
-disp([' Removed too low:',num2str(length(ia1)-length(ib1))]);
-ct = ct(ib1);
-cl = cl(ib1);
-keepers = ia1(ib1);
 % prune by RL only if spectra & waveforms have been loaded
-if specploton && loadMSP 
+
+if specploton && loadMSP
+    disp([' Removed too low:',num2str(length(ia1)-length(ib1))]);
+    ct = ct(ib1);
+    cl = cl(ib1);
+    keepers = ia1(ib1);
+    
     csn = csn(ib1,:);
     csp = csp(ib1,:);
+else
+    keepers = ia1;
 end
 
 %% Make FD file intersect with MTT
@@ -220,7 +224,7 @@ end
 % TODO: this is calculated in mkLTSA, we should save it there instead of 
 % recalculating here but would create backward compatibility issues
 % TODO: Should be a function
-
+bFlag = 0;
 % find edges (start and end times) of bouts or sessions
 dt = diff(ct)*24*60*60; % calculate time between detections in seconds
 
@@ -263,7 +267,7 @@ disp(['Number Bouts : ',num2str(nb)])
 
 %% Make LTSA session file
 lspn = detpn;
-lsfn = [sdn,'_',p.speName,'_LTSA',itnum,'.mat'];
+lsfn = [sdn,p.speName,'_LTSA',itnum,'.mat'];
 fn5 = fullfile(lspn,lsfn);
 A5 = exist(fn5,'file');
 if A5 ~= 2
@@ -381,7 +385,7 @@ while (k <= nb)
         
         % calculate peak-to-peak amplitude including transfer function
         xmppAll = cl'-tf+ Ptfpp(im + flowt-1); % vectorized version
-        plot(h51,xmspAll,xmppAll,'co','UserData',ct)
+        plot(h51,xmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',ct)
         % hold on;  % keep figure(51) plot with hold on
         title(['Based on ',num2str(length(xmppAll)),' clicks']);
         
@@ -547,7 +551,7 @@ while (k <= nb)
         h52 = gca;
         if ~isempty(trueTimes)
             % plot average true click spectrum
-            trueSpec = norm_spec(cspJtrue,flowt,fimint,fimaxt);
+            trueSpec = norm_spec_simple(cspJtrue,flowt,fimint,fimaxt);
             plot(h50,ft,trueSpec(fimint:fimaxt),'Linewidth',4)
             hold off;
             % average true click waveform
@@ -557,7 +561,7 @@ while (k <= nb)
             disp(['No true with at least ',num2str(minNdet),' detections'])
         end
         if ff2   % average false click spec
-            SPEC2 = norm_spec(specFD, flowt, fimint, fimaxt);
+            SPEC2 = norm_spec_simple(specFD, flowt, fimint, fimaxt);
             % plot average false click spectrum
             figure(50); hold on
             plot(ft,SPEC2(fimint:fimaxt),'r','Linewidth',4)
@@ -570,7 +574,7 @@ while (k <= nb)
         if ff3  % average id click spec
             specID_norm = [];
             for iSpec = 1:size(specID,1)
-                specID_norm(iSpec,:) = norm_spec(specID(iSpec,:), flowt, fimint, fimaxt);
+                specID_norm(iSpec,:) = norm_spec_simple(specID(iSpec,:), flowt, fimint, fimaxt);
             end
             % plot average ID'd click spectra
             figure(50); hold on
@@ -592,10 +596,10 @@ while (k <= nb)
         grid(h50,'on')
         xlim(h50, 'manual');
         ylim(h50,[0 1]);
-        
+        xlim(h50,[fmsp(1),fmsp(121)])
+
         xlabel(h52,'Time (1ms @ 200kHz)');
         ylabel(h52,'Amplitude');
-        
         % for all detections in this session, calculate xmpp and xmsp
         xmsp0 = cspJ + ones(length(J),1) *  Ptfpp; % add transfer fun to session's spectra
         [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2);  % maximum value
@@ -609,14 +613,14 @@ while (k <= nb)
         % Plot  PP versus RMS Plot for this session
         figure(51);set(51,'name','RL pp vs. RL rms')
         hold on
-        plot(xmsp,xmpp,'o','UserData',t)% true ones in blue
+        plot(xmsp,xmpp,'.','UserData',t)% true ones in blue
         if ff2 % false in red
-            plot(xmsp(K2),xmpp(K2),'ro','UserData',t(K2))
+            plot(xmsp(K2),xmpp(K2),'r.','UserData',t(K2))
         end
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(xmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'o','UserData',t(K3(thisIDset)));
+                hPP = plot(xmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
         end
@@ -754,7 +758,7 @@ while (k <= nb)
         figure(50);  % add click to spec plot in BLACK
         hold on
         cspJy = mean(cspJ(yell,:),1);
-        tSPEC = norm_spec(cspJy, flowt,fimint,fimaxt);
+        tSPEC = norm_spec_simple(cspJy, flowt,fimint,fimaxt);
         plot(ft,tSPEC(:,fimint:fimaxt),'k','Linewidth',4);
         hold off
     end
@@ -873,3 +877,5 @@ disp(' ')
 disp(['Number of Test Detections & False Detect = ',num2str(sum(zTD(tfinal,:)))])
 disp(' ')
 disp(['Done with file ',fn])
+
+commandwindow;

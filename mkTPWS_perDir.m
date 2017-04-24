@@ -15,9 +15,9 @@
 clearvars
 
 % Setup variables:
-baseDir = 'G:\DCL\'; % directory containing de_detector output
-outDir = 'G:\DCL\HAT04_TPWS'; % directory where you want to save your TTPP file
-siteName = 'HAT_04metadata'; % site name, used to name the output file
+baseDir = 'D:\DTmetadata\DT_postDecompFix\DT08'; % directory containing de_detector output
+outDir = 'D:\DTmetadata\DT_postDecompFix\LTSAs'; % directory where you want to save your TPWS file
+siteName = 'GofMX_DT08'; % site name, used to name the output file
 ppThresh = 120; % minimum RL in dBpp. If detections have RL below this
 % threshold, they will be excluded from the output file. Useful if you have
 % an unmanageable number of detections.
@@ -32,6 +32,7 @@ end
 letterCode = 97:122;
 dirSet = dir(fullfile(baseDir,[siteName,'*']));
 for itr0 = 1:length(dirSet)
+    fSave = [];
     if dirSet(itr0).isdir &&~strcmp(dirSet(itr0).name,'.')&&...
             ~strcmp(dirSet(itr0).name,'..')
         
@@ -50,8 +51,8 @@ for itr0 = 1:length(dirSet)
             
             load(char(fullfile(inDir,thisFile)),'-mat','clickTimes','hdr',...
                 'ppSignal','specClickTf','yFiltBuff','f','durClick')
-            specClickTf = specClickTf;
-            if ~isempty(clickTimes)
+            if ~isempty(clickTimes)&& size(specClickTf,2)>1
+                % specClickTf = specClickTfHR;
                 keepers = find(ppSignal >= ppThresh);
                 
                 ppSignal = ppSignal(keepers);
@@ -73,7 +74,10 @@ for itr0 = 1:length(dirSet)
                     thisClick = yFiltBuff{keepers(keepers2(iTS))};
                     [~,maxIdx] = max(thisClick);
                     % want to align clicks by max cycle
-                    f = f;
+                    % f = fHR;
+                    if isempty(fSave)
+                        fSave = f;
+                    end
                     dTs = (tsWin/2) - maxIdx; % which is bigger, the time series or the window?
                     dTe =  (tsWin/2)- (length(thisClick)-maxIdx); % is the length after the peak bigger than the window?
                     if dTs<=0 % if the signal starts more than N samples ahead of the peak
@@ -125,10 +129,11 @@ for itr0 = 1:length(dirSet)
                     subTP = 1;
                 else
                     
-                    ttppOutName = [fullfile(outDir,dirSet(itr0).name),char(letterCode(subTP)),'Delphin_TPWS1','.mat'];
+                    ttppOutName = [fullfile(outDir,dirSet(itr0).name),char(letterCode(subTP)),'_Delphin_TPWS1','.mat'];
                     subTP = subTP+1;
                     letterFlag = 1;
                 end
+                f = fSave;
                 save(ttppOutName,'MTT','MPP','MSP','MSN','f','-v7.3')
                 
                 MTT = [];

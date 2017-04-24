@@ -5,12 +5,12 @@
 clearvars
 clear global
 % setup info - modify to fit your site, species and path
-stn = 'HAT'; % sitename
-dpn = '03A'; % deployment code
-sp = 'whs'; % your species code
+stn = 'GofMX_'; % sitename
+dpn = 'DT08'; % deployment code
+sp = 'De'; % your species code
 itnum = 1; % which iteration you are looking for
-LTSApath = 'D:\HAT_whs_over5'; % directory containing all LTSAs for this deployment
-tpwsPath = 'D:\HAT_whs_over5\TPWS'; %directory of TPWS files
+LTSApath = 'D:\DTmetadata\DT_postDecompFix\LTSAs'; % directory containing all LTSAs for this deployment
+tpwsPath = 'D:\DTmetadata\DT_postDecompFix\DT08\TPWS'; %directory of TPWS files
 
 
 

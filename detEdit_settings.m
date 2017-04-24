@@ -9,15 +9,15 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-stn = 'HAT_A_05_'; % site name
-dpn = 'disk01a'; % deployment number
+stn = 'GofMX_GC04_'; % site name
+dpn = 'disk01_'; % deployment number
 itnum = '1'; % iteration
 srate = 200; % sample rate
 sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
-sdir = 'D:\HAT05A_metadata\TPWS'; %Directory with TPWS files
+sdir = 'G:\GC\GC04_TPWS'; %Directory with TPWS files
 % tfName = 'E:\Code\TF_files\Recalculated\tf files\707_130408\707_130408_invSensit.tf';
 
 % Colors to use for classification
@@ -39,15 +39,15 @@ colorTab = round(colorTab.*100)/100;
 % Comment these in as needed to override detEdit defaults
 
 spParamsUser.ltsaLims = [0,100]; % min and max ylimits in kHz for ltsa plot
-spParamsUser.ltsaMax = 3; % ltsa maximum duration per session
+spParamsUser.ltsaMax = 6; % ltsa maximum duration per session
 spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 % spParamsUser.specChar = 'Unk';  %Simone abbreviation for species
-% spParamsUser.speName = 'Unknown';  % Species code used in file names 
-spParamsUser.dtHi = .4; % max yaxis value for IPI display in sec
+spParamsUser.speName = 'Delphin';  % Species code used in file names 
+spParamsUser.dtHi = .3; % max yaxis value for IPI display in sec
 % spParamsUser.fLow = 5; % boundary for spectrum plot
 spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
-spParamsUser.ltsaContrast = 150; % ltsa contrast
-spParamsUser.ltsaBright = 65; % ltsa brightness
+spParamsUser.ltsaContrast = 116; % ltsa contrast
+spParamsUser.ltsaBright = 55; % ltsa brightness
 % spParamsUser.ltsaLims = [0,100]; % max and min of LTSA plot
 spParamsUser.rlLow = 115; % PP plot window low limit
 spParamsUser.rlHi = 165; % PP plot window high limit

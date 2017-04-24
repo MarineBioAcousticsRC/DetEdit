@@ -10,8 +10,8 @@ tic % start timer
 % set some parameters
 gth = .5;    % gap time in hrs between sessions
 gt = gth*60*60;    % gap time in sec
-ltsamax = 3; % length of ltsa window
-thres = 80;
+ltsamax = 6; % length of ltsa window
+thres = 0;
 
 % get user input and set up file names
 dsk = [];
@@ -304,6 +304,8 @@ while (k <= nb)
         else
             rfT = rfTime{K};
             disp('L is empty')
+            pt{k} = [];
+            pwr{k} = [];
             %             disp(datestr(rfT))
             disp(['bout start time is ',datestr(sb(k))])
             disp(['bout end time is ',datestr(eb(k))])
@@ -366,6 +368,8 @@ while (k <= nb)
         if isempty(Ls) || isempty(Le)
             disp('Error: Ls or Le are empty ')
             k = k + 1;
+            pwr{k} = [];
+            pt{k} = [];
             continue
         else            % combine from end of ltsa with begin of next
             pwr{k} = [pwrLs pwrLe];

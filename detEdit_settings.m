@@ -10,7 +10,7 @@
 % use.
 
 stn = 'GofMX_GC04_'; % site name
-dpn = 'disk01_'; % deployment number
+dpn = 'disk01_'; % deployment number (or disk01-08)
 itnum = '1'; % iteration
 srate = 200; % sample rate
 sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);

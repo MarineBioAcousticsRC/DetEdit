@@ -67,11 +67,12 @@ if p.tfSelect > 0
     if ~exist('tfName','var')% user interface to get TF file
         disp('Load Transfer Function File');
         [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
+        tffn = fullfile(pname,fname);
     else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(stn,'_'); % get only station and deployment
         tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
     end
-    tffn = fullfile(pname,fname);
+
     if strcmp(num2str(fname),'0')
         disp('Cancelled TF File');
         return

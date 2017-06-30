@@ -86,6 +86,10 @@ elseif strcmpi(sp,'whs')
     spe = 'whs';  tfselect = 0; % freq used for transfer function
     ltsamax = .5; % length of ltsa window
     thres = 0;
+elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
+    spe = 'Pm'; tfselect = 0; %freq used for tf
+    thres = 120; % dB threshold
+    minDur = 60; % minimum window duration in minutes     
 else
     disp(' Bad Species type')
     return

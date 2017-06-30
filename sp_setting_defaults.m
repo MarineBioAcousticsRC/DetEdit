@@ -93,7 +93,16 @@ elseif strcmpi(sp,'Dl')
     fLow = 20;  
     threshRL = 110;
     rlLow = threshRL - 5; rlHi = 170;
-    ltsaContrast = 200; ltsaBright = 70; 
+    ltsaContrast = 200; ltsaBright = 70;
+elseif (strcmp(sp,'PM') || strcmp(sp,'pm') ...
+        || strcmp(sp,'Pm'))
+    speName = 'Pm'; tfSelect = 15000;
+    dtHi = 2; 
+    fLow = 5;
+    threshRL = 120;% threshRMS = 110; threshHiFreq = 30;
+    rlLow = threshRL - 5; rlHi = 190;
+    ltsaContrast = 180; ltsaBright = 70;
+    dfManual = 100;    
 else
     disp('CAUTION: Unknown Species Type!!!')
 end

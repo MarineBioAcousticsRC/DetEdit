@@ -401,20 +401,62 @@ while (k <= nb)
         zTD = [zTD,-1.*ones(length(zTD),2)];
         save(fn6,'zTD');
     end
+
+    % If all time series are loaded:
     % Make PP versus RMS plot for all clicks, if all time series are loaded
-    figure(51);clf
+    figure(51); clf; set(51,'name',sprintf('RL pp vs. RL rms (left shift by %d)',p.threshRL))
     h51 = gca;
-        
+    
+    % Make RMS versus frequency plot for all clicks
+    figure(53); clf; set(53,'name',sprintf('RL rms vs. Peak freq. (left shift by %d)',p.threshRL))
+    h53 = gca;
+    
     if specploton && loadMSP
         xmsp0All = csp + repmat(Ptfpp,size(csp,1),1);
         [xmspAll,im] = max(xmsp0All(:,flowt:fimaxt),[],2); % maximum between flow-100kHz
         
         % calculate peak-to-peak amplitude including transfer function
         xmppAll = cl'-tf+ Ptfpp(im + flowt-1); % vectorized version
-        plot(h51,xmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',ct)
-        % hold on;  % keep figure(51) plot with hold on
-        title(['Based on ',num2str(length(xmppAll)),' clicks']);
+        % turn diagonal to vertical (easier way to find thresholds)
+        if isrow(xmspAll)
+            pxmspAll = xmspAll' - (xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
+        elseif isrow(xmppAll)
+            pxmspAll = xmspAll - (xmppAll' - p.threshRL); %use slope of 1 to mod xmsp for plot
+        else
+            pxmspAll = xmspAll - (xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
+        end        
+        plot(h51,pxmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',ct)
+        title(h51,['Based on ',num2str(length(xmppAll)),' clicks']);
         
+        % apply RMS threshold to figure (51)
+        if (p.threshRMS > 0)
+            Badct = ct(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
+            disp(['Number of Detections Below RMS threshold = ',num2str(length(Badct))])
+            zFD = [zFD; Badct];   % cummulative False Detection matrix
+            save(fn2,'zFD')
+            xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
+            hold(h51,'on');
+            plot(h51,xtline,ytline,'r')
+            hold(h51,'off');
+            %p.threshRMS = 0;
+        end
+
+        % plot RMS vs frequency plot, keeping RMS vertical like in fig(51)
+        freqAll = fmsp(im + flowt-1);
+        plot(h53,pxmspAll,freqAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',ct)
+        title(h53,['Based on total of ',num2str(length(freqAll)),' clicks']);
+        % apply High Frequency threshold to figure (53)
+        if (p.threshHiFreq > 0)
+            Badct = ct(freqAll > p.threshHiFreq);  % for all false if below RMS threshold
+            disp(['Number of Detections Below Freq threshold = ',num2str(length(Badct))])
+            zFD = [zFD; Badct];   % cummulative False Detection matrix
+            save(fn2,'zFD')
+            xtline = [min(pxmspAll),max(pxmspAll)]; ytline = [p.threshHiFreq ,p.threshHiFreq];
+            hold(h53,'on');
+            plot(h53,xtline,ytline,'r')
+            hold(h53,'off');
+            %p.threshHiFreq = 0;
+        end         
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % find detections and false detections within this bout (session)
@@ -579,23 +621,21 @@ while (k <= nb)
             % plot average true click spectrum
             trueSpec = norm_spec_simple(cspJtrue,flowt,fimint,fimaxt);
             plot(h50,ft,trueSpec(fimint:fimaxt),'Linewidth',4)
-            hold off;
             % average true click waveform
             plot(h52, wtrue + 2*min(wtrue));
-            hold off;
         else
             disp(['No true with at least ',num2str(minNdet),' detections'])
         end
         if ff2   % average false click spec
             SPEC2 = norm_spec_simple(specFD, flowt, fimint, fimaxt);
             % plot average false click spectrum
-            figure(50); hold on
-            plot(ft,SPEC2(fimint:fimaxt),'r','Linewidth',4)
-            hold off
+            hold(h50, 'on')
+            plot(h50,ft,SPEC2(fimint:fimaxt),'r','Linewidth',4)
+            hold(h50, 'off')
             % plot average false click waveform
-            figure(52);hold on
-            plot(wavFD + min(wavFD),'r');
-            hold off
+            hold(h52, 'on')
+            plot(h52,wavFD + min(wavFD),'r');
+            hold(h52, 'off')
         end
         if ff3  % average id click spec
             specID_norm = [];
@@ -603,57 +643,88 @@ while (k <= nb)
                 specID_norm(iSpec,:) = norm_spec_simple(specID(iSpec,:), flowt, fimint, fimaxt);
             end
             % plot average ID'd click spectra
-            figure(50); hold on
-            hID = plot(ft,specID_norm(:,fimint:fimaxt),'Linewidth',4);
-            hold off
+            hold(h50, 'on')
+            hID = plot(h50,ft,specID_norm(:,fimint:fimaxt),'Linewidth',4);
+            hold(h50, 'off')
             
             % plot average ID'd click waveform(s)
-            figure(52); hold on
-            hID2 = plot((wavID + 5*rand(size(hID))*min(wavID))');
+            hold(h52, 'on')
+            hID2 = plot(h52,(wavID + 5*rand(size(hID))*min(wavID))');
             
             for iC = 1:length(hID) % set colors
                 set(hID(iC),'Color',colorTab(specIDs(iC),:))
                 set(hID2(iC),'Color',colorTab(specIDs(iC),:))
             end
-            hold off
+            hold(h52, 'off')
             
         end
-        xlabel(h50,'Frequency (kHz)');
-        grid(h50,'on')
-        xlim(h50, 'manual');
-        ylim(h50,[0 1]);
-        xlim(h50,[fmsp(1),fmsp(121)])
 
-        xlabel(h52,'Time (1ms @ 200kHz)');
-        ylabel(h52,'Amplitude');
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Add detections of this session in figure 51 and 53        
         % for all detections in this session, calculate xmpp and xmsp
-        xmsp0 = cspJ + ones(length(J),1) *  Ptfpp; % add transfer fun to session's spectra
-        [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2);  % maximum value
-        xmpp = zeros(length(RL),1);
-        for imax = 1 : nd % (over number of detections)
-            Pmax = Ptfpp(im(imax) + flowt-1);
-            xmpp(imax,1) = RL(imax) - tf + Pmax;
+        xmsp0 = cspJ + repmat(Ptfpp,size(cspJ,1),1); % add transfer fun to session's spectra
+        [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2);
+        xmpp = RL' - tf + Ptfpp(im + flowt - 1);
+        
+        % turn diagonal to vertical
+        if ~isempty(xmsp) && ~isempty(xmpp)
+            if isrow(xmsp)
+                pxmsp = xmsp' - (xmpp - p.threshRL); %use slope of 1 to mod xmsp for plot
+            elseif isrow(xmpp)
+                pxmsp = xmsp - (xmpp' - p.threshRL);
+            else
+                pxmsp = xmsp - (xmpp - p.threshRL);
+            end     
         end
         
-        % peakFrkHz = fmsp(im)./1000;
         % Plot  PP versus RMS Plot for this session
-        figure(51);set(51,'name','RL pp vs. RL rms')
-        hold on
-        plot(xmsp,xmpp,'.','UserData',t)% true ones in blue
+        hold(h51, 'on')
+        plot(h51,pxmsp,xmpp,'.','UserData',t)% true ones in blue
         if ff2 % false in red
-            plot(xmsp(K2),xmpp(K2),'r.','UserData',t(K2))
+            plot(h51,pxmsp(K2),xmpp(K2),'r.','UserData',t(K2))
         end
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(xmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
+                hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
         end
-       
+        hold(h51, 'off')
         
+        % Plot RMS vs frequency plot for this session
+        hold(h53, 'on')
+        freq = fmsp(im + flowt -1);
+        plot(h53,pxmsp,freq,'.','UserData',t) % true ones in blue
+        if ff2 % false in red
+            plot(h53,pxmsp(K2),freq(K2),'r.','UserData',t(K2))
+        end
+        if ff3 % ID'd in associated color
+            for iC2 = 1:length(specIDs) % set colors
+                thisIDset = spCodeSet ==specIDs(iC2);
+                hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
+                set(hPP,'Color',colorTab(specIDs(iC2),:))
+            end
+        end
+        hold(h53, 'off')
     end
-    %
+
+    % add figure labels
+    xlabel(h50,'Frequency (kHz)');
+    grid(h50,'on')
+    xlim(h50, 'manual');
+    ylim(h50,[0 1]);
+    xlim(h50,[fmsp(1),fmsp(end)])
+    
+    xlabel(h51,'dB RMS')
+    ylabel(h51,'dB Peak-to-peak')
+    
+    xlabel(h52,'Time (1ms @ 200kHz)');
+    ylabel(h52,'Amplitude');
+
+    xlabel(h53,'dB RMS')
+    ylabel(h53,'dB Frequency (kHz)')
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % plots stuff now in figure(201)
     warning('off')
@@ -664,7 +735,6 @@ while (k <= nb)
     axes(hA201(1))
     plot(t,RL,'b.','UserData',t)
     hold on
-    % plot(t,RL,'b.','UserData',t)
     if ff2 % plot False detections in red
         plot(tfd,fdRL,'r.','UserData',tfd)
         % disp([' false det plotted:',num2str(length(tfd))])
@@ -692,8 +762,8 @@ while (k <= nb)
     axes(hA201(2))% middle panel LTSA
     c = (p.ltsaContrast/100) .* pwr1 + p.ltsaBright;
     image(PT,f/1000,c)
-    axis([PT(1) PT(end) p.ltsaLims])%v2(4)
     set(gca,'yDir','normal')
+    axis([PT(1) PT(end) p.ltsaLims])%v2(4)
     ylabel('Frequency (kHz)')
     datetick('keeplimits')
     
@@ -770,23 +840,25 @@ while (k <= nb)
         plot(t(yellDT),dt(yellDT),'ko','MarkerSize',6,'UserData',t(yell));
         hold off
         
-        figure(51)
-        hold on
-        plot(xmsp(yell),xmpp(yell),'ko','MarkerSize',10,...
-            'LineWidth',2,'UserData',ct(K2))
-        hold off
-        
-        figure(52); % add click to waveform plot in BLACK
-        hold on
-        plot(mean(csnJ(yell,:),1)','k');
-        hold off
-     
-        figure(50);  % add click to spec plot in BLACK
-        hold on
+        hold(h50,'on') % add click to spec plot in BLACK
         cspJy = mean(cspJ(yell,:),1);
         tSPEC = norm_spec_simple(cspJy, flowt,fimint,fimaxt);
-        plot(ft,tSPEC(:,fimint:fimaxt),'k','Linewidth',4);
-        hold off
+        plot(h50,ft,tSPEC(:,fimint:fimaxt),'k','Linewidth',4);
+        hold(h50,'off')
+        
+        hold(h51,'on')
+        plot(h51,pxmsp(yell),xmpp(yell),'ko','MarkerSize',10,...
+            'LineWidth',2,'UserData',ct(K2))
+        hold(h51,'off')
+        
+        hold(h52,'on') % add click to waveform plot in BLACK
+        plot(h52,mean(csnJ(yell,:),1)','k');
+        hold(h52,'off')
+        
+        hold(h53,'on')
+        plot(h53,pxmsp(yell),freq(yell),'ko','MarkerSize',10,...
+            'LineWidth',2,'UserData',ct(K2))
+        hold(h53,'off')
     end
     % end of plotting
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -812,7 +884,13 @@ while (k <= nb)
     elseif strcmp(cc,'a')% change LTSA parameters
         p.ltsaContrast = input(sprintf('  Current Contrast %d. Update Contrast:  ',p.ltsaContrast)); 
         p.ltsaBright = input(sprintf('  Current Brightness %d. Update Brightness:  ',p.ltsaBright));
+    
+    elseif strcmp(cc,'<') % change RMS threshold plot 51
+        p.threshRMS = input(' Set RMS Threshold:  '); % Set false thres
         
+    elseif strcmp(cc,'^') % change High Frequency threshold plot 51
+        p.threshHiFreq = input(' Set High Frequency Threshold:  '); % Set false thres
+                
     elseif strcmp(cc,'b') % Move backward one bout
         if k ~= 1
             k = k-1;
@@ -825,7 +903,6 @@ while (k <= nb)
             zID = zID(iCID,:);
         end
         newFD = t;
-        %end
         zFD = [zFD; newFD; trueTimes]; % Add everything to zFD
         
     elseif strcmp(cc,'t') %assign ALL as true

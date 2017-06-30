@@ -11,6 +11,8 @@ tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 dtHi = .5; % max yaxis value for IPI display in sec
 fLow = 5; % boundary for spectrum plot
 threshRL = 0; % minimum RL threshold in dB peak-to-peak
+threshRMS = 0; % default for < coommand, RMS threshold cutoff
+threshHiFreq = 0; % default for ^ command, high freq cutoff for clicks
 ltsaContrast = 250; % ltsa contrast
 ltsaBright = 100; % ltsa brightness
 ltsaLims = [0,100]; % max and min of LTSA plot
@@ -142,6 +144,18 @@ if isfield(spParamsUser,'threshRL')
     spParams.threshRL = spParamsUser.threshRL; 
 else
     spParams.threshRL = threshRL;
+end
+
+if isfield(spParamsUser,'threshRMS')
+    spParams.threshRMS = spParamsUser.threshRMS; 
+else
+    spParams.threshRMS = threshRMS;
+end
+
+if isfield(spParamsUser,'threshHiFreq')
+    spParams.threshHiFreq = spParamsUser.threshHiFreq; 
+else
+    spParams.threshHiFreq = threshHiFreq;
 end
 
 if isfield(spParamsUser,'ltsaContrast')

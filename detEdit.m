@@ -365,7 +365,6 @@ if specploton
     % find index of first bin above min freq boundary
     flowt = find(fmsp > p.fLow,1,'first');
     ft = fmsp(fi);
-    fmsp = ft;
     
     % for the PP vs RMS plot
     if (p.tfSelect > 0)

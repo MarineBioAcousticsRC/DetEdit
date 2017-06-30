@@ -560,7 +560,7 @@ while (k <= nb)
         PT(1) = sb(k) ; PT(2) = eb(k); % start end times for plots
         pwr1(1:length(f)) = ones; % make uniform LTSA
     else
-        pwr1 = pwr1((1000*fimin/df)+1:round(1000*fimax/df)+1,:)+ repmat(tfLTSA,1,size(pwr1,2)); % limit plot range LTSA
+        pwr1 = pwr1((1000*fimin/df)+1:round(1000*fimax/df)+1,:);
     end
     durS = PT(end) - PT(1);
     

@@ -355,7 +355,11 @@ if specploton
     smsp2 = size(MSP,2);% 2nd element is num fft points
     ift = 1:smsp2;
     % make frequency vector that matches spectral bins
-    fmsp = inFileMat.f;
+    if any(strcmp('f',fieldnames(inFileMat)))
+        fmsp = inFileMat.f;
+    else
+        fmsp = [];
+    end
     if isempty(fmsp)
         fmsp = ((srate/2)/(smsp2-1))*ift - (srate/2)/(smsp2-1);
         fprintf('No freq vector in TPWS file. Using approximation based on sample rate.\n')

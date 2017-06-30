@@ -331,7 +331,7 @@ while isempty(pwr{1,iPwr}) && iPwr<length(pwr)
     iPwr = iPwr+1;
 end
 
-if exist(p.dfManual,'var') % allow non-standard ltsa step sizes
+if any(strcmp('dfManual',fieldnames(p))) % allow non-standard ltsa step sizes
     df = p.dfManual;
 else
     df = 1000*fimax/(size(pwr{1,iPwr},1)-1);

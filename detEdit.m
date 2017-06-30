@@ -51,7 +51,11 @@ sdn = [stn,dpn];    % site name and deployment number
 %% Check if TPWS file exists
 
 detpn = [sdir,'\'];
-detfn = [stn,dpn,p.speName,'_TPWS',itnum,'.mat'];
+if isempty(p.speName)
+    detfn = [stn,dpn,'_TPWS',itnum,'.mat'];
+else
+    detfn = [stn,dpn,p.speName,'_TPWS',itnum,'.mat'];
+end
 fn = fullfile(detpn,detfn);
 if exist(fn,'file') == 0
     fprintf('ERROR: No file named %s exists\n',fn)
@@ -93,7 +97,11 @@ end
 
 % false Detection file1
 f1pn = detpn;
-f1fn = [stn,dpn,p.speName,'_FD',itnum,'.mat'];
+if isempty(p.speName)
+    f1fn = [stn,dpn,'_FD',itnum,'.mat'];
+else
+    f1fn = [stn,dpn,'_',p.speName,'_FD',itnum,'.mat'];
+end
 fn2 = fullfile(f1pn,f1fn);
 A2 = exist(fn2,'file');
 if (A2 ~= 2)
@@ -104,11 +112,19 @@ end
 
 % Test false Detection file
 lf1pn = detpn;
-tfn = [stn,dpn,p.speName,'_TD',itnum,'.mat'];
+if isempty(p.speName)
+    tfn = [stn,dpn,'_TD',itnum,'.mat'];
+else
+    tfn = [stn,dpn,'_',p.speName,'_TD',itnum,'.mat'];
+end
 fn6 = fullfile(f1pn,tfn);
 
 % ID File
-fnID1 = [stn,dpn,p.speName,'_ID',itnum,'.mat'];
+if isempty(p.speName)
+    fnID1 = [stn,dpn,'_ID',itnum,'.mat'];
+else
+    fnID1 = [stn,dpn,'_',p.speName,'_ID',itnum,'.mat'];
+end
 fnID = fullfile(f1pn,fnID1);
 A2 = exist(fnID,'file');
 if (A2 ~= 2)

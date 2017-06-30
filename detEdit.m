@@ -129,7 +129,13 @@ load(fn,'MTT','MPP')
 % select non-contiguous sets from files stored on disk.
 nDets = length(MTT);
 
-loadMSP = nDets <= maxDetLoad; % true/false, if you have more detections than
+if ~exist('maxDetLoad')
+    loadMSP = true;
+elseif isempty(maxDetLoad)
+    loadMSP = true;
+else
+    loadMSP = nDets <= maxDetLoad; % true/false, if you have more detections than
+end
 % the maximum load this becomes false.
 ic1 = [];
 if loadMSP 

@@ -60,7 +60,7 @@ spParamsUser.rlHi = 165; % PP plot window high limit
 specploton = 1; %1 = yes spec plot 0 = no spec plot
 gth = .5;    % gap time in hrs between sessions
 minNdet = 1; % minimum number of detections per session. Sessions with fewer than this will be skipped
-maxDetLoad = 4e5; % the number of detections above which you want to 
-% read from disk instead of loading all spectra and timeseries into memory
-% this is for large files (e.g. dolphin click detections)
+maxDetLoad = 4e5; % [] - read all or 4e5 - the number of detections above 
+% which you want to read from disk instead of loading all spectra and 
+% timeseries into memory this is for large files (e.g. dolphin click detections)
 

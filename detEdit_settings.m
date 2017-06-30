@@ -18,7 +18,9 @@ sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
 sdir = 'G:\GC\GC04_TPWS'; %Directory with TPWS files
-% tfName = 'E:\Code\TF_files\Recalculated\tf files\707_130408\707_130408_invSensit.tf';
+tfName = 'E:\TF_files'; % Directory ...
+% with .tf files (directory containing folders with different series ...
+% (e.g. 300_series,400_series)
 
 % Colors to use for classification
 colorTab = [255, 153, 200; ... % type 1 pink

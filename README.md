@@ -108,13 +108,13 @@ Date: 1/26/2016
     	'w' Test a random subset of time bins to estimate false positive bin rate  
 
    - **Output:**  
-     `\*ID.mat` - This file contains a 2xn matrix in which the first column contains the detection time, and the second column contains an ID number associated with that detection. The ID number is given by the brush color used by the analyste to identify that detection type.  
+     `*ID.mat` - This file contains a 2xn matrix in which the first column contains the detection time, and the second column contains an ID number associated with that detection. The ID number is given by the brush color used by the analyste to identify that detection type.  
 
-     `\*FD.mat` - This file contains a 1Xn vector consisting of the times of all detections marked as false positives by the user.  
+     `*FD.mat` - This file contains a 1Xn vector consisting of the times of all detections marked as false positives by the user.  
 
-     `\*MD.mat` - This file contains a 1Xn vector consisting of the times of all detections marked as misidentifications by the user.  
+     `*MD.mat` - This file contains a 1Xn vector consisting of the times of all detections marked as misidentifications by the user.  
 
-     NOTE: ID.mat and FD.mat files are updated each time a bout is edited.
+     NOTE: `ID.mat`,`FD.mat`, and `MD.mat` files are updated each time a bout is edited.
 
 #### 4. Update detections
 

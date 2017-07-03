@@ -52,13 +52,13 @@ sdn = [stn,dpn];    % site name and deployment number
 
 detpn = [sdir,'\'];
 if isempty(p.speName)
-    detfn = [stn,dpn,'_TPWS',itnum,'.mat'];
+    detfn = [stn,dpn,'TPWS',itnum,'.mat'];
 else
     detfn = [stn,dpn,p.speName,'_TPWS',itnum,'.mat'];
 end
-fn = fullfile(detpn,detfn);
-if exist(fn,'file') == 0
-    fprintf('ERROR: No file named %s exists\n',fn)
+fnTPWS = fullfile(detpn,detfn);
+if exist(fnTPWS,'file') == 0
+    fprintf('ERROR: No file named %s exists\n',fnTPWS)
     break
 end
 %% Handle Transfer Function
@@ -93,51 +93,37 @@ else
 end
 
 %% Generate FD, TD, and ID files if needed
-% detpn = [sdir,['\',stn,'_',spe],'\'];
 
-
-% false Detection file1
-f1pn = detpn;
-if isempty(p.speName)
-    f1fn = [stn,dpn,'_FD',itnum,'.mat'];
-else
-    f1fn = [stn,dpn,'_',p.speName,'_FD',itnum,'.mat'];
-end
-fn2 = fullfile(f1pn,f1fn);
-A2 = exist(fn2,'file');
-if (A2 ~= 2)
+% Name and build false detection file
+ffn = strrep(detfn,'TPWS','FD');
+fnameFD = fullfile(detpn,ffn);
+AFD = exist(fnameFD,'file');
+if (AFD ~= 2) % if it doesn't exist, make it
     zFD(1,1) = 1;
-    save(fn2,'zFD');    % create new FD
+    save(fnameFD,'zFD'); 
     disp('Make new FD file');
 end
 
-% Test false Detection file
-lf1pn = detpn;
-if isempty(p.speName)
-    tfn = [stn,dpn,'_TD',itnum,'.mat'];
-else
-    tfn = [stn,dpn,'_',p.speName,'_TD',itnum,'.mat'];
-end
-fn6 = fullfile(f1pn,tfn);
+% Name true detection file
+tfn = strrep(detfn,'TPWS','TD');
+fnameTD = fullfile(detpn,tfn);
+% NOTE: TD file is made below because it depends on a later variable
 
-% ID File
-if isempty(p.speName)
-    fnID1 = [stn,dpn,'_ID',itnum,'.mat'];
-else
-    fnID1 = [stn,dpn,'_',p.speName,'_ID',itnum,'.mat'];
-end
-fnID = fullfile(f1pn,fnID1);
-A2 = exist(fnID,'file');
-if (A2 ~= 2)
+
+% Name and build ID file
+idfn = strrep(detfn,'TPWS','ID');
+fnameID = fullfile(detpn,idfn);
+AID = exist(fnameID,'file');
+if (AID ~= 2)% if it doesn't exist, make it
     zID = [];
-    save(fnID,'zID');    % create new FD
+    save(fnameID,'zID');   
     disp('Make new ID file');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
-load(fn,'MTT','MPP')
+load(fnTPWS,'MTT','MPP')
 
 
 % if you have more than "maxDetLoad" detections, don't load all spectra and
@@ -162,7 +148,7 @@ if loadMSP
         disp([' TimeLevel Data NOT UNIQUE - removed:   ', ...
             num2str(length(ic1) - length(ia1))]);
     end
-    load(fn,'MSP','MSN')
+    load(fnTPWS,'MSP','MSN')
 else
     ia1 = [1:length(MTT)]';
 end
@@ -210,7 +196,7 @@ else
 end
 
 %% Make FD file intersect with MTT
-load(fn2)  % false detection times zFD
+load(fnameFD)  % false detection times zFD
 jFD = []; ia = []; ic = [];
 if (~isempty(zFD))
     [jFD,ia,ic] = intersect(MTT,zFD);
@@ -223,11 +209,11 @@ if (~isempty(zFD))
     if (isempty(zFD))
         zFD(1,1) = 1;  % keep from blowing up later
     end
-    save(fn2,'zFD');
+    save(fnameFD,'zFD');
 end
 
 %% Make ID file intersect with MTT
-load(fnID)  % identified detection times zID
+load(fnameID)  % identified detection times zID
 if (~isempty(zID))
     [jID,ia,ic] = intersect(MTT,zID(:,1));
     rID = length(zID) - length(jID);
@@ -239,7 +225,7 @@ if (~isempty(zID))
     %     if isempty(zID)
     %         zID = [];  % keep from blowing up later
     %     end
-    save(fnID,'zID');
+    save(fnameID,'zID');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -289,16 +275,15 @@ end
 disp(['Number Bouts : ',num2str(nb)])
 
 %% Make LTSA session file
-lspn = detpn;
-lsfn = [sdn,p.speName,'_LTSA',itnum,'.mat'];
-fn5 = fullfile(lspn,lsfn);
-A5 = exist(fn5,'file');
-if A5 ~= 2
-    disp(['Error: LTSA Sessions File Does Not Exist: ',fn5])
+lsfn = strrep(detfn,'TPWS','LTSA');
+fnameLTSA = fullfile(detpn,lsfn);
+Altsa = exist(fnameLTSA,'file');
+if Altsa ~= 2
+    disp(['Error: LTSA Sessions File Does Not Exist: ',fnameLTSA])
     return
 else
     disp('Loading LTSA Sessions, please wait ...')
-    load(fn5)   % LTSA sessions: pwr and pt structures
+    load(fnameLTSA)   % LTSA sessions: pwr and pt structures
     disp('Done Loading LTSA Sessions')
     sltsa = size(pt);
     if (sltsa(2) ~= nb)
@@ -309,18 +294,20 @@ end
 
 %% Set up Tests for False Detections
 ixfd = (1: c4fd : length(ct));  % selected to test for False Det
-A6 = exist(fn6,'file');
+
+A6 = exist(fnameTD,'file');
 if (A6 ~= 2)
     zTD = -1.*ones(nb,4);
-    save(fn6,'zTD');    % create new FD
-    disp(' Make new TD2 file');
+    save(fnameTD,'zTD');    % create new FD
+    disp(' Make new TD file');
 else
-    load(fn6)
+    load(fnameTD)
     if (length(zTD(:,1)) ~= nb)
-        disp([' Problem with TD file:',fn6]);
+        disp([' Problem with TD file:',fnameTD]);
         return
     end
 end
+
 
 %% Compute Spectra Plot Parameters
 fimin = 0;% TODO: make this configurable
@@ -332,7 +319,8 @@ while isempty(pwr{1,iPwr}) && iPwr<length(pwr)
     iPwr = iPwr+1;
 end
 
-if any(strcmp('dfManual',fieldnames(p))) % allow non-standard ltsa step sizes
+if any(strcmp('dfManual',fieldnames(p)))&& ~isempty(p.dfManual)
+    % allow non-standard ltsa step sizes
     df = p.dfManual;
 else
     df = 1000*fimax/(size(pwr{1,iPwr},1)-1);
@@ -348,7 +336,7 @@ end
 
 if specploton
     % check length of MSP
-    inFileMat = matfile(fn);
+    inFileMat = matfile(fnTPWS);
     if ~loadMSP
         MSP = inFileMat.MSP(1,:);
     end
@@ -393,13 +381,13 @@ blag = 0;
 while (k <= nb)
     disp([' BEGIN SESSION: ',num2str(k)]);
     % load in FD, MD and TD each session incase these have been modified
-    load(fn2); % brings in zFD
-    load(fnID); % bring in zID
+    load(fnameFD); % brings in zFD
+    load(fnameID); % bring in zID
     %     load(fn3);  % brings in zMD
-    load(fn6); % brings in zTD
+    load(fnameTD); % brings in zTD
     if (length(zTD(1,:)) == 2)
         zTD = [zTD,-1.*ones(length(zTD),2)];
-        save(fn6,'zTD');
+        save(fnameTD,'zTD');
     end
 
     % If all time series are loaded:
@@ -433,7 +421,7 @@ while (k <= nb)
             Badct = ct(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
             disp(['Number of Detections Below RMS threshold = ',num2str(length(Badct))])
             zFD = [zFD; Badct];   % cummulative False Detection matrix
-            save(fn2,'zFD')
+            save(fnameFD,'zFD')
             xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
             hold(h51,'on');
             plot(h51,xtline,ytline,'r')
@@ -450,7 +438,7 @@ while (k <= nb)
             Badct = ct(freqAll > p.threshHiFreq);  % for all false if below RMS threshold
             disp(['Number of Detections Below Freq threshold = ',num2str(length(Badct))])
             zFD = [zFD; Badct];   % cummulative False Detection matrix
-            save(fn2,'zFD')
+            save(fnameFD,'zFD')
             xtline = [min(pxmspAll),max(pxmspAll)]; ytline = [p.threshHiFreq ,p.threshHiFreq];
             hold(h53,'on');
             plot(h53,xtline,ytline,'r')
@@ -592,7 +580,7 @@ while (k <= nb)
             num2str(length(binCX)),' but NO False']);
         zTD(k,3) = length(binCX);
         zTD(k,4) = 0;
-        save(fn6,'zTD');
+        save(fnameTD,'zTD');
         k = k + 1;
         continue
     end
@@ -752,7 +740,7 @@ while (k <= nb)
     axis([PT(1) PT(end) p.rlLow p.rlHi])
     datetick('x',15,'keeplimits')
     grid on
-    tstr(1) = {fn};
+    tstr(1) = {fnTPWS};
     tstr(2) = {['Session: ',num2str(k),' Start Time ',...
         datestr(sb(k)),' Detect = ',num2str(nd)]};
     title(tstr);
@@ -942,9 +930,9 @@ while (k <= nb)
         [~,uniqueID] = unique(zID(:,1));
         zID = zID(uniqueID,:);
     end
-    save(fn2,'zFD')
-    save(fnID,'zID')    
-    save(fn6,'zTD');
+    save(fnameFD,'zFD')
+    save(fnameID,'zID')    
+    save(fnameTD,'zTD');
     
     % don't end if you used paintbrush on last record
     if (k > nb) && bFlag
@@ -958,14 +946,14 @@ pause off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %make zFD unique
 uZFD = [];  ia = []; ic = [];
-load(fn2);   % load false detections
+load(fnameFD);   % load false detections
 [uzFD,ia,ic] = unique(zFD);     % make zFD have unique entries
 if (length(ia) ~= length(ic))
     disp([' False Detect NOT UNIQUE - removed:   ', ...
         num2str(length(ic) - length(ia))]);
 end
 zFD = uzFD;
-save(fn2,'zFD');
+save(fnameFD,'zFD');
 tfinal = find(zTD(:,1) > 0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(' ')
@@ -979,6 +967,6 @@ disp(' ')
 % disp(' ')
 disp(['Number of Test Detections & False Detect = ',num2str(sum(zTD(tfinal,:)))])
 disp(' ')
-disp(['Done with file ',fn])
+disp(['Done with file ',fnTPWS])
 
 commandwindow;

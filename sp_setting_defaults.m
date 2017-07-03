@@ -106,7 +106,7 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') ...
     ltsaContrast = 180; ltsaBright = 70;
     dfManual = 100;    
 else
-    disp('CAUTION: Unknown Species Type!!!')
+    warning('Unknown Species Type!!!')
 end
 
 %% apply default if user has not specified a value

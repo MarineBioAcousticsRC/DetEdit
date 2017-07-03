@@ -28,12 +28,11 @@ colorTab = [255, 153, 200; ... % type 1 pink
     179, 200, 255; ... % type 3 light-blue
     174, 235, 255; ... % type 4 pale-blue
     0, 255, 255; ... % type 5 cyan
-    0, 255,   0; ... % type 6 bright green
-    255, 177, 100; ... % type 7 peach
-    255,   0, 255; ... % type 8 magenta
-    122,  15, 227; ... % type 9 purple
-    20,  43, 140; ... % type 10 dark blue
-    221, 125,   0]./255; % type 11  orange
+    255, 177, 100; ... % type 6 peach
+    255,   0, 255; ... % type 7 magenta
+    122,  15, 227; ... % type 8 purple
+    20,  43, 140; ... % type 9 dark blue
+    221, 125,   0]./255; % type 10  orange
 colorTab = round(colorTab.*100)/100;
 
 

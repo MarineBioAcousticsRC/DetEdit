@@ -120,6 +120,15 @@ if (AID ~= 2)% if it doesn't exist, make it
     disp('Make new ID file');
 end
 
+% Name and build ID file
+mdfn = strrep(detfn,'TPWS','MD');
+fnameMD = fullfile(detpn,mdfn);
+AMD = exist(fnameMD,'file');
+if (AID ~= 2)% if it doesn't exist, make it
+    zMD = [];
+    save(fnameMD,'zMD');   
+    disp('Make new MD file');
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
@@ -155,11 +164,11 @@ end
 
 [r,c] = size(MTT); %get shape of array
 if (r > c)
-    ct = MTT(ia1);
-    cl = MPP(ia1);
+    clickTimes = MTT(ia1);
+    clickLevels = MPP(ia1);
 else
-    ct = MTT(ia1)';
-    cl = MPP(ia1)';
+    clickTimes = MTT(ia1)';
+    clickLevels = MPP(ia1)';
 end
 
 if specploton && loadMSP
@@ -171,22 +180,22 @@ else
 end
 
 %% apply tf and remove low amplitude detections
-cl = cl + tf;
-ib1 = find(cl >= p.threshRL);
+clickLevels = clickLevels + tf;
+ib1 = find(clickLevels >= p.threshRL);
 
-if (size(ib1,1) ~= size(cl,1)) && ~loadMSP % catch for case where enforcing
+if (size(ib1,1) ~= size(clickLevels,1)) && ~loadMSP % catch for case where enforcing
     % min RL threshold on large dataset creates non-continuous indices.
     error('detEdit:RL',['Error: Re-run makeTPWS to enforce your minimum peak to peak RL threshold.\n',...
         'You cannot do it here because you have too many detections to load into memory.\n',...
-        sprintf('TPWS minimum RL = %d \ndetEdit minimum RL = %d',min(cl),p.threshRL)])
+        sprintf('TPWS minimum RL = %d \ndetEdit minimum RL = %d',min(clickLevels),p.threshRL)])
 end
 
 % prune by RL only if spectra & waveforms have been loaded
 
 if specploton && loadMSP
     disp([' Removed too low:',num2str(length(ia1)-length(ib1))]);
-    ct = ct(ib1);
-    cl = cl(ib1);
+    clickTimes = clickTimes(ib1);
+    clickLevels = clickLevels(ib1);
     keepers = ia1(ib1);
     
     csn = csn(ib1,:);
@@ -201,14 +210,12 @@ jFD = []; ia = []; ic = [];
 if (~isempty(zFD))
     [jFD,ia,ic] = intersect(MTT,zFD);
     rFD = length(zFD) - length(jFD);
-    disp([' Removed ',num2str(rFD),' False Det']);
+    disp([' Removed ',num2str(rFD),...
+        ' FD detections that do not match detection times']);    
     if size(jFD,1)<size(jFD,2)
         jFD = jFD';
     end
     zFD = jFD;
-    if (isempty(zFD))
-        zFD(1,1) = 1;  % keep from blowing up later
-    end
     save(fnameFD,'zFD');
 end
 
@@ -217,15 +224,27 @@ load(fnameID)  % identified detection times zID
 if (~isempty(zID))
     [jID,ia,ic] = intersect(MTT,zID(:,1));
     rID = length(zID) - length(jID);
-    disp([' Removed ',num2str(rID),' ID Dets']);
+    disp([' Removed ',num2str(rID),...
+        ' ID detections that do not match detection times']);
     if size(jID,1)<size(jID,2)
         jID = jID';
     end
     zID = zID(ic,:);
-    %     if isempty(zID)
-    %         zID = [];  % keep from blowing up later
-    %     end
     save(fnameID,'zID');
+end
+
+%% Make MD file intersect with MTT
+load(fnameMD)  % identified detection times zMD
+if (~isempty(zMD))
+    [jMD,ia,ic] = intersect(MTT,zMD(:,1));
+    rMD = length(zMD) - length(jMD);
+    disp([' Removed ',num2str(rMD),...
+        ' MD detections that do not match detection times']);
+    if size(jMD,1)<size(jMD,2)
+        jMD = jMD';
+    end
+    zMD = zMD(ic,:);
+    save(fnameMD,'zMD');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -235,12 +254,12 @@ end
 % TODO: Should be a function
 bFlag = 0;
 % find edges (start and end times) of bouts or sessions
-dt = diff(ct)*24*60*60; % calculate time between detections in seconds
+dt = diff(clickTimes)*24*60*60; % calculate time between detections in seconds
 
 I = find(dt>gt);  % find start of gaps
-sb = [ct(1);ct(I+1)];   % start time of bout
-eb = [ct(I);ct(end)];   % end time of bout
-dd = ct(end)-ct(1);     % deployment duration [d]
+sb = [clickTimes(1);clickTimes(I+1)];   % start time of bout
+eb = [clickTimes(I);clickTimes(end)];   % end time of bout
+dd = clickTimes(end)-clickTimes(1);     % deployment duration [d]
 nb = length(sb);        % number of bouts
 bd = (eb - sb);      % duration of bout in days
 
@@ -287,13 +306,14 @@ else
     disp('Done Loading LTSA Sessions')
     sltsa = size(pt);
     if (sltsa(2) ~= nb)
-        disp('Error: Wrong # LTSA session, REMAKE LTSA ')
+        disp(['Error: Number of LTSA sessions calculated here doesn''t match ',...
+            'input LTSA file. Check ltsaMax parameter.'])
         return
     end
 end
 
 %% Set up Tests for False Detections
-ixfd = (1: c4fd : length(ct));  % selected to test for False Det
+ixfd = (1: c4fd : length(clickTimes));  % selected to test for False Det
 
 A6 = exist(fnameTD,'file');
 if (A6 ~= 2)
@@ -319,6 +339,9 @@ while isempty(pwr{1,iPwr}) && iPwr<length(pwr)
     iPwr = iPwr+1;
 end
 
+% ToDo: Seems like LTSA parameters (step size and frequency bins) could
+% be calculated from LTSA directly, especially because there are 
+% inconsistent step sizes in some LTSAs.
 if any(strcmp('dfManual',fieldnames(p)))&& ~isempty(p.dfManual)
     % allow non-standard ltsa step sizes
     df = p.dfManual;
@@ -380,11 +403,12 @@ blag = 0;
 % loop over the number of bouts (sessions)
 while (k <= nb)
     disp([' BEGIN SESSION: ',num2str(k)]);
-    % load in FD, MD and TD each session incase these have been modified
+    % load in FD, MD and TD each session in case these have been modified
     load(fnameFD); % brings in zFD
-    load(fnameID); % bring in zID
-    %     load(fn3);  % brings in zMD
+    load(fnameID); % brings in zID
+    load(fnameMD); % brings in zMD
     load(fnameTD); % brings in zTD
+    
     if (length(zTD(1,:)) == 2)
         zTD = [zTD,-1.*ones(length(zTD),2)];
         save(fnameTD,'zTD');
@@ -404,7 +428,7 @@ while (k <= nb)
         [xmspAll,im] = max(xmsp0All(:,flowt:fimaxt),[],2); % maximum between flow-100kHz
         
         % calculate peak-to-peak amplitude including transfer function
-        xmppAll = cl'-tf+ Ptfpp(im + flowt-1); % vectorized version
+        xmppAll = clickLevels'-tf+ Ptfpp(im + flowt-1); % vectorized version
         % turn diagonal to vertical (easier way to find thresholds)
         if isrow(xmspAll)
             pxmspAll = xmspAll' - (xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
@@ -413,14 +437,14 @@ while (k <= nb)
         else
             pxmspAll = xmspAll - (xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
         end        
-        plot(h51,pxmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',ct)
+        plot(h51,pxmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
         title(h51,['Based on ',num2str(length(xmppAll)),' clicks']);
         
         % apply RMS threshold to figure (51)
         if (p.threshRMS > 0)
-            Badct = ct(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
-            disp(['Number of Detections Below RMS threshold = ',num2str(length(Badct))])
-            zFD = [zFD; Badct];   % cummulative False Detection matrix
+            badClickTime = clickTimes(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
+            disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
+            zFD = [zFD; badClickTime];   % cummulative False Detection matrix
             save(fnameFD,'zFD')
             xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
             hold(h51,'on');
@@ -431,13 +455,13 @@ while (k <= nb)
 
         % plot RMS vs frequency plot, keeping RMS vertical like in fig(51)
         freqAll = fmsp(im + flowt-1);
-        plot(h53,pxmspAll,freqAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',ct)
+        plot(h53,pxmspAll,freqAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
         title(h53,['Based on total of ',num2str(length(freqAll)),' clicks']);
         % apply High Frequency threshold to figure (53)
         if (p.threshHiFreq > 0)
-            Badct = ct(freqAll > p.threshHiFreq);  % for all false if below RMS threshold
-            disp(['Number of Detections Below Freq threshold = ',num2str(length(Badct))])
-            zFD = [zFD; Badct];   % cummulative False Detection matrix
+            badClickTime = clickTimes(freqAll > p.threshHiFreq);  % for all false if below RMS threshold
+            disp(['Number of Detections Below Freq threshold = ',num2str(length(badClickTime))])
+            zFD = [zFD; badClickTime];   % cummulative False Detection matrix
             save(fnameFD,'zFD')
             xtline = [min(pxmspAll),max(pxmspAll)]; ytline = [p.threshHiFreq ,p.threshHiFreq];
             hold(h53,'on');
@@ -449,7 +473,7 @@ while (k <= nb)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % find detections and false detections within this bout (session)
     J = []; JFD =[]; Jtrue = []; XFD = []; JID = [];
-    J = find(ct >= sb(k) & ct <= eb(k));
+    J = find(clickTimes >= sb(k) & clickTimes <= eb(k));
     if specploton && loadMSP % have to load consecutive detections if reading from disk
         J = J(1):J(end);
         csnJ = csn(J,:);
@@ -460,7 +484,7 @@ while (k <= nb)
     end
     
     % get indices  of test clicks in this session
-    XFD = find(ct(ixfd) >= sb(k) & ct(ixfd) <= eb(k));
+    XFD = find(clickTimes(ixfd) >= sb(k) & clickTimes(ixfd) <= eb(k));
     zTD(k,1) = length(XFD);
     
     % Test for XFD and strcmp('x or z or w') - if no test points skip
@@ -473,16 +497,16 @@ while (k <= nb)
     end
     
     if ~isempty(J) % if there are detection in this session
-        t = ct(J); % detection times in this session
+        t = clickTimes(J); % detection times in this session
         disp([' Detection times:',num2str(length(t))]);
         if (~isempty(XFD))
-            xt = ct(ixfd(XFD));  %times to test for False Detection
-            xPP = cl(ixfd(XFD));   %amplitude for test False Detection
+            xt = clickTimes(ixfd(XFD));  %times to test for False Detection
+            xPP = clickLevels(ixfd(XFD));   %amplitude for test False Detection
             disp([' Test False Detection times:',num2str(zTD(k,1))]),
         else
             xt = [];
         end
-        RL = cl(J);         % received levels in this session
+        RL = clickLevels(J);         % received levels in this session
         nd = length(J);     % number of detections in this session
         
         % get false detection times that intersect with detection times
@@ -491,7 +515,7 @@ while (k <= nb)
         tfd = [];
         if (~isempty(zFD)) % get times and indices of false detections
             [tfd,K2,~] = intersect(t,zFD(:,1));
-            fdRL = RL(K2);
+            rlFD = RL(K2);
         end
         if ~isempty(K2) % if this session contains false detections
             ff2 = 1; % set false flag to true
@@ -502,7 +526,7 @@ while (k <= nb)
             disp([' False detections:',num2str(length(K2))])
         else
             ff2 = 0;
-            disp(' No False Det')
+            disp(' No False Detections')
         end
         
         % get ID'd detection times that intersect with detection times
@@ -530,15 +554,38 @@ while (k <= nb)
             disp([' ID detections:',num2str(length(K3))])
         else
             ff3 = 0;
-            disp(' No ID')
+            disp(' No identified detections (ID)')
         end
         
-        % Calculate indices of detections which are neither false nor ID'd
+        % get MisID detection times that intersect with detection times
+        K4 = []; % holds MD'd indices
+        ff4 = 0; % becomes positive if you have MD's detections in this session
+        tMD = []; % times of MD'd detections
+        MDidx = [];
+        if ~isempty(zMD)
+            [tMD,K4,MDidx] = intersect(t,zMD(:,1));
+            rlMD = RL(K4);
+        end
+        if ~isempty(K4) % if this session contains mis-ID detections
+            ff4 = 1; % set false flag to true
+            if specploton
+                wavMD = mean(csnJ(K4,:),1); % calculate mean MD series
+                specMD = cspJ(K4,:); % get set of MD spectra
+            end
+            disp([' MD detections:',num2str(length(K4))])
+        else
+            ff4 = 0;
+            disp(' No misidentified Detections (MD)')
+        end
+        
+        % Calculate indices of detections which are neither false, ID'd,
+        % or MD
         JFD = J(K2);
         JID = J(K3);
-        JFDandID = union(JFD,JID);
-        [Jtrue,iJ,~]= setxor(J,JFDandID); % find all true detections
-        trueTimes = ct(Jtrue);% vector of true times in this session
+        JMD = J(K4);
+        JFIM = union(union(JFD,JID),JMD);
+        [Jtrue,iJ,~]= setxor(J,JFIM); % find all true detections
+        trueTimes = clickTimes(Jtrue);% vector of true times in this session
 
         if specploton
             cspJtrue = cspJ(iJ,:); % true spectra in this session
@@ -559,7 +606,9 @@ while (k <= nb)
     if ff3
         dtID = dt(K3(1:end-1));
     end
-    
+    if ff4
+        dtMD = dt(K4(1:end-1));
+    end
     disp(['END SESSION: ',num2str(k),' Start: ',datestr(sb(k)),...
         ' End:',datestr(eb(k))])
     
@@ -646,7 +695,17 @@ while (k <= nb)
             hold(h52, 'off')
             
         end
-
+        if ff4   % average false click spec
+            SPEC4 = norm_spec_simple(specMD, flowt, fimint, fimaxt);
+            % plot average false click spectrum
+            hold(h50, 'on')
+            plot(h50,ft,SPEC4(fimint:fimaxt),'g','Linewidth',4)
+            hold(h50, 'off')
+            % plot average false click waveform
+            hold(h52, 'on')
+            plot(h52,wavMD + min(wavMD),'g');
+            hold(h52, 'off')
+        end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Add detections of this session in figure 51 and 53        
         % for all detections in this session, calculate xmpp and xmsp
@@ -678,6 +737,9 @@ while (k <= nb)
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
         end
+        if ff4 % MD in green
+            plot(h51,pxmsp(K4),xmpp(K4),'g.','UserData',t(K4))
+        end
         hold(h51, 'off')
         
         % Plot RMS vs frequency plot for this session
@@ -693,6 +755,9 @@ while (k <= nb)
                 hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
+        end
+        if ff4 % MD in green
+            plot(h53,pxmsp(K4),freq(K4),'g.','UserData',t(K4))
         end
         hold(h53, 'off')
     end
@@ -724,7 +789,7 @@ while (k <= nb)
     plot(t,RL,'b.','UserData',t)
     hold on
     if ff2 % plot False detections in red
-        plot(tfd,fdRL,'r.','UserData',tfd)
+        plot(tfd,rlFD,'r.','UserData',tfd)
         % disp([' false det plotted:',num2str(length(tfd))])
     end
     if ff3 % plot ID'd detections in associated color
@@ -735,6 +800,9 @@ while (k <= nb)
             hRLID = plot(tID(thisIDset),rlID(thisIDset),'.','UserData',tID(thisIDset));
             set(hRLID,'Color',colorTab(specIDs(iC2),:))
         end
+    end
+    if ff4 % plot MD detections in green
+        plot(tMD,rlMD,'g.','UserData',tfd)
     end
     hold off
     axis([PT(1) PT(end) p.rlLow p.rlHi])
@@ -793,19 +861,23 @@ while (k <= nb)
         title('Inter-Detection Interval (IDI)')
         grid on
         
-        %%% plot false and ID
+        %%% plot FD, ID, MD
         axes(AX(1))
         hold on
-        if ff2
+        if ff2 
             plot(AX(1),tfd(2:end),dtFD,'.r','UserData',tfd(2:end))
             % no need to double FD since only the blue points are brush captured
         end
         if ff3 % plot ID'd in associated color
-            for iC2 = 1:length(specIDs) % set colors
-                thisIDset = spCodeSet ==specIDs(iC2);
-                hdtID = plot(AX(1),tID(thisIDset(2:end)),dtID(thisIDset(2:end)),'.','UserData',tID(thisIDset));
-                set(hdtID,'Color',colorTab(specIDs(iC2),:))
+            for iC3 = 1:length(specIDs) % set colors
+                thisIDset = spCodeSet ==specIDs(iC3);
+                hdtID = plot(AX(1),tID(thisIDset(2:end)),...
+                    dtID(thisIDset(2:end)),'.','UserData',tID(thisIDset));
+                set(hdtID,'Color',colorTab(specIDs(iC3),:))
             end
+        end
+        if ff4 % plot MDs in bright green
+            plot(AX(1),tMD(2:end),dtMD,'.g','UserData',tMD(2:end));
         end
         hold off
     else
@@ -836,7 +908,7 @@ while (k <= nb)
         
         hold(h51,'on')
         plot(h51,pxmsp(yell),xmpp(yell),'ko','MarkerSize',10,...
-            'LineWidth',2,'UserData',ct(K2))
+            'LineWidth',2,'UserData',clickTimes(K2))
         hold(h51,'off')
         
         hold(h52,'on') % add click to waveform plot in BLACK
@@ -845,7 +917,7 @@ while (k <= nb)
         
         hold(h53,'on')
         plot(h53,pxmsp(yell),freq(yell),'ko','MarkerSize',10,...
-            'LineWidth',2,'UserData',ct(K2))
+            'LineWidth',2,'UserData',clickTimes(K2))
         hold(h53,'off')
     end
     % end of plotting
@@ -856,11 +928,12 @@ while (k <= nb)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % get key stroke
     cc = get(gcf,'CurrentCharacter');
-    if strcmp(cc,'u') || strcmp(cc,'g') || strcmp(cc,'y') ||  strcmp(cc,'r');
+    if strcmp(cc,'u') || strcmp(cc,'g') || strcmp(cc,'y') || ...
+            strcmp(cc,'r') ;
         % detections were flagged by user
         disp(' Update Display') % Stay on same bout
         % get brushed data and figure out what to do based on color:
-        [yell,zFD,zID,bFlag] = brush_color(gca, cc, zFD, zID, colorTab, t);
+        [yell,zFD,zID,zMD,bFlag] = brush_color(gca,cc,zFD,zID,zMD,colorTab,t);
         
     elseif strcmp(cc,'s') % change time diff scale on bottom plot of 201
         p.dtHi = input(' Update IPI scale (sec):  '); % Set IPI scale
@@ -888,7 +961,9 @@ while (k <= nb)
         if ~isempty(zID)
             %[newFD,~] = setdiff(t,zID(:,1)); % remove from zID
             [~,iCID] = setdiff(zID(:,1),t); % remove from zID 
-            zID = zID(iCID,:);
+            zID = zID(iCID,:);            
+            [~,iCMD] = setdiff(zMD(:,1),t); % remove from zMD 
+            zMD = zMD(iCMD,:);     
         end
         newFD = t;
         zFD = [zFD; newFD; trueTimes]; % Add everything to zFD
@@ -900,7 +975,22 @@ while (k <= nb)
             [~,iCID] = setdiff(zID(:,1),t);
             zID = zID(iCID,:);
         end
-        
+        if ~isempty(zMD)
+            [~,iCMD] = setdiff(zMD(:,1),t); % remove from zMD 
+            zMD = zMD(iCMD,:);    
+        end
+    elseif strcmp(cc,'m')% assign ALL as mis-ID
+        disp(['Number of mis-ID Detections Added = ',num2str(length(t))])
+        if ~isempty(zID) % remove these times from FD and ID
+            [~,iCID] = setdiff(zID(:,1),t); % remove from zID 
+            zID = zID(iCID,:); 
+        end
+        if ~isempty(zFD)
+            [~,iCFD] = setdiff(zFD,t); % remove from zFD
+            zFD = zFD(iCFD,:);     
+        end
+        zMD = [zMD; t];
+
     elseif strcmp(cc,'j')% jump to non-consecutive session
         prompt = 'Jump to Session: ';
         kjump = input(prompt);
@@ -930,8 +1020,12 @@ while (k <= nb)
         [~,uniqueID] = unique(zID(:,1));
         zID = zID(uniqueID,:);
     end
+    if ~isempty(zMD)
+        zMD = unique(zMD);
+    end
     save(fnameFD,'zFD')
-    save(fnameID,'zID')    
+    save(fnameID,'zID')  
+    save(fnameMD,'zMD')  
     save(fnameTD,'zTD');
     
     % don't end if you used paintbrush on last record
@@ -957,9 +1051,9 @@ save(fnameFD,'zFD');
 tfinal = find(zTD(:,1) > 0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(' ')
-disp(['Number of Starting Detections = ',num2str(length(ct)+2)])
+disp(['Number of Starting Detections = ',num2str(length(clickTimes)+2)])
 disp(' ')
-disp(['Number of True Detections = ',num2str(length(ct)-length(zFD)+2)])
+disp(['Number of True Detections = ',num2str(length(clickTimes)-length(zFD)+2)])
 disp(' ')
 disp(['Number of False Detections = ',num2str(length(zFD)-1)])
 disp(' ')

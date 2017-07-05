@@ -1,6 +1,8 @@
 function PathFileList = findTfFile(indir,stationDeploy)
 
-
+if length(stationDeploy) > 1
+   stationDeploy = stationDeploy(2); % skip site name if given 
+end
 % select which tf corresponds to station/deployment
 switch stationDeploy
     % site DT

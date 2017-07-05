@@ -264,7 +264,7 @@ bd = (eb - sb);   %duration bout in sec
 disp(['Number Bouts : ',num2str(nb)])
 
 %Attempt to create a minimum bout duration
-if exist('minb','var')
+if exist('minDur','var')
     minbcount = 1;  %counter for while loop
     while minbcount <= nb
         if bd(minbcount) <= (minDur/(60*24))

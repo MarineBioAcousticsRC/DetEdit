@@ -102,7 +102,6 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') ...
     dtHi = 2; 
     fLow = 5;
     threshRL = 120;% threshRMS = 110; threshHiFreq = 30;
-    rlLow = threshRL - 5; rlHi = 190;
     ltsaContrast = 180; ltsaBright = 70;
     dfManual = 100;    
 else

@@ -68,17 +68,16 @@ if p.tfSelect > 0
         disp('Load Transfer Function File');
         [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
         tffn = fullfile(pname,fname);
+        if strcmp(num2str(fname),'0')
+            disp('Cancelled TF File');
+            return
+        end
     else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(stn,'_'); % get only station and deployment
         tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
     end
+    disp(['TF File: ',tffn]);
 
-    if strcmp(num2str(fname),'0')
-        disp('Cancelled TF File');
-        return
-    else %give feedback
-        disp(['TF File: ',tffn]);
-    end
     fid = fopen(tffn);
     [A,count] = fscanf(fid,'%f %f',[2,inf]);
     tffreq = A(1,:);
@@ -263,9 +262,15 @@ dd = clickTimes(end)-clickTimes(1);     % deployment duration [d]
 nb = length(sb);        % number of bouts
 bd = (eb - sb);      % duration of bout in days
 
-% find bouts > 10 sec long
-% bd10 = find(bd > 1 / (60*60*24)); % for Kogia 10 sec
-% disp(['Number Bouts : ',num2str(length(bd))])
+% find bouts longer than the minimum
+if ~isempty(p.minBout)
+    bdI = find(bd > (p.minBout / (60*60*24)));
+    bd = bd(bdI);
+    sb = sb(bdI);
+    eb = eb(bdI);
+    nb = length(sb);        % number of bouts
+end
+
 % limit the length of a bout
 blim = p.ltsaMax/24;       % 6 hr bout length limit in days
 ib = 1;

@@ -12,6 +12,7 @@ gth = .5;    % gap time in hrs between sessions
 gt = gth*60*60;    % gap time in sec
 ltsamax = 6; % length of ltsa window
 thres = 0;
+minBout = [];
 
 % get user input and set up file names
 dsk = [];
@@ -89,7 +90,8 @@ elseif strcmpi(sp,'whs')
 elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     spe = 'Pm'; tfselect = 0; %freq used for tf
     thres = 120; % dB threshold
-    minDur = 60; % minimum window duration in minutes     
+    minDur = 60; % minimum window duration in minutes
+    minBout = 75; % minimum bout length
 else
     disp(' Bad Species type')
     return
@@ -230,9 +232,15 @@ eb = [ct(I);ct(end)];   % end time of bout
 % dd = ct(end)-ct(1);     % deployment duration [d]
 nb = length(sb);        % number of bouts
 bd = (eb - sb);      % duration of bout in days
-%find bouts > 10 sec long
-% bd10 = find(bd > 1 / (60*60*24)); % for Kogia 10 sec
-% disp(['Number Bouts: ',num2str(length(bd))])
+
+% find bouts longer than the minimum
+if ~isempty(minBout)
+    bdI = find(bd > (minBout / (60*60*24)));
+    bd = bd(bdI);
+    sb = sb(bdI);
+    eb = eb(bdI);
+    nb = length(sb);        % number of bouts
+end
 % limit the length of a bout
 blim = ltsamax/24;       % 6 hr bout length limit
 ib = 1;

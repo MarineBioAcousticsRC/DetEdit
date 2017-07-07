@@ -22,6 +22,7 @@ rlHi = 170; % PP plot window high limit
 dfManual = []; % LTSA step size in 10 [Hz] bins
 p1Low = threshRL - 5;
 p1Hi = 170; % ??
+minBout = [];
 
 
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
@@ -103,7 +104,8 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') ...
     fLow = 5;
     threshRL = 120;% threshRMS = 110; threshHiFreq = 30;
     ltsaContrast = 180; ltsaBright = 70;
-    dfManual = 100;    
+    dfManual = 100;
+    minBout = 75;
 else
     warning('Unknown Species Type!!!')
 end
@@ -215,4 +217,10 @@ if isfield(spParamsUser,'p1Hi')
     spParams.p1Hi = spParamsUser.p1Hi;
 else
     spParams.p1Hi = p1Hi;
+end
+
+if isfield(spParamsUser,'minBout')
+    spParams.minBout = spParamsUser.minBout;
+else
+    spParams.minBout = minBout;
 end

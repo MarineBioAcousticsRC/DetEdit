@@ -123,7 +123,7 @@ end
 mdfn = strrep(detfn,'TPWS','MD');
 fnameMD = fullfile(detpn,mdfn);
 AMD = exist(fnameMD,'file');
-if (AID ~= 2)% if it doesn't exist, make it
+if (AMD ~= 2)% if it doesn't exist, make it
     zMD = [];
     save(fnameMD,'zMD');   
     disp('Make new MD file');

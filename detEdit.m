@@ -525,7 +525,7 @@ while (k <= nb)
         if ~isempty(K2) % if this session contains false detections
             ff2 = 1; % set false flag to true
             if specploton
-                wavFD = mean(csnJ(K2,:),1); % calculate mean false time series
+                wavFD = norm_wav(mean(csnJ(K2,:),1)); % calculate mean false time series
                 specFD = cspJ(K2,:); % get set of false spectra
             end
             disp([' False detections:',num2str(length(K2))])
@@ -552,7 +552,7 @@ while (k <= nb)
                 specID = [];
                 for iSpID = 1:length(specIDs)
                     thisSet = spCodeSet == specIDs(iSpID);
-                    wavID(iSpID,:) = mean(csnJ(K3(thisSet,:),:),1);
+                    wavID(iSpID,:) = norm_wav(mean(csnJ(K3(thisSet,:),:),1));
                     specID(iSpID,:) = mean(cspJ(K3(thisSet,:),:),1);
                 end
             end
@@ -574,7 +574,7 @@ while (k <= nb)
         if ~isempty(K4) % if this session contains mis-ID detections
             ff4 = 1; % set false flag to true
             if specploton
-                wavMD = mean(csnJ(K4,:),1); % calculate mean MD series
+                wavMD = norm_wav(mean(csnJ(K4,:),1)); % calculate mean MD series
                 specMD = cspJ(K4,:); % get set of MD spectra
             end
             disp([' MD detections:',num2str(length(K4))])
@@ -595,7 +595,7 @@ while (k <= nb)
         if specploton
             cspJtrue = cspJ(iJ,:); % true spectra in this session
             csnJtrue = csnJ(iJ,:); % true time series in this session
-            wtrue = nanmean(csnJtrue,1); % mean of true spectra in this session
+            wtrue = norm_wav(nanmean(csnJtrue,1)); % mean of true spectra in this session
             strue = nanmean(cspJtrue,1); % mean of true time series in this session
         end
         disp([' True Detections: ',num2str(length(trueTimes))])
@@ -664,7 +664,7 @@ while (k <= nb)
             trueSpec = norm_spec_simple(cspJtrue,flowt,fimint,fimaxt);
             plot(h50,ft,trueSpec(fimint:fimaxt),'Linewidth',4)
             % average true click waveform
-            plot(h52, wtrue + 2*min(wtrue));
+            plot(h52, wtrue);
         else
             disp(['No true with at least ',num2str(minNdet),' detections'])
         end
@@ -676,7 +676,7 @@ while (k <= nb)
             hold(h50, 'off')
             % plot average false click waveform
             hold(h52, 'on')
-            plot(h52,wavFD + min(wavFD),'r');
+            plot(h52,wavFD + 0.5 ,'r');
             hold(h52, 'off')
         end
         if ff3  % average id click spec
@@ -691,7 +691,7 @@ while (k <= nb)
             
             % plot average ID'd click waveform(s)
             hold(h52, 'on')
-            hID2 = plot(h52,(wavID + 5*rand(size(hID))*min(wavID))');
+            hID2 = plot(h52,(wavID + repmat(-1*rand(size(hID)),1,length(wavID)))');
             
             for iC = 1:length(hID) % set colors
                 set(hID(iC),'Color',colorTab(specIDs(iC),:))
@@ -708,7 +708,7 @@ while (k <= nb)
             hold(h50, 'off')
             % plot average false click waveform
             hold(h52, 'on')
-            plot(h52,wavMD + min(wavMD),'g');
+            plot(h52,wavMD + 1,'g');
             hold(h52, 'off')
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -778,7 +778,7 @@ while (k <= nb)
     ylabel(h51,'dB Peak-to-peak')
     
     xlabel(h52,'Time (1ms @ 200kHz)');
-    ylabel(h52,'Amplitude');
+    ylabel(h52,' Normalized Amplitude');
 
     xlabel(h53,'dB RMS')
     ylabel(h53,'dB Frequency (kHz)')
@@ -917,7 +917,7 @@ while (k <= nb)
         hold(h51,'off')
         
         hold(h52,'on') % add click to waveform plot in BLACK
-        plot(h52,mean(csnJ(yell,:),1)','k');
+        plot(h52,norm_wav(mean(csnJ(yell,:),1))' + 1.5,'k');
         hold(h52,'off')
         
         hold(h53,'on')
@@ -966,9 +966,11 @@ while (k <= nb)
         if ~isempty(zID)
             %[newFD,~] = setdiff(t,zID(:,1)); % remove from zID
             [~,iCID] = setdiff(zID(:,1),t); % remove from zID 
-            zID = zID(iCID,:);            
-            [~,iCMD] = setdiff(zMD(:,1),t); % remove from zMD 
-            zMD = zMD(iCMD,:);     
+            zID = zID(iCID,:);    
+            if ~isempty(zMD)
+                [~,iCMD] = setdiff(zMD(:,1),t); % remove from zMD
+                zMD = zMD(iCMD,:);
+            end
         end
         newFD = t;
         zFD = [zFD; newFD; trueTimes]; % Add everything to zFD

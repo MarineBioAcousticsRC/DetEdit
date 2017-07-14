@@ -1,7 +1,7 @@
 % modDetKO.m
 % modify detections based on analyst input
 % originally based on jah/smw GoM beaked whale detector work
-%
+% JAH
 % 140305 smw
 % 140318 jah  141003 jah modified for TPWS files 
 % 150813 jah for KO

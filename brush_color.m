@@ -39,8 +39,8 @@ if ~isempty(brushDataX)
             disp(['Datevec ',num2str(datevec(brushDate(1)))]);
             [~,yell] = intersect(t, brushDate);
             
-        elseif isequal(brushColor,[0,.5,0]);
-            % set back to true
+        elseif isequal(brushColor,[0,0,0]) || strcmp(cc,'i');
+            % black paintbrush = % set back to true
             disp(['Number of Detections Selected = ',num2str(length(brushDate(1)))])
             if exist('zFD','var')
                 % make sure you're not flagging something outside this session
@@ -62,6 +62,7 @@ if ~isempty(brushDataX)
                 % save(fn2,'zFD')
             end
         elseif isequal(brushColor,[0,1,0]) || strcmp(cc,'m');
+            % green paintbrush = misidentified Detections
             disp(['Number of Mid-ID Detections = ',num2str(length(brushDataX))])
             % make sure you're not flagging something outside this session
             [newMD,~] = intersect(t, brushDate);

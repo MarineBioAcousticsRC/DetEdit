@@ -9,16 +9,16 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-stn = 'GofMX_GC04_'; % site name
-dpn = 'disk01_'; % deployment number (or disk01-08)
+stn = 'GofMX_DT01_'; % site name
+dpn = 'disk01-08_'; % deployment number (or disk01-08)
 itnum = '1'; % iteration
 srate = 200; % sample rate
-sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
+sp = 'Pm'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
-sdir = 'G:\GC\GC04_TPWS'; %Directory with TPWS files
-tfName = 'E:\TF_files'; % Directory ...
+sdir = 'E:\JAH\Pm\TPWS'; %Directory with TPWS files
+tfName = 'E:\Harp_TF'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
 
@@ -43,10 +43,10 @@ spParamsUser.ltsaLims = [0,100]; % min and max ylimits in kHz for ltsa plot
 spParamsUser.ltsaMax = 6; % ltsa maximum duration per session
 spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 % spParamsUser.specChar = 'Unk';  %Simone abbreviation for species
-spParamsUser.speName = 'Delphin';  % Species code used in file names 
-spParamsUser.dtHi = .3; % max yaxis value for IPI display in sec
+% spParamsUser.speName = 'Delphin';  % Species code used in file names 
+%spParamsUser.dtHi = .3; % max yaxis value for IPI display in sec
 % spParamsUser.fLow = 5; % boundary for spectrum plot
-spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
+%spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
 % spParamsUser.threshRMS = 126; % RMS threshold cutoff
 % spParamsUser.threshHiFreq = 25; % high freq cutoff for clicks
 spParamsUser.ltsaContrast = 116; % ltsa contrast

@@ -934,7 +934,7 @@ while (k <= nb)
     % get key stroke
     cc = get(gcf,'CurrentCharacter');
     if strcmp(cc,'u') || strcmp(cc,'g') || strcmp(cc,'y') || ...
-            strcmp(cc,'r') ;
+            strcmp(cc,'r') || strcmp(cc,'i')  ;
         % detections were flagged by user
         disp(' Update Display') % Stay on same bout
         % get brushed data and figure out what to do based on color:

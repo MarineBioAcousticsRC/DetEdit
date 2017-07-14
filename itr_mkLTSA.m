@@ -6,7 +6,7 @@ clearvars
 clear global
 % setup info - modify to fit your site, species and path
 stn = 'GofMX_'; % sitename
-dpn = 'DT08'; % deployment code
+dpn = 'DT06'; % deployment code
 sp = 'De'; % your species code
 itnum = 1; % which iteration you are looking for
 LTSApath = 'D:\DTmetadata\DT_postDecompFix\LTSAs'; % directory containing all LTSAs for this deployment

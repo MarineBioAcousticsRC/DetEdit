@@ -72,8 +72,8 @@ Date: 1/26/2016
   	Brushing - Matlab's paintbrush tool is used to label detections.  
   	Colors have different meanings:  
         	Red:  False positive  
-		Dark Green:  True detection  
-		Yellow: Temporarily shows details of brushed clicks in black outline  
+		Black:  True detection  
+		Yellow: Temporarily shows details of brushed clicks in black outline but does not change their designation 
 		Bright Green:  Misidentified detection  
 		10 other colors available for ID labeling include:  
 
@@ -92,7 +92,7 @@ Date: 1/26/2016
    Keyboard Shortcuts:  
 	'r' Label currently selected clicks as false  
 	'f' Label all clicks in current window as false  
-	'g' Label currently selected clicks as true (does not work if brush color is red,yellow, or bright green)  
+	'i' Label currently selected clicks as true (does not work if brush color is red,yellow, or bright green)  
 	't' Label all clicks in current window as true  
 	'm' Label all clicks in current window as misidentified  
 	'y' Display summary info for only currently selected clicks (mean spectrum and mean timeseries will be shown in black)  
@@ -102,7 +102,7 @@ Date: 1/26/2016
 	'a' Adjust LTSA contrast and brightness  
 	's' Update maximum ICI scale  
 	'<' Change RMS threshold in plot 51  
-	'^' Change high frequency threshold in plot 51  
+	'^' Change high frequency threshold in plot 53  
      	'd' Change recieved level scale on top subplot of fig 201  
     	'x' or 'z' Test a random subset of detections to estimate false positive cue rate  
     	'w' Test a random subset of time bins to estimate false positive bin rate  

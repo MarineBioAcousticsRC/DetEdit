@@ -103,6 +103,7 @@ Date: 1/26/2016
 	's' Update maximum ICI scale  
 	'<' Change RMS threshold in plot 51  
 	'^' Change high frequency threshold in plot 51  
+	'!' Change frequency scale in plot 53
      	'd' Change recieved level scale on top subplot of fig 201  
     	'x' or 'z' Test a random subset of detections to estimate false positive cue rate  
     	'w' Test a random subset of time bins to estimate false positive bin rate  

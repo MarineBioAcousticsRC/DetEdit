@@ -428,6 +428,12 @@ while (k <= nb)
     figure(53); clf; set(53,'name',sprintf('RL rms vs. Peak freq. (left shift by %d)',p.threshRL))
     h53 = gca;
     
+    if p.threshHiFreq ~=0 %any(strcmp('threshHiFreq',fieldnames(p)))
+        ymax = p.threshHiFreq + 1;
+    else
+        ymax = fmsp(end);  % yaxis max of plot 53 (Default)
+    end
+    
     if specploton && loadMSP
         xmsp0All = csp + repmat(Ptfpp,size(csp,1),1);
         [xmspAll,im] = max(xmsp0All(:,flowt:fimaxt),[],2); % maximum between flow-100kHz
@@ -765,6 +771,7 @@ while (k <= nb)
             plot(h53,pxmsp(K4),freq(K4),'g.','UserData',t(K4))
         end
         hold(h53, 'off')
+        ylim(h53,[p.fLow ymax])
     end
 
     % add figure labels
@@ -781,7 +788,7 @@ while (k <= nb)
     ylabel(h52,' Normalized Amplitude');
 
     xlabel(h53,'dB RMS')
-    ylabel(h53,'dB Frequency (kHz)')
+    ylabel(h53,'Peak Frequency (kHz)')
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % plots stuff now in figure(201)
@@ -956,6 +963,9 @@ while (k <= nb)
         
     elseif strcmp(cc,'^') % change High Frequency threshold plot 51
         p.threshHiFreq = input(' Set High Frequency Threshold:  '); % Set false thres
+        
+    elseif strcmp(cc,'!') % change High Frequency threshold plot 51
+        ymax = input(' Update High Frequency axis:  '); % Set false thres
                 
     elseif strcmp(cc,'b') % Move backward one bout
         if k ~= 1

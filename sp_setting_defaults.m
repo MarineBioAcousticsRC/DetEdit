@@ -102,8 +102,8 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') ...
     speName = 'Pm'; tfSelect = 15000;
     dtHi = 2; 
     fLow = 5;
-    threshRL = 120;% threshRMS = 110; threshHiFreq = 30;
-    ltsaContrast = 180; ltsaBright = 70;
+    threshRL = 120; threshRMS = 92; threshHiFreq = 20;
+    ltsaContrast = 180; ltsaBright = 73;
     dfManual = 100;
     minBout = 75;
 else

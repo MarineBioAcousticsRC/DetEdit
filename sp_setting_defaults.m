@@ -23,6 +23,7 @@ dfManual = []; % LTSA step size in 10 [Hz] bins
 p1Low = threshRL - 5;
 p1Hi = 170; % ??
 minBout = [];
+slope = 1;
 
 
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
@@ -106,6 +107,7 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') ...
     ltsaContrast = 180; ltsaBright = 73;
     dfManual = 100;
     minBout = 75;
+    slope = 1.2;
 else
     warning('Unknown Species Type!!!')
 end
@@ -223,4 +225,10 @@ if isfield(spParamsUser,'minBout')
     spParams.minBout = spParamsUser.minBout;
 else
     spParams.minBout = minBout;
+end
+
+if isfield(spParamsUser,'slope')
+    spParams.slope = spParamsUser.slope;
+else
+    spParams.slope = slope;
 end

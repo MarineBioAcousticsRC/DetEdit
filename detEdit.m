@@ -442,11 +442,11 @@ while (k <= nb)
         xmppAll = clickLevels'-tf+ Ptfpp(im + flowt-1); % vectorized version
         % turn diagonal to vertical (easier way to find thresholds)
         if isrow(xmspAll)
-            pxmspAll = xmspAll' - (xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
+            pxmspAll = xmspAll' - p.slope*(xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
         elseif isrow(xmppAll)
-            pxmspAll = xmspAll - (xmppAll' - p.threshRL); %use slope of 1 to mod xmsp for plot
+            pxmspAll = xmspAll - p.slope*(xmppAll' - p.threshRL); %use slope of 1 to mod xmsp for plot
         else
-            pxmspAll = xmspAll - (xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
+            pxmspAll = xmspAll - p.slope*(xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
         end        
         plot(h51,pxmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
         title(h51,['Based on ',num2str(length(xmppAll)),' clicks']);
@@ -727,11 +727,11 @@ while (k <= nb)
         % turn diagonal to vertical
         if ~isempty(xmsp) && ~isempty(xmpp)
             if isrow(xmsp)
-                pxmsp = xmsp' - (xmpp - p.threshRL); %use slope of 1 to mod xmsp for plot
+                pxmsp = xmsp' - p.slope*(xmpp - p.threshRL); %use slope of 1 to mod xmsp for plot
             elseif isrow(xmpp)
-                pxmsp = xmsp - (xmpp' - p.threshRL);
+                pxmsp = xmsp - p.slope*(xmpp' - p.threshRL);
             else
-                pxmsp = xmsp - (xmpp - p.threshRL);
+                pxmsp = xmsp - p.slope*(xmpp - p.threshRL);
             end     
         end
         

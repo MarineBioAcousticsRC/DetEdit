@@ -969,6 +969,9 @@ while (k <= nb)
     elseif strcmp(cc,'<') % change RMS threshold plot 51
         p.threshRMS = input(' Set RMS Threshold:  '); % Set false thres
         
+    elseif strcmp(cc,':') % change RMS threshold plot 51
+        p.threshPP = input(' Set PP Threshold:  '); % Set false thres
+        
     elseif strcmp(cc,'^') % change High Frequency threshold plot 51
         p.threshHiFreq = input(' Set High Frequency Threshold:  '); % Set false thres
         

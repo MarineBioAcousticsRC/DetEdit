@@ -52,7 +52,7 @@ sdn = [stn,dpn];    % site name and deployment number
 
 detpn = [sdir,'\'];
 if isempty(p.speName)
-    detfn = [stn,dpn,'TPWS',itnum,'.mat'];
+    detfn = [stn,dpn,'TPWS',itnum,'.mat'];  
 else
     detfn = [stn,dpn,p.speName,'_TPWS',itnum,'.mat'];
 end
@@ -148,7 +148,7 @@ else
     loadMSP = nDets <= maxDetLoad; % true/false, if you have more detections than
 end
 % the maximum load this becomes false.
-ic1 = [];
+ic1 = []; 
 if loadMSP 
     % remove duplicates from MTT (can't do this if too many detections to load into memory).
     [uMTT,ia1,ic1] = unique(MTT);
@@ -161,8 +161,9 @@ else
     ia1 = [1:length(MTT)]';
 end
 
-[r,c] = size(MTT); %get shape of array
+ [r,c] = size(MTT); %get shape of array
 if (r > c)
+    %clickTimes = []; clickLevels = [];
     clickTimes = MTT(ia1);
     clickLevels = MPP(ia1);
 else
@@ -171,8 +172,8 @@ else
 end
 
 if specploton && loadMSP
-    % if specploton and there aren't too many detections, load spectra 
-    csn = MSN(ia1,:); 
+    % if specploton and there aren't too many detections, load spectra
+    csn = MSN(ia1,:);
     csp = MSP(ia1,:);
 else
     disp('No Waveform or Spectra');
@@ -189,6 +190,11 @@ if (size(ib1,1) ~= size(clickLevels,1)) && ~loadMSP % catch for case where enfor
         sprintf('TPWS minimum RL = %d \ndetEdit minimum RL = %d',min(clickLevels),p.threshRL)])
 end
 
+if (size(ib1,1) == 0) 
+    % min RL threshold excludes all detections
+    error('detEdit:RL',['Error: No detections meet the minimum peak to peak RL threshold.\n',...
+        sprintf('TPWS maximum RL = %d \ndetEdit minimum RL = %d',max(clickLevels),p.threshRL)])
+end
 % prune by RL only if spectra & waveforms have been loaded
 
 if specploton && loadMSP

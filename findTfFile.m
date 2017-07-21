@@ -3,6 +3,9 @@ function PathFileList = findTfFile(indir,stationDeploy)
 if size(stationDeploy,1) > 1
    stationDeploy = stationDeploy{2}; % skip site name if given 
 end
+if iscell(stationDeploy)
+    stationDeploy = stationDeploy{:};
+end
 % select which tf corresponds to station/deployment
 switch stationDeploy
     % site DT
@@ -52,7 +55,11 @@ switch stationDeploy
     case 'GC09'
         tfnum = 718; 
         serie = '700_series';
-        
+    
+    % 'Antarc01EIE'
+    case {'Antarc01EIE'}
+        tfnum = 729;
+        serie = '700_series';
     otherwise
         tfnum = [];
         disp('Transfer function folder not found or site matches')

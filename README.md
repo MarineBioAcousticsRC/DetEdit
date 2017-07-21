@@ -102,12 +102,10 @@ Date: 1/26/2016
 	'a' Adjust LTSA contrast and brightness  
 	's' Update maximum ICI scale  
 	'<' Change RMS threshold in plot 51  
-<<<<<<< HEAD
+	':' Change PP threshold in plot 51 
 	'^' Change high frequency threshold in plot 51  
 	'!' Change frequency scale in plot 53
-=======
 	'^' Change high frequency threshold in plot 53  
->>>>>>> dc9eb1611ef3cf08f77e270082f15b6d63a12dce
      	'd' Change recieved level scale on top subplot of fig 201  
     	'x' or 'z' Test a random subset of detections to estimate false positive cue rate  
     	'w' Test a random subset of time bins to estimate false positive bin rate  

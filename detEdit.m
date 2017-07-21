@@ -453,11 +453,19 @@ while (k <= nb)
         
         % apply RMS threshold to figure (51)
         if (p.threshRMS > 0)
-            badClickTime = clickTimes(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
-            disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
-            zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-            save(fnameFD,'zFD')
-            xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
+            if p.threshPP > 0
+                badClickTime = clickTimes(pxmspAll < p.threshRMS & xmppAll' < p.threshPP);  % for all false if below RMS threshold
+                disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
+                zFD = [zFD; badClickTime];   % cummulative False Detection matrix
+                save(fnameFD,'zFD')
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
+            else
+                badClickTime = clickTimes(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
+                disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
+                zFD = [zFD; badClickTime];   % cummulative False Detection matrix
+                save(fnameFD,'zFD')
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
+            end
             hold(h51,'on');
             plot(h51,xtline,ytline,'r')
             hold(h51,'off');

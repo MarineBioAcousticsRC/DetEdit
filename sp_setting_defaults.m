@@ -12,6 +12,7 @@ dtHi = .5; % max yaxis value for IPI display in sec
 fLow = 5; % boundary for spectrum plot
 threshRL = 0; % minimum RL threshold in dB peak-to-peak
 threshRMS = 0; % default for < coommand, RMS threshold cutoff
+threshPP = 0; % default for : coommand, PP threshold cutoff
 threshHiFreq = 0; % default for ^ command, high freq cutoff for clicks
 ltsaContrast = 250; % ltsa contrast
 ltsaBright = 100; % ltsa brightness
@@ -103,7 +104,8 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') ...
     speName = 'Pm'; tfSelect = 15000;
     dtHi = 2; 
     fLow = 5;
-    threshRL = 120; threshRMS = 92; threshHiFreq = 20;
+    threshRL = 120; threshHiFreq = 20;
+    threshRMS = 95; threshPP = 145;
     ltsaContrast = 180; ltsaBright = 73;
     dfManual = 100;
     minBout = 75;
@@ -153,6 +155,12 @@ if isfield(spParamsUser,'threshRMS')
     spParams.threshRMS = spParamsUser.threshRMS; 
 else
     spParams.threshRMS = threshRMS;
+end
+
+if isfield(spParamsUser,'threshPP')
+    spParams.threshPP = spParamsUser.threshPP; 
+else
+    spParams.threshPP = threshPP;
 end
 
 if isfield(spParamsUser,'threshHiFreq')

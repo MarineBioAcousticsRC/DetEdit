@@ -97,7 +97,6 @@ else
     return
 end
 
-
 if ~exist('lpn','var')
     disp('Select Directory with LTSA');
     lpn = uigetdir('I:\','Select Directory with LTSAs');

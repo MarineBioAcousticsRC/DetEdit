@@ -412,6 +412,7 @@ yell = [];
 blag = 0;
 %% Main Loop
 % loop over the number of bouts (sessions)
+onerun = 1;
 while (k <= nb)
     disp([' BEGIN SESSION: ',num2str(k)]);
     % load in FD, MD and TD each session in case these have been modified
@@ -459,18 +460,30 @@ while (k <= nb)
         
         % apply RMS threshold to figure (51)
         if (p.threshRMS > 0)
+            if onerun == 1
             if p.threshPP > 0
                 badClickTime = clickTimes(pxmspAll < p.threshRMS & xmppAll' < p.threshPP);  % for all false if below RMS threshold
                 disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
                 zFD = [zFD; badClickTime];   % cummulative False Detection matrix
                 save(fnameFD,'zFD')
                 xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
+                onerun = onerun+1;
             else
                 badClickTime = clickTimes(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
                 disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
                 zFD = [zFD; badClickTime];   % cummulative False Detection matrix
                 save(fnameFD,'zFD')
                 xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
+                onerun = onerun+1;
+            end
+            else
+            if p.threshPP > 0
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
+                onerun = onerun+1;
+            else
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
+                onerun = onerun+1;
+            end                
             end
             hold(h51,'on');
             plot(h51,xtline,ytline,'r')
@@ -988,6 +1001,7 @@ while (k <= nb)
         if k ~= 1
             k = k-1;
         end
+        onerun = 1;
     elseif strcmp(cc,'f') % assign ALL as false
         disp(['Number of False Detections Added = ',num2str(length(trueTimes))])
         if ~isempty(zID)
@@ -1031,6 +1045,7 @@ while (k <= nb)
         if (kjump > 0 && kjump < nb)
             k = kjump;
         end
+        onerun = 1;
            
     elseif (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
         [zFD,zTD] = test_false_dets(XFD,k,zTD,zFD,xt,xPP,ixfd,ft,trueSpec,flowt,...
@@ -1044,6 +1059,7 @@ while (k <= nb)
           
     else
         k = k+1;  % move forward one bout
+        onerun = 1;
     end
     
     % after edits, remove duplicate labels and save updated vectors

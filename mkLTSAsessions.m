@@ -72,7 +72,7 @@ elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
     spe = 'BW31';  tfselect = 40200; % freq used for transfer function
 elseif strcmpi(sp,'De')
     %specchar = 'D'; %Simone abbreviations for BW species
-    spe = 'Delphin';  tfselect = 0; % freq used for transfer function
+    spe = '';  tfselect = 0; % freq used for transfer function
 elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
     %specchar = 'D'; %Simone abbreviations for BW species
     spe = 'Porpoise';  tfselect = 0; % freq used for transfer function
@@ -112,7 +112,7 @@ end
 detpn = [sdir,'\'];
 
 % detfn = [stn,dpn,'_',spe,'_TPWS2.mat'];
-detfn = [stn,dpn,'_',dsk,spe,'_TPWS',itnum,'.mat'];
+detfn = [stn,dpn,'_',dsk,spe,'TPWS',itnum,'.mat'];
 fn = fullfile(detpn,detfn);
 A1 = exist(fn,'file');
 if A1 ~= 2
@@ -144,7 +144,7 @@ else
 end
 % LTSA session output file
 lspn = detpn;
-lsfn = [sdn,'_',dsk,spe,'_LTSA',itnum,'.mat'];
+lsfn = [sdn,'_',dsk,spe,'LTSA',itnum,'.mat'];
 %lsfn = [sdn,'_',spe,'_LTSA.mat'];
 fn2 = fullfile(lspn,lsfn);
 
@@ -226,6 +226,10 @@ dt = diff(ct)*24*60*60; % time between detections
 %                           convert from days to seconds
 % I = [];
 I = find(dt>gt);  % find start of gaps
+
+if isempty(ct) % Catch in case there are no detections.
+    return
+end
 sb = [ct(1);ct(I+1)];   % start time of bout
 eb = [ct(I);ct(end)];   % end time of bout
 % dd = ct(end)-ct(1);     % deployment duration [d]

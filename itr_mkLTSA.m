@@ -7,11 +7,11 @@ clearvars
 clear global
 % setup info - modify to fit your site, species and path
 stn = 'MC'; % sitename
-dpn = '03'; % deployment code
+dpn = '01'; % deployment code
 sp = 'De'; % your species code
 itnum = 2; % which iteration you are looking for
-LTSApath = 'D:\ltsa\MC\MC03'; % directory containing all LTSAs for this deployment
-tpwsPath = 'F:\GOM_clickTypePaper_detections\TPWS\MC01_02_03_TPWS\FP_rate_set'; %directory of TPWS files
+LTSApath = 'G:\ltsa\MC\MC01'; % directory containing all LTSAs for this deployment
+tpwsPath = 'I:\MC\MC01_TPWS2'; %directory of TPWS files
 
 
 

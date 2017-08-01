@@ -61,7 +61,7 @@ if strcmp(num2str(fname),'0')
     disp('Cancelled TF File');
     return
 else %give feedback
-    disp(['TF FilI: ',tffn]);
+    disp(['TF File: ',tffn]);
 end
 fid = fopen(tffn);
 [A,count] = fscanf(fid,'%f %f',[2,inf]);

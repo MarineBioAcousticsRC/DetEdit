@@ -1,3 +1,4 @@
+
 % itr_mkLTSA.m
 % Iterates over a directory of TPWS files and calls mkLTSAsessions for each
 % one.
@@ -5,12 +6,12 @@
 clearvars
 clear global
 % setup info - modify to fit your site, species and path
-stn = 'GofMX_'; % sitename
-dpn = 'DT06'; % deployment code
+stn = 'MC'; % sitename
+dpn = '03'; % deployment code
 sp = 'De'; % your species code
-itnum = 1; % which iteration you are looking for
-LTSApath = 'D:\DTmetadata\DT_postDecompFix\LTSAs'; % directory containing all LTSAs for this deployment
-tpwsPath = 'D:\DTmetadata\DT_postDecompFix\DT08\TPWS'; %directory of TPWS files
+itnum = 2; % which iteration you are looking for
+LTSApath = 'D:\ltsa\MC\MC03'; % directory containing all LTSAs for this deployment
+tpwsPath = 'F:\GOM_clickTypePaper_detections\TPWS\MC01_02_03_TPWS\FP_rate_set'; %directory of TPWS files
 
 
 

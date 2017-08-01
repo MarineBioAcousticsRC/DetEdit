@@ -17,13 +17,8 @@ sp = 'Pm'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
-<<<<<<< HEAD
 sdir = 'E:\TPWS'; %Directory with TPWS files
 tfName = 'C:\Users\Alba\Documents\MATLAB\transfer_functions'; % Directory ...
-=======
-sdir = 'E:\JAH\Pm\TPWS'; %Directory with TPWS files
-tfName = 'E:\Harp_TF'; % Directory ...
->>>>>>> dc9eb1611ef3cf08f77e270082f15b6d63a12dce
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
 
@@ -48,17 +43,10 @@ spParamsUser.ltsaLims = [0,100]; % min and max ylimits in kHz for ltsa plot
 spParamsUser.ltsaMax = 6; % ltsa maximum duration per session
 spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 % spParamsUser.specChar = 'Unk';  %Simone abbreviation for species
-<<<<<<< HEAD
 % spParamsUser.speName = 'Pm';  % Species code used in file names 
 % spParamsUser.dtHi = .3; % max yaxis value for IPI display in sec
-% % spParamsUser.fLow = 5; % boundary for spectrum plot
-% spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
-=======
-% spParamsUser.speName = 'Delphin';  % Species code used in file names 
-%spParamsUser.dtHi = .3; % max yaxis value for IPI display in sec
 % spParamsUser.fLow = 5; % boundary for spectrum plot
-%spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
->>>>>>> dc9eb1611ef3cf08f77e270082f15b6d63a12dce
+% spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
 % spParamsUser.threshRMS = 126; % RMS threshold cutoff
 % spParamsUser.threshHiFreq = 30; % high freq cutoff for clicks
 % spParamsUser.ltsaContrast = 116; % ltsa contrast
@@ -69,8 +57,9 @@ spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no a
 % spParamsUser.dfManual = []; % LTSA step size in 10 [Hz] bins
 % spParamsUser.p1Low = thresRL - 5;
 % spParamsUser.p1Hi = 170;
-% spParamsUser.minBout = 75;
-
+% spParamsUser.minBout = 75; % minimum bout duration in seconds
+% spParamsUser.minSpectralFreq = 10;% in kHz
+% spParamsUser.maxSpectralFreq = 70; % in kHz
 
 %%%%%%%% other preferences - modify with care %%%%%%%%%%
 specploton = 1; %1 = yes spec plot 0 = no spec plot

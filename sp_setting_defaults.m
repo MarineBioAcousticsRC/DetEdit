@@ -1,4 +1,4 @@
-function spParams = sp_setting_defaults(sp,spParamsUser)
+function spParams = sp_setting_defaults(sp,spParamsUser,srate)
 % Establish basic parameter settings, then update for species
 % specific defaults, and user preferences.
 % Pulled into subroutine kf 10/4/2016
@@ -23,6 +23,7 @@ rlHi = 170; % PP plot window high limit
 dfManual = []; % LTSA step size in 10 [Hz] bins
 p1Low = threshRL - 5;
 p1Hi = 170; % ??
+minSpectralFreq = 0; 
 minBout = [];
 slope = 1;
 
@@ -239,4 +240,27 @@ if isfield(spParamsUser,'slope')
     spParams.slope = spParamsUser.slope;
 else
     spParams.slope = slope;
+end
+if isfield(spParamsUser,'minSpectralFreq')
+    spParams.minSpectralFreq = spParamsUser.minSpectralFreq;
+else
+    spParams.minSpectralFreq = minSpectralFreq;
+end
+
+if isfield(spParamsUser,'maxSpectralFreq')
+    spParams.maxSpectralFreq = spParamsUser.maxSpectralFreq;
+else
+    spParams.maxSpectralFreq = srate/2; % set it later based on sample rate.
+end
+
+if isfield(spParamsUser,'minSpectralFreq')
+    spParams.minSpectralFreq = spParamsUser.minSpectralFreq;
+else
+    spParams.minSpectralFreq = minSpectralFreq;
+end
+
+if isfield(spParamsUser,'maxSpectralFreq')
+    spParams.maxSpectralFreq = spParamsUser.maxSpectralFreq;
+else
+    spParams.maxSpectralFreq = srate/2; % set it later based on sample rate.
 end

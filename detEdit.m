@@ -19,7 +19,7 @@ clearvars
 spParamsUser = [];
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings
+detEdit_settings_kf
 
 
 %% Get user input
@@ -41,9 +41,9 @@ elseif ~exist('sdir','var')% Get Directory with Detections
     sdir = uigetdir('I:\','Select Directory with Detections');
 end
 
-% Get parameter settings worked out between user preferemces, defaults, and
+% Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
-p = sp_setting_defaults(sp,spParamsUser);
+p = sp_setting_defaults(sp,spParamsUser,srate);
 
 gt = gth*60*60;    % gap time in sec
 sdn = [stn,dpn];    % site name and deployment number
@@ -68,16 +68,17 @@ if p.tfSelect > 0
         disp('Load Transfer Function File');
         [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
         tffn = fullfile(pname,fname);
-        if strcmp(num2str(fname),'0')
-            disp('Cancelled TF File');
-            return
-        end
     else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(stn,'_'); % get only station and deployment
         tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
     end
-    disp(['TF File: ',tffn]);
     
+    if strcmp(num2str(fname),'0')
+        disp('Cancelled TF File');
+        return
+    else %give feedback
+        disp(['TF File: ',tffn]);
+    end
     fid = fopen(tffn);
     [A,count] = fscanf(fid,'%f %f',[2,inf]);
     tffreq = A(1,:);
@@ -90,7 +91,6 @@ else
     tf = 0;
     disp('No TF Applied');
 end
-
 %% Generate FD, TD, and ID files if needed
 
 % Name and build false detection file
@@ -163,7 +163,6 @@ end
 
 [r,c] = size(MTT); %get shape of array
 if (r > c)
-    %clickTimes = []; clickLevels = [];
     clickTimes = MTT(ia1);
     clickLevels = MPP(ia1);
 else
@@ -324,12 +323,24 @@ else
 end
 
 %% Set up Tests for False Detections
-ixfd = (1: c4fd : length(clickTimes));  % selected to test for False Det
+% The false positive estimate tool picks every Nth click to test. If you
+% have false positives in zFD, you can pick out only the true ones to
+% determine which click indices to look at (that happens just below),
+% but if the user then adds or removes anything from zFD, the indices won't
+% adjust. Provide a warning to tell the user there might be an issue.
+if ~isempty(zFD)
+    disp(strcat('WARNING: This dataset contains false-flagged detections.  ', ...
+        ' It is recommended that you remove them using modDet prior to ',...
+        'estimating false positive rate.'))
+end
+[~,trueClickIDx] = setdiff(clickTimes, zFD);
+ixfd = (1: c4fd : length(trueClickIDx));  % selected to test for False Det
+testClickIdx = trueClickIDx(ixfd);
 
 A6 = exist(fnameTD,'file');
 if (A6 ~= 2)
     zTD = -1.*ones(nb,4);
-    save(fnameTD,'zTD');    % create new FD
+    save(fnameTD,'zTD');    % create new TD
     disp(' Make new TD file');
 else
     load(fnameTD)
@@ -341,6 +352,7 @@ end
 
 
 %% Compute Spectra Plot Parameters
+% max and min for LTSA frequency
 fimin = 0;% TODO: make this configurable
 fimax = srate/2 ; % in kHz 100 or 160 kHz
 
@@ -387,7 +399,8 @@ if specploton
         fprintf('No freq vector in TPWS file. Using approximation based on sample rate.\n')
     end
     % find the indices that are in the range of interest
-    fi = find(fmsp > fimin & fmsp <= fimax);
+    fi = find(fmsp > p.minSpectralFreq &...
+        fmsp <= p.maxSpectralFreq);
     fimint = fi(1); fimaxt = fi(end);
     % find index of first bin above min freq boundary
     flowt = find(fmsp > p.fLow,1,'first');
@@ -410,9 +423,16 @@ cc = ' ';  % avoids crash when first bout too short
 k = kstart;
 yell = [];
 blag = 0;
+if (size(zTD,2) == 2) % this seems to patch on extra columns
+    % to old zTD matrices that maybe only had the first two. Probably
+    % only needed for backward compatibility
+    zTD = [zTD,-1.*ones(length(zTD),2)];
+    save(fnameTD,'zTD');
+end
 %% Main Loop
 % loop over the number of bouts (sessions)
-onerun = 1;
+onerun = 1; % What does this do?
+
 while (k <= nb)
     disp([' BEGIN SESSION: ',num2str(k)]);
     % load in FD, MD and TD each session in case these have been modified
@@ -420,11 +440,6 @@ while (k <= nb)
     load(fnameID); % brings in zID
     load(fnameMD); % brings in zMD
     load(fnameTD); % brings in zTD
-    
-    if (length(zTD(1,:)) == 2)
-        zTD = [zTD,-1.*ones(length(zTD),2)];
-        save(fnameTD,'zTD');
-    end
     
     % If all time series are loaded:
     % Make PP versus RMS plot for all clicks, if all time series are loaded
@@ -443,7 +458,7 @@ while (k <= nb)
     
     if specploton && loadMSP
         xmsp0All = csp + repmat(Ptfpp,size(csp,1),1);
-        [xmspAll,im] = max(xmsp0All(:,flowt:fimaxt),[],2); % maximum between flow-100kHz
+        [xmspAll,im] = max(xmsp0All(:,fimint:fimaxt),[],2); % maximum between flow-100kHz
         
         % calculate peak-to-peak amplitude including transfer function
         xmppAll = clickLevels'-tf+ Ptfpp(im + flowt-1); % vectorized version
@@ -462,18 +477,15 @@ while (k <= nb)
         if (p.threshRMS > 0)
             if onerun == 1
                 if p.threshPP > 0
-                    badClickTime = clickTimes(pxmspAll < p.threshRMS & xmppAll' < p.threshPP);  % for all false if below RMS threshold
-                    disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
-                    zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-                    save(fnameFD,'zFD')
-                    xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
+                    badClickTime = clickTimes(pxmspAll < p.threshRMS &...
+                        xmppAll' < p.threshPP);  % for all false if below RMS threshold
                 else
-                    badClickTime = clickTimes(pxmspAll < p.threshRMS);  % for all false if below RMS threshold
+                    badClickTime = clickTimes(pxmspAll < p.threshRMS);  
+                end
                     disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
                     zFD = [zFD; badClickTime];   % cummulative False Detection matrix
                     save(fnameFD,'zFD')
                     xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
-                end
             else
                 if p.threshPP > 0
                     xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
@@ -517,7 +529,8 @@ while (k <= nb)
     % find detections and false detections within this bout (session)
     J = []; JFD =[]; Jtrue = []; XFD = []; JID = [];
     J = find(clickTimes >= sb(k) & clickTimes <= eb(k));
-    if specploton && loadMSP % have to load consecutive detections if reading from disk
+    if specploton && loadMSP
+        % have to load consecutive detections if reading from disk
         J = J(1):J(end);
         csnJ = csn(J,:);
         cspJ = csp(J,:);
@@ -527,7 +540,8 @@ while (k <= nb)
     end
     
     % get indices  of test clicks in this session
-    XFD = find(clickTimes(ixfd) >= sb(k) & clickTimes(ixfd) <= eb(k));
+    XFD = find(clickTimes(testClickIdx) >= sb(k) &...
+        clickTimes(testClickIdx) <= eb(k));
     zTD(k,1) = length(XFD);
     
     % Test for XFD and strcmp('x or z or w') - if no test points skip
@@ -543,8 +557,8 @@ while (k <= nb)
         t = clickTimes(J); % detection times in this session
         disp([' Detection times:',num2str(length(t))]);
         if (~isempty(XFD))
-            xt = clickTimes(ixfd(XFD));  %times to test for False Detection
-            xPP = clickLevels(ixfd(XFD));   %amplitude for test False Detection
+            xt = clickTimes(testClickIdx(XFD));  %times to test for False Detection
+            xPP = clickLevels(testClickIdx(XFD));   %amplitude for test False Detection
             disp([' Test False Detection times:',num2str(zTD(k,1))]),
         else
             xt = [];
@@ -627,8 +641,10 @@ while (k <= nb)
         JID = J(K3);
         JMD = J(K4);
         JFIM = union(union(JFD,JID),JMD);
+        JFM = union(JFD,JMD); 
         [Jtrue,iJ,~]= setxor(J,JFIM); % find all true detections
-        trueTimes = clickTimes(Jtrue);% vector of true times in this session
+        [JtrueWithID,~,~]= setxor(J,JFM); % find all true detections no ID
+        trueTimes = clickTimes(JtrueWithID);% vector of true times in this session
         
         if specploton
             cspJtrue = cspJ(iJ,:); % true spectra in this session
@@ -697,9 +713,10 @@ while (k <= nb)
         h50 = gca;
         figure(52);clf;set(52,'name','Waveform')
         h52 = gca;
+        trueSpec = [];   
         if ~isempty(trueTimes)
             % plot average true click spectrum
-            trueSpec = norm_spec_simple(cspJtrue,flowt,fimint,fimaxt);
+            trueSpec = norm_spec_simple(cspJtrue,fimint,fimaxt);
             plot(h50,ft,trueSpec(fimint:fimaxt),'Linewidth',4)
             % average true click waveform
             plot(h52, wtrue);
@@ -707,7 +724,7 @@ while (k <= nb)
             disp(['No true with at least ',num2str(minNdet),' detections'])
         end
         if ff2   % average false click spec
-            SPEC2 = norm_spec_simple(specFD, flowt, fimint, fimaxt);
+            SPEC2 = norm_spec_simple(specFD,fimint,fimaxt);
             % plot average false click spectrum
             hold(h50, 'on')
             plot(h50,ft,SPEC2(fimint:fimaxt),'r','Linewidth',4)
@@ -720,7 +737,7 @@ while (k <= nb)
         if ff3  % average id click spec
             specID_norm = [];
             for iSpec = 1:size(specID,1)
-                specID_norm(iSpec,:) = norm_spec_simple(specID(iSpec,:), flowt, fimint, fimaxt);
+                specID_norm(iSpec,:) = norm_spec_simple(specID(iSpec,:),fimint,fimaxt);
             end
             % plot average ID'd click spectra
             hold(h50, 'on')
@@ -739,7 +756,7 @@ while (k <= nb)
             
         end
         if ff4   % average false click spec
-            SPEC4 = norm_spec_simple(specMD, flowt, fimint, fimaxt);
+            SPEC4 = norm_spec_simple(specMD,fimint,fimaxt);
             % plot average false click spectrum
             hold(h50, 'on')
             plot(h50,ft,SPEC4(fimint:fimaxt),'g','Linewidth',4)
@@ -754,7 +771,7 @@ while (k <= nb)
         % for all detections in this session, calculate xmpp and xmsp
         xmsp0 = cspJ + repmat(Ptfpp,size(cspJ,1),1); % add transfer fun to session's spectra
         [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2);
-        xmpp = RL' - tf + Ptfpp(im + flowt - 1);
+        xmpp = RL' - tf + Ptfpp([im + flowt - 1]);
         
         % turn diagonal to vertical
         if ~isempty(xmsp) && ~isempty(xmpp)
@@ -787,7 +804,7 @@ while (k <= nb)
         
         % Plot RMS vs frequency plot for this session
         hold(h53, 'on')
-        freq = fmsp(im + flowt -1);
+        freq = fmsp(im + fimint -1);
         plot(h53,pxmsp,freq,'.','UserData',t) % true ones in blue
         if ff2 % false in red
             plot(h53,pxmsp(K2),freq(K2),'r.','UserData',t(K2))
@@ -815,7 +832,7 @@ while (k <= nb)
     grid(h50,'on')
     xlim(h50, 'manual');
     ylim(h50,[0 1]);
-    xlim(h50,[fmsp(1),fmsp(end)])
+    xlim(h50,[p.minSpectralFreq,p.maxSpectralFreq]) 
     
     xlabel(h51,'dB RMS')
     ylabel(h51,'dB Peak-to-peak')
@@ -950,7 +967,7 @@ while (k <= nb)
         
         hold(h50,'on') % add click to spec plot in BLACK
         cspJy = mean(cspJ(yell,:),1);
-        tSPEC = norm_spec_simple(cspJy, flowt,fimint,fimaxt);
+        tSPEC = norm_spec_simple(cspJy,fimint,fimaxt);
         plot(h50,ft,tSPEC(:,fimint:fimaxt),'k','Linewidth',4);
         hold(h50,'off')
         
@@ -1057,10 +1074,56 @@ while (k <= nb)
         onerun = 1;
         
     elseif (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
-        [zFD,zTD] = test_false_dets(XFD,k,zTD,zFD,xt,xPP,ixfd,ft,trueSpec,flowt,...
-            fimint,fimaxt,csn,csp,loadMSP,specploton);
-        k = k+1;
-        
+                if ~isempty(XFD)
+            zTD(k,2) = 0;
+            for inxfd = 1 : zTD(k,1)
+                axes(hA201(1))
+                hold on
+                testTimes = xt(inxfd);
+                plot(testTimes,xPP(inxfd),'ro','MarkerSize',10);
+                hold off
+                disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
+                if (specploton == 1)
+                    hold(h50,'on')  % add click to spec plot in BLACK
+                    plot(h50,ft,trueSpec(fi),'Linewidth',2);
+                    clickInBoutIdx = find(t==testTimes);
+                    testSnip = csnJtrue(clickInBoutIdx,:);
+                    testSpectrum = cspJtrue(clickInBoutIdx,:);
+
+                    
+                    % make low freq part = 0
+                    tempSPEC = norm_spec_simple(testSpectrum,fimint,fimaxt);
+                    xH0 = plot(h50,ft,tempSPEC(fimint:fimaxt),'k','Linewidth',4);
+                    hold(h50,'off')
+
+                    hold(h52,'on') % add click to waveform plot in BLACK
+                    xH2 = plot(h52,testSnip,'k');
+                    hold(h52,'off')
+                    
+                    hold(h51,'on')
+                    % get click index relative to bout 
+                    xH1 = plot(h51,pxmsp(clickInBoutIdx),xmpp(clickInBoutIdx),'ro','MarkerSize',10,...
+                        'LineWidth',2);
+                    hold(h51,'off')
+                    
+                    hold(h53,'on')
+                    xH3 = plot(h53,pxmsp(clickInBoutIdx),freq(clickInBoutIdx),'ro','MarkerSize',10,...
+                        'LineWidth',2);
+                    hold(h53,'off')
+                end
+                pause
+                cc = get(gcf,'CurrentCharacter');
+                if (strcmp(cc,'z'))
+                    zTD(k,2) = zTD(k,2) + 1;
+                    zFD = [zFD; xt(inxfd)]; % add to FD
+                end
+                delete([xH0,xH1,xH2,xH3])
+            end
+            disp([' Tested: ',num2str(zTD(k,1)),' False: ',...
+                num2str(zTD(k,2))]);
+           
+        end
+        k = k+1;    
     elseif (strcmp(cc,'w') && (zTD(k,2) > 0));  % test 5 min window
         % Test 5 min window
         zTD = test_false_bins(k,zTD,xt,xPP,binCX);

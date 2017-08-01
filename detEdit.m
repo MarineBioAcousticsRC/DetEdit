@@ -19,7 +19,7 @@ clearvars
 spParamsUser = [];
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings_kf
+detEdit_settings
 
 
 %% Get user input

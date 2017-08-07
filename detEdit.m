@@ -717,7 +717,7 @@ while (k <= nb)
         if ~isempty(trueTimes)
             % plot average true click spectrum
             trueSpec = norm_spec_simple(cspJtrue,fimint,fimaxt);
-            plot(h50,ft,trueSpec(fimint:fimaxt),'Linewidth',4)
+            plot(h50,ft,trueSpec,'Linewidth',4)
             % average true click waveform
             plot(h52, wtrue);
         else
@@ -727,7 +727,7 @@ while (k <= nb)
             SPEC2 = norm_spec_simple(specFD,fimint,fimaxt);
             % plot average false click spectrum
             hold(h50, 'on')
-            plot(h50,ft,SPEC2(fimint:fimaxt),'r','Linewidth',4)
+            plot(h50,ft,SPEC2,'r','Linewidth',4)
             hold(h50, 'off')
             % plot average false click waveform
             hold(h52, 'on')
@@ -741,7 +741,7 @@ while (k <= nb)
             end
             % plot average ID'd click spectra
             hold(h50, 'on')
-            hID = plot(h50,ft,specID_norm(:,fimint:fimaxt),'Linewidth',4);
+            hID = plot(h50,ft,specID_norm,'Linewidth',4);
             hold(h50, 'off')
             
             % plot average ID'd click waveform(s)
@@ -759,7 +759,7 @@ while (k <= nb)
             SPEC4 = norm_spec_simple(specMD,fimint,fimaxt);
             % plot average false click spectrum
             hold(h50, 'on')
-            plot(h50,ft,SPEC4(fimint:fimaxt),'g','Linewidth',4)
+            plot(h50,ft,SPEC4,'g','Linewidth',4)
             hold(h50, 'off')
             % plot average false click waveform
             hold(h52, 'on')
@@ -968,7 +968,7 @@ while (k <= nb)
         hold(h50,'on') % add click to spec plot in BLACK
         cspJy = mean(cspJ(yell,:),1);
         tSPEC = norm_spec_simple(cspJy,fimint,fimaxt);
-        plot(h50,ft,tSPEC(:,fimint:fimaxt),'k','Linewidth',4);
+        plot(h50,ft,tSPEC,'k','Linewidth',4);
         hold(h50,'off')
         
         hold(h51,'on')
@@ -1093,7 +1093,7 @@ while (k <= nb)
                     
                     % make low freq part = 0
                     tempSPEC = norm_spec_simple(testSpectrum,fimint,fimaxt);
-                    xH0 = plot(h50,ft,tempSPEC(fimint:fimaxt),'k','Linewidth',4);
+                    xH0 = plot(h50,ft,tempSPEC,'k','Linewidth',4);
                     hold(h50,'off')
 
                     hold(h52,'on') % add click to waveform plot in BLACK

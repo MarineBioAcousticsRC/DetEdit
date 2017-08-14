@@ -9,7 +9,8 @@ specChar = 'Unk';  %Simone abbreviation for species
 speName = 'Unknown';  % Species code used in file names 
 tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 dtHi = .5; % max yaxis value for IPI display in sec
-fLow = 5; % boundary for spectrum plot
+fLow = 0; % Minimum frequency of interest
+fHi = srate/2; % Maximum frequency of interest
 threshRL = 0; % minimum RL threshold in dB peak-to-peak
 threshRMS = 0; % default for < coommand, RMS threshold cutoff
 threshPP = 0; % default for : coommand, PP threshold cutoff
@@ -23,7 +24,6 @@ rlHi = 170; % PP plot window high limit
 dfManual = []; % LTSA step size in 10 [Hz] bins
 p1Low = threshRL - 5;
 p1Hi = 170; % ??
-minSpectralFreq = 0; 
 minBout = [];
 slope = 1;
 
@@ -146,6 +146,13 @@ else
     spParams.fLow = fLow;
 end
 
+if isfield(spParamsUser,'fHi')
+    spParams.fHi = spParamsUser.fHi;
+else
+    spParams.fHi = fHi; % set it later based on sample rate.
+end
+
+
 if isfield(spParamsUser,'threshRL')
     spParams.threshRL = spParamsUser.threshRL; 
 else
@@ -241,26 +248,6 @@ if isfield(spParamsUser,'slope')
 else
     spParams.slope = slope;
 end
-if isfield(spParamsUser,'minSpectralFreq')
-    spParams.minSpectralFreq = spParamsUser.minSpectralFreq;
-else
-    spParams.minSpectralFreq = minSpectralFreq;
-end
 
-if isfield(spParamsUser,'maxSpectralFreq')
-    spParams.maxSpectralFreq = spParamsUser.maxSpectralFreq;
-else
-    spParams.maxSpectralFreq = srate/2; % set it later based on sample rate.
-end
 
-if isfield(spParamsUser,'minSpectralFreq')
-    spParams.minSpectralFreq = spParamsUser.minSpectralFreq;
-else
-    spParams.minSpectralFreq = minSpectralFreq;
-end
 
-if isfield(spParamsUser,'maxSpectralFreq')
-    spParams.maxSpectralFreq = spParamsUser.maxSpectralFreq;
-else
-    spParams.maxSpectralFreq = srate/2; % set it later based on sample rate.
-end

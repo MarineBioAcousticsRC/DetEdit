@@ -45,7 +45,9 @@ spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no a
 % spParamsUser.specChar = 'Unk';  %Simone abbreviation for species
 % spParamsUser.speName = 'Pm';  % Species code used in file names 
 % spParamsUser.dtHi = .3; % max yaxis value for IPI display in sec
-% spParamsUser.fLow = 5; % boundary for spectrum plot
+% spParamsUser.fLow = 5; % Minimum frequency of interest in kHz
+% spParamsUser.fHi = 10;%  Maximum frequency of interest in kHz
+
 % spParamsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
 % spParamsUser.threshRMS = 126; % RMS threshold cutoff
 % spParamsUser.threshHiFreq = 30; % high freq cutoff for clicks
@@ -58,7 +60,6 @@ spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no a
 % spParamsUser.p1Low = thresRL - 5;
 % spParamsUser.p1Hi = 170;
 % spParamsUser.minBout = 75; % minimum bout duration in seconds
-% spParamsUser.minSpectralFreq = 10;% in kHz
 % spParamsUser.maxSpectralFreq = 70; % in kHz
 
 %%%%%%%% other preferences - modify with care %%%%%%%%%%

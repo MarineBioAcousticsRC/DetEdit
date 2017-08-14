@@ -19,8 +19,7 @@ clearvars
 spParamsUser = [];
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings
-
+detEdit_settings_kf
 
 %% Get user input
 % and set up file names, if not provided by settings
@@ -59,7 +58,7 @@ end
 fnTPWS = fullfile(detpn,detfn);
 if exist(fnTPWS,'file') == 0
     fprintf('ERROR: No file named %s exists\n',fnTPWS)
-    break
+    return
 end
 %% Handle Transfer Function
 % add in transfer function if desired
@@ -353,8 +352,8 @@ end
 
 %% Compute Spectra Plot Parameters
 % max and min for LTSA frequency
-fimin = 0;% TODO: make this configurable
-fimax = srate/2 ; % in kHz 100 or 160 kHz
+fiminLTSA = 0;% TODO: make this configurable
+fimaxLTSA = srate/2 ; % in kHz 100 or 160 kHz
 
 % set ltsa step size
 iPwr = 1;
@@ -369,11 +368,11 @@ if any(strcmp('dfManual',fieldnames(p)))&& ~isempty(p.dfManual)
     % allow non-standard ltsa step sizes
     df = p.dfManual;
 else
-    df = 1000*fimax/(size(pwr{1,iPwr},1)-1);
+    df = 1000*fimaxLTSA/(size(pwr{1,iPwr},1)-1);
 end
 
 % for LTSA PLOT
-f = 1000*fimin:df:1000*fimax;
+f = 1000*fiminLTSA:df:1000*fimaxLTSA;
 if p.tfSelect > 0 % tfParams isn't being used...
     tfLTSA = interp1(tffreq,tfuppc,f,'linear','extrap')'; % add to LTSA vector
 else
@@ -399,11 +398,9 @@ if specploton
         fprintf('No freq vector in TPWS file. Using approximation based on sample rate.\n')
     end
     % find the indices that are in the range of interest
-    fi = find(fmsp > p.minSpectralFreq &...
-        fmsp <= p.maxSpectralFreq);
+    fi = find(fmsp > p.fLow &...
+        fmsp <= p.fHi);
     fimint = fi(1); fimaxt = fi(end);
-    % find index of first bin above min freq boundary
-    flowt = find(fmsp > p.fLow,1,'first');
     ft = fmsp(fi);
     
     % for the PP vs RMS plot
@@ -461,7 +458,7 @@ while (k <= nb)
         [xmspAll,im] = max(xmsp0All(:,fimint:fimaxt),[],2); % maximum between flow-100kHz
         
         % calculate peak-to-peak amplitude including transfer function
-        xmppAll = clickLevels'-tf+ Ptfpp(im + flowt-1); % vectorized version
+        xmppAll = clickLevels'-tf+ Ptfpp(im + fimint-1); % vectorized version
         % turn diagonal to vertical (easier way to find thresholds)
         if isrow(xmspAll)
             pxmspAll = xmspAll' - p.slope*(xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
@@ -500,7 +497,7 @@ while (k <= nb)
         end
         
         % plot RMS vs frequency plot, keeping RMS vertical like in fig(51)
-        freqAll = fmsp(im + flowt-1);
+        freqAll = fmsp(im + fimint-1);
         plot(h53,pxmspAll,freqAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
         title(h53,['Based on total of ',num2str(length(freqAll)),' clicks']);
         % apply High Frequency threshold to figure (53)
@@ -683,7 +680,7 @@ while (k <= nb)
         k = k + 1;  % go to next
         continue
     end
-    if (strcmp(cc,'w') && (zTD(k,2) == 0));
+    if (strcmp(cc,'w') && (zTD(k,2) == 0))
         disp(['Session: ',num2str(k),' # Test Detect Bins: ',...
             num2str(length(binCX)),' but NO False']);
         zTD(k,3) = length(binCX);
@@ -703,12 +700,12 @@ while (k <= nb)
         PT(1) = sb(k) ; PT(2) = eb(k); % start end times for plots
         pwr1(1:length(f)) = ones; % make uniform LTSA
     else
-        pwr1 = pwr1((1000*fimin/df)+1:round(1000*fimax/df)+1,:);
+        pwr1 = pwr1((1000*fiminLTSA/df)+1:round(1000*fimaxLTSA/df)+1,:);
     end
     durS = PT(end) - PT(1);
     
     if specploton
-        % allSPEC = norm_spec(cspJ,flowt,fimint,fimaxt);
+        % allSPEC = norm_spec(cspJ,fimint,fimint,fimaxt);
         figure(50);clf;set(50,'name','Frequency Spectra')
         h50 = gca;
         figure(52);clf;set(52,'name','Waveform')
@@ -770,8 +767,8 @@ while (k <= nb)
         % Add detections of this session in figure 51 and 53
         % for all detections in this session, calculate xmpp and xmsp
         xmsp0 = cspJ + repmat(Ptfpp,size(cspJ,1),1); % add transfer fun to session's spectra
-        [xmsp,im] = max(xmsp0(:,flowt:fimaxt),[],2);
-        xmpp = RL' - tf + Ptfpp([im + flowt - 1]);
+        [xmsp,im] = max(xmsp0(:,fimint:fimaxt),[],2);
+        xmpp = RL' - tf + Ptfpp([im + fimint - 1]);
         
         % turn diagonal to vertical
         if ~isempty(xmsp) && ~isempty(xmpp)
@@ -832,7 +829,7 @@ while (k <= nb)
     grid(h50,'on')
     xlim(h50, 'manual');
     ylim(h50,[0 1]);
-    xlim(h50,[p.minSpectralFreq,p.maxSpectralFreq]) 
+    xlim(h50,[p.fLow,p.fHi]) 
     
     xlabel(h51,'dB RMS')
     ylabel(h51,'dB Peak-to-peak')

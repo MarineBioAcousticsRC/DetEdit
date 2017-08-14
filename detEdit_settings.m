@@ -60,7 +60,6 @@ spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no a
 % spParamsUser.p1Low = thresRL - 5;
 % spParamsUser.p1Hi = 170;
 % spParamsUser.minBout = 75; % minimum bout duration in seconds
-% spParamsUser.maxSpectralFreq = 70; % in kHz
 
 %%%%%%%% other preferences - modify with care %%%%%%%%%%
 specploton = 1; %1 = yes spec plot 0 = no spec plot

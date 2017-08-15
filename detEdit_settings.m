@@ -18,7 +18,7 @@ sp = 'Pm'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
 sdir = 'E:\TPWS'; %Directory with TPWS files
-tfName = 'C:\Users\Alba\Documents\MATLAB\transfer_functions'; % Directory ...
+tfName = 'C:\MATLAB\transfer_functions'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
 
@@ -65,7 +65,12 @@ spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no a
 specploton = 1; %1 = yes spec plot 0 = no spec plot
 gth = .5;    % gap time in hrs between sessions
 minNdet = 1; % minimum number of detections per session. Sessions with fewer than this will be skipped
-maxDetLoad = []; % [] - read all or 4e5 - the number of detections above 
+maxDetLoad = 4e5; % [] - read all or 4e5 - the number of detections above 
 % which you want to read from disk instead of loading all spectra and 
 % timeseries into memory this is for large files (e.g. dolphin click detections)
-
+% if maxDetLoad exist, plotaxes can be defined to keep the format of plot
+% 51 and 53
+% plotaxes.minRMS = 60;
+% plotaxes.maxRMS = 130;
+% plotaxes.minPP = 120;
+% plotaxes.maxPP = 180;

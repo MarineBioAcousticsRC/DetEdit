@@ -784,6 +784,17 @@ while (k <= nb)
         % Plot  PP versus RMS Plot for this session
         hold(h51, 'on')
         plot(h51,pxmsp,xmpp,'.','UserData',t)% true ones in blue
+        if ~loadMSP % plot threshold line now because no background data
+            if p.threshPP > 0 && exist('plotaxes','var')
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ plotaxes.minPP,p.threshPP];
+            elseif p.threshPP > 0
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmpp),p.threshPP];
+            else
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmpp),max(xmpp)];
+            end
+            plot(h51,xtline,ytline,'r')
+        end
+        
         if ff2 % false in red
             plot(h51,pxmsp(K2),xmpp(K2),'r.','UserData',t(K2))
         end
@@ -803,6 +814,14 @@ while (k <= nb)
         hold(h53, 'on')
         freq = fmsp(im + fimint -1);
         plot(h53,pxmsp,freq,'.','UserData',t) % true ones in blue
+        if ~loadMSP
+            if p.threshHiFreq > 0 && exist('plotaxes','var')
+                xtline = [plotaxes.minRMS,plotaxes.maxRMS]; ytline = [p.threshHiFreq ,p.threshHiFreq];
+            elseif p.threshHiFreq > 0
+                xtline = [min(pxmsp),max(pxmsp)]; ytline = [p.threshHiFreq ,p.threshHiFreq];
+            end
+            plot(h53,xtline,ytline,'r')
+        end
         if ff2 % false in red
             plot(h53,pxmsp(K2),freq(K2),'r.','UserData',t(K2))
         end
@@ -833,12 +852,19 @@ while (k <= nb)
     
     xlabel(h51,'dB RMS')
     ylabel(h51,'dB Peak-to-peak')
+    if exist('plotaxes','var')
+        xlim(h51,[plotaxes.minRMS,plotaxes.maxRMS])
+        ylim(h51,[plotaxes.minPP,plotaxes.maxPP])
+    end
     
     xlabel(h52,'Time (1ms @ 200kHz)');
     ylabel(h52,' Normalized Amplitude');
     
     xlabel(h53,'dB RMS')
     ylabel(h53,'Peak Frequency (kHz)')
+    if exist('plotaxes','var')
+        xlim(h53,[plotaxes.minRMS,plotaxes.maxRMS])
+    end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % plots stuff now in figure(201)

@@ -482,13 +482,11 @@ while (k <= nb)
                     disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
                     zFD = [zFD; badClickTime];   % cummulative False Detection matrix
                     save(fnameFD,'zFD')
-                    xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
+            end
+            if p.threshPP > 0
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
             else
-                if p.threshPP > 0
-                    xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
-                else
-                    xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
-                end
+                xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),max(xmppAll)];
             end
             hold(h51,'on');
             plot(h51,xtline,ytline,'r')
@@ -507,19 +505,14 @@ while (k <= nb)
                 disp(['Number of Detections Below Freq threshold = ',num2str(length(badClickTime))])
                 zFD = [zFD; badClickTime];   % cummulative False Detection matrix
                 save(fnameFD,'zFD')
-                xtline = [min(pxmspAll),max(pxmspAll)]; ytline = [p.threshHiFreq ,p.threshHiFreq];
-                hold(h53,'on');
-                plot(h53,xtline,ytline,'r')
-                hold(h53,'off');
                 %p.threshHiFreq = 0;
             end
-        else
-            if (p.threshHiFreq > 0)
-                xtline = [min(pxmspAll),max(pxmspAll)]; ytline = [p.threshHiFreq ,p.threshHiFreq];
-                hold(h53,'on');
-                plot(h53,xtline,ytline,'r')
-                hold(h53,'off');
-            end
+        end
+        if (p.threshHiFreq > 0)
+            xtline = [min(pxmspAll),max(pxmspAll)]; ytline = [p.threshHiFreq ,p.threshHiFreq];
+            hold(h53,'on');
+            plot(h53,xtline,ytline,'r')
+            hold(h53,'off');
         end
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -640,8 +633,8 @@ while (k <= nb)
         JFIM = union(union(JFD,JID),JMD);
         JFM = union(JFD,JMD); 
         [Jtrue,iJ,~]= setxor(J,JFIM); % find all true detections
-        [JtrueWithID,~,~]= setxor(J,JFM); % find all true detections no ID
-        trueTimes = clickTimes(JtrueWithID);% vector of true times in this session
+        %[JtrueWithID,~,~]= setxor(J,JFM); % find all true detections no ID
+        trueTimes = clickTimes(Jtrue);% vector of true times in this session
         
         if specploton
             cspJtrue = cspJ(iJ,:); % true spectra in this session
@@ -784,7 +777,37 @@ while (k <= nb)
         % Plot  PP versus RMS Plot for this session
         hold(h51, 'on')
         plot(h51,pxmsp,xmpp,'.','UserData',t)% true ones in blue
+        
         if ~loadMSP % plot threshold line now because no background data
+            if (p.threshRMS > 0)
+                if onerun == 1
+                    if p.threshPP > 0
+                        badClickTime = t(pxmsp < p.threshRMS &...
+                            xmpp' < p.threshPP);  % for all false if below RMS threshold
+                    else
+                        badClickTime = t(pxmsp < p.threshRMS);
+                    end
+                    disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
+                    zFD = [zFD; badClickTime];   % cummulative False Detection matrix
+                    save(fnameFD,'zFD')
+                    if ~isempty(zFD) % get times and indices of false detections
+                        [tfd,K2,~] = intersect(t,zFD(:,1));
+                        rlFD = RL(K2);
+                    end
+                    if ~isempty(K2) % if this session contains false detections
+                        ff2 = 1; % set false flag to true
+                        if specploton
+                            wavFD = norm_wav(mean(csnJ(K2,:),1)); % calculate mean false time series
+                            specFD = cspJ(K2,:); % get set of false spectra
+                        end
+                        dtFD = dt(K2(1:end-1));
+                        disp([' False detections:',num2str(length(K2))])
+                    else
+                        ff2 = 0;
+                        disp(' No False Detections')
+                    end
+                end
+            end
             if p.threshPP > 0 && exist('plotaxes','var')
                 xtline = [p.threshRMS,p.threshRMS]; ytline = [ plotaxes.minPP,p.threshPP];
             elseif p.threshPP > 0
@@ -815,6 +838,30 @@ while (k <= nb)
         freq = fmsp(im + fimint -1);
         plot(h53,pxmsp,freq,'.','UserData',t) % true ones in blue
         if ~loadMSP
+            if onerun == 1
+                if (p.threshHiFreq > 0)
+                    badClickTime = t(freq > p.threshHiFreq);  % for all false if below RMS threshold
+                    disp(['Number of Detections Below Freq threshold = ',num2str(length(badClickTime))])
+                    zFD = [zFD; badClickTime];   % cummulative False Detection matrix
+                    save(fnameFD,'zFD')
+                    if ~isempty(zFD) % get times and indices of false detections
+                        [tfd,K2,~] = intersect(t,zFD(:,1));
+                        rlFD = RL(K2);
+                    end
+                    if ~isempty(K2) % if this session contains false detections
+                        ff2 = 1; % set false flag to true
+                        if specploton
+                            wavFD = norm_wav(mean(csnJ(K2,:),1)); % calculate mean false time series
+                            specFD = cspJ(K2,:); % get set of false spectra
+                        end
+                        disp([' False detections:',num2str(length(K2))])
+                        dtFD = dt(K2(1:end-1));
+                    else
+                        ff2 = 0;
+                        disp(' No False Detections')
+                    end
+                end
+            end
             if p.threshHiFreq > 0 && exist('plotaxes','var')
                 xtline = [plotaxes.minRMS,plotaxes.maxRMS]; ytline = [p.threshHiFreq ,p.threshHiFreq];
             elseif p.threshHiFreq > 0
@@ -1014,6 +1061,7 @@ while (k <= nb)
     yell = [];
     pause  % wait for user input.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    onerun = onerun+1;
     % get key stroke
     cc = get(gcf,'CurrentCharacter');
     if strcmp(cc,'u') || strcmp(cc,'g') || strcmp(cc,'y') || ...
@@ -1180,7 +1228,6 @@ while (k <= nb)
         
     end
     bFlag = 0;
-    onerun = onerun+1;
 end
 pause off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

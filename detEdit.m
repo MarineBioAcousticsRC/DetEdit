@@ -21,45 +21,33 @@ spParamsUser = [];
 % Load user input. Has to happen first so you know species.
 detEdit_settings
 
-%% Get user input
-% and set up file names, if not provided by settings
-if ~exist('stn','var')
-    stn = input('Enter Project Name (MC GC DT SOCAL): ','s'); % site name
-elseif~exist('dpn','var')
-    dpn = input('Enter Deployment number + site (01 02 ...): ','s'); % deployment number
-elseif~exist('itnum','var')
-    itnum = input('Enter Iteration number (1 2 ...): ','s');
-elseif~exist('srate','var')
-    srate = input('Enter sample rate in kHz (eg 200 or 320): ');
-elseif ~exist('sp','var')
-    sp = input('Enter Species: Zc Me BWG Md Ko De Po ','s');
-elseif ~exist('c4fd','var')
-    c4fd = input('Enter Interval to test for False Detections: ') ; %check 4 fd
-elseif ~exist('sdir','var')% Get Directory with Detections
-    disp('Select Directory with Detections');
-    sdir = uigetdir('I:\','Select Directory with Detections');
-end
-
+%% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
 p = sp_setting_defaults(sp,spParamsUser,srate);
 
-gt = gth*60*60;    % gap time in sec
-sdn = [stn,dpn];    % site name and deployment number
-
 %% Check if TPWS file exists
-
-detpn = [sdir,'\'];
+% Concatenate parts of file name
 if isempty(p.speName)
-    detfn = [stn,dpn,'TPWS',itnum,'.mat'];
+    detfn = [filePrefix,'.*','TPWS',itnum,'.mat'];
 else
-    detfn = [stn,dpn,p.speName,'_TPWS',itnum,'.mat'];
+    detfn = [filePrefix,'.*',p.speName,'_TPWS',itnum,'.mat'];
 end
-fnTPWS = fullfile(detpn,detfn);
-if exist(fnTPWS,'file') == 0
-    fprintf('ERROR: No file named %s exists\n',fnTPWS)
-    return
+% Get a list of all the files in the start directory
+fileList = cellstr(ls(sdir));
+% Find the file name that matches the filePrefix
+fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
+if isempty(fileMatchIdx)
+    % if no matches, throw error
+    error('No files matching filePrefix found!')
+elseif length(fileMatchIdx)>1 
+    % if more than one match, throw error
+    error('Multiple TPWS files match the filePrefix. Make the prefix more specific.')
 end
+
+matchingFile = fileList{fileMatchIdx};
+fnTPWS = fullfile(sdir,matchingFile);
+
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
@@ -93,8 +81,8 @@ end
 %% Generate FD, TD, and ID files if needed
 
 % Name and build false detection file
-ffn = strrep(detfn,'TPWS','FD');
-fnameFD = fullfile(detpn,ffn);
+ffn = strrep(matchingFile,'TPWS','FD');
+fnameFD = fullfile(sdir,ffn);
 AFD = exist(fnameFD,'file');
 if (AFD ~= 2) % if it doesn't exist, make it
     zFD(1,1) = 1;
@@ -103,14 +91,14 @@ if (AFD ~= 2) % if it doesn't exist, make it
 end
 
 % Name true detection file
-tfn = strrep(detfn,'TPWS','TD');
-fnameTD = fullfile(detpn,tfn);
+tfn = strrep(matchingFile,'TPWS','TD');
+fnameTD = fullfile(sdir,tfn);
 % NOTE: TD file is made below because it depends on a later variable
 
 
 % Name and build ID file
-idfn = strrep(detfn,'TPWS','ID');
-fnameID = fullfile(detpn,idfn);
+idfn = strrep(matchingFile,'TPWS','ID');
+fnameID = fullfile(sdir,idfn);
 AID = exist(fnameID,'file');
 if (AID ~= 2)% if it doesn't exist, make it
     zID = [];
@@ -119,8 +107,8 @@ if (AID ~= 2)% if it doesn't exist, make it
 end
 
 % Name and build ID file
-mdfn = strrep(detfn,'TPWS','MD');
-fnameMD = fullfile(detpn,mdfn);
+mdfn = strrep(matchingFile,'TPWS','MD');
+fnameMD = fullfile(sdir,mdfn);
 AMD = exist(fnameMD,'file');
 if (AMD ~= 2)% if it doesn't exist, make it
     zMD = [];
@@ -258,7 +246,7 @@ end
 bFlag = 0;
 % find edges (start and end times) of bouts or sessions
 dt = diff(clickTimes)*24*60*60; % calculate time between detections in seconds
-
+gt = gth*60*60;    % gap time in sec
 I = find(dt>gt);  % find start of gaps
 sb = [clickTimes(1);clickTimes(I+1)];   % start time of bout
 eb = [clickTimes(I);clickTimes(end)];   % end time of bout
@@ -303,8 +291,8 @@ end
 disp(['Number Bouts : ',num2str(nb)])
 
 %% Make LTSA session file
-lsfn = strrep(detfn,'TPWS','LTSA');
-fnameLTSA = fullfile(detpn,lsfn);
+lsfn = strrep(matchingFile,'TPWS','LTSA');
+fnameLTSA = fullfile(sdir,lsfn);
 Altsa = exist(fnameLTSA,'file');
 if Altsa ~= 2
     disp(['Error: LTSA Sessions File Does Not Exist: ',fnameLTSA])

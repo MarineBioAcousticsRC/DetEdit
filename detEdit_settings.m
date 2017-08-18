@@ -9,8 +9,11 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-stn = 'GofMX_DT01_'; % site name
-dpn = 'disk01-08_'; % deployment number (or disk01-08)
+filePrefix = 'GofMX_DT01_disk01-08'; % File name to match. 
+% File prefix should include deployment, site, (disk is optional). 
+% Example: 
+% File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
+%                    -> filePrefix = 'GofMX_DT01_disk01-08'
 itnum = '1'; % iteration
 srate = 200; % sample rate
 sp = 'Pm'; % species code (can be: 'Ko' or 'k' (kogia);

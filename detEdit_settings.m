@@ -9,7 +9,7 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-filePrefix = 'GofMX_DT01_disk01-08'; % File name to match. 
+filePrefix = 'GofMX_DT02_disk03'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
@@ -21,7 +21,7 @@ sp = 'Pm'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
 sdir = 'E:\TPWS'; %Directory with TPWS files
-tfName = 'C:\Users\Alba\Documents\MATLAB\transfer_functions'; % Directory ...
+%tfName = 'E:\TF_files'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
 

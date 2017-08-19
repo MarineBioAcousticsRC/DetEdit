@@ -10,120 +10,51 @@ tic % start timer
 % set some parameters
 gth = .5;    % gap time in hrs between sessions
 gt = gth*60*60;    % gap time in sec
-ltsamax = 6; % length of ltsa window
-thres = 0;
-minBout = [];
 
 % get user input and set up file names
-dsk = [];
 n = 1;
 while n <= length(varargin)
     switch varargin{n}
-        case 'stn'
-            stn = varargin{n+1}; n=n+2;
-        case  'dpn'
-            dpn = varargin{n+1}; n=n+2;
-        case 'itnum'
-            itnum = varargin{n+1}; n=n+2;
+        case 'filePrefix'
+            filePrefix = varargin{n+1}; n=n+2;
+        case 'detfn'
+            detfn = varargin{n+1}; n=n+2;
         case 'sp'
             sp = varargin{n+1}; n=n+2;
         case 'lpn'
             lpn = varargin{n+1}; n=n+2;
-        case 'disk'
-            dsk = varargin{n+1}; n=n+2;
         case 'sdir'
             sdir = varargin{n+1}; n=n+2;
+        case 'srate'
+            srate = varargin{n+1}; n=n+2;
         otherwise
             error('Bad optional argument: "%s"', varargin{n});
     end
 end
 
-
-if ~exist('stn','var')
-    stn = input('Enter Project Name (MC GC DT HH JAX SOCAL): ','s'); % site name
-end
-if ~exist('dpn','var')
-    dpn = input('Enter Deployment number (01 02 11D ...): ','s'); % deployment number
-end
-if ~exist('itnum','var')
-    itnum = input('Enter Iteration number (1 2 ...): ','s');
-end
-if ~exist('sdn','var')
-    sdn = [stn,dpn];    % site name and deployment number
-end
-if ~exist('sp','var')
-    sp = input('Enter Species: Zc Me BWG Md Ko De ','s');
-end
-if (strcmp(sp,'Ko') || strcmp(sp,'k'))
-    specchar = 'K'; %Simone abbreviation for species
-    spe = 'Kogia';  tfselect = 80000; % freq used for transfer function
-elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
-    specchar = 'Z'; %Simone abbreviations for BW species
-    spe = 'Cuviers';  tfselect = 40200; % freq used for transfer function
-    thres = 121;
-elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
-    specchar = 'M'; %Simone abbreviations for BW species
-    spe = 'Gervais'; tfselect = 40200; % freq used for transfer function
-elseif (strcmp(sp,'BWG') || strcmp(sp,'g'))
-    specchar = 'G'; %Simone abbreviations for BW species
-    spe = 'BWG';  tfselect = 40200; % freq used for transfer function
-elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
-    specchar = 'D'; %Simone abbreviations for BW species
-    spe = 'BW31';  tfselect = 40200; % freq used for transfer function
-elseif strcmpi(sp,'De')
-    %specchar = 'D'; %Simone abbreviations for BW species
-    spe = '';  tfselect = 0; % freq used for transfer function
-elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
-    %specchar = 'D'; %Simone abbreviations for BW species
-    spe = 'Porpoise';  tfselect = 0; % freq used for transfer function
-    thres = 100;
-elseif strcmpi(sp,'MFA')
-    spe = 'MFA';  tfselect = 4000; % freq used for transfer function
-    ltsamax = .5; % length of ltsa window
-    thres = 80;
-elseif strcmpi(sp,'Dl')
-    spe = 'Beluga'; tfselect = 45000; %freq used for tf
-elseif strcmpi(sp,'whs')
-    spe = 'whs';  tfselect = 0; % freq used for transfer function
-    ltsamax = .5; % length of ltsa window
-    thres = 0;
-elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
-    spe = 'Pm'; tfselect = 0; %freq used for tf
-    thres = 120; % dB threshold
-    minDur = 60; % minimum window duration in minutes
-    minBout = 75; % minimum bout length
-else
-    disp(' Bad Species type')
-    return
-end
-
-if ~exist('lpn','var')
-    disp('Select Directory with LTSA');
-    lpn = uigetdir('I:\','Select Directory with LTSAs');
-end
-lpn = [lpn,'\'];
-% lpn = ['I:\JAH\ltsa\',stn,'\'];  % ltsa pathname
-% detection file
-if ~exist('sdir','var')
-    disp('Select Directory with Detections');
-    sdir = uigetdir('I:\','Select Directory with Detections');
-end
-% detpn = [sdir,['\',stn,'_',spe],'\'];
-detpn = [sdir,'\'];
-
-% detfn = [stn,dpn,'_',spe,'_TPWS2.mat'];
-detfn = [stn,dpn,'_',dsk,spe,'TPWS',itnum,'.mat'];
-fn = fullfile(detpn,detfn);
+fn = fullfile(sdir,detfn);
 A1 = exist(fn,'file');
 if A1 ~= 2
     disp(['Error: File Does Not Exist: ',fn])
     return
 end
+
+%% Load Settings preferences
+% Get parameter settings worked out between user preferences, defaults, and
+% species-specific settings:
+p = sp_setting_defaults(sp,srate);
+
 % user interface to get TF file
-if (tfselect > 0)
+if (p.tfSelect > 0)
     disp('Load Transfer Function');
-    [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
-    tffn = fullfile(pname,fname);
+    if ~exist('tfName','var')% user interface to get TF file
+        disp('Load Transfer Function File');
+        [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
+        tffn = fullfile(pname,fname);
+    else % or get it automatically from tf directory provided in settings
+        stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
+        tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
+    end
     if strcmp(num2str(fname),'0')
         disp('Cancelled TF File');
         return
@@ -136,17 +67,16 @@ if (tfselect > 0)
     tfuppc = A(2,:);
     fclose(fid);
     
-    tf = interp1(tffreq,tfuppc,tfselect,'linear','extrap');
-    disp(['TF @',num2str(tfselect),' Hz =',num2str(tf)]);
+    tf = interp1(tffreq,tfuppc,p.tfSelect,'linear','extrap');
+    disp(['TF @',num2str(p.tfSelect),' Hz =',num2str(tf)]);
 else
     tf = 0;
     disp('No TF Applied ');
 end
+
 % LTSA session output file
-lspn = detpn;
-lsfn = [sdn,'_',dsk,spe,'LTSA',itnum,'.mat'];
-%lsfn = [sdn,'_',spe,'_LTSA.mat'];
-fn2 = fullfile(lspn,lsfn);
+lsfn = strrep(detfn,'TPWS','LTSA');
+fn2 = fullfile(lpn,lsfn);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % load detections
@@ -170,24 +100,21 @@ else
 end
 % apply tf and remove low amplitude
 cl = cl + tf;
-ib = find(cl >= thres);
+ib = find(cl >= p.threshRL);
 disp([' Removed too low:',num2str(length(ia)-length(ib))]);
 ct = ct(ib);
 cl = cl(ib);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get ltsa file names for a specific site name and deployment number
-%d = dir([lpn,'GofMX_',sdn,'*']);
-if (strcmp(stn,'MC')|| strcmp(stn,'GC') || strcmp(stn,'DC') || ...
-        strcmp(stn,'DT') || strcmp(stn,'HH'))|| strcmp(stn,'MP')
-    d = dir([lpn,'GofMX_',sdn,'*.ltsa']);
-else
-    d = dir([lpn,sdn,'*.ltsa']);
-end
+d = dir(fullfile(lpn,[filePrefix,'*.ltsa']));
 fnames = char(d.name);
 nltsas = length(d);
+
 % load up rawfile start times
 doff = datenum([2000 0 0 0 0 0]);   % convert ltsa time to millenium time
-global PARAMS
+
+global hdr
 
 % make the variables that hold the ltsa header info persistent, in case
 % you are running itr_mkLTSA.m, this way you don't have to read the header
@@ -198,20 +125,11 @@ if isempty(sTime)
     if nltsas > 0
         sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
         disp('reading ltsa headers, please be patient ...')
-        
         for k = 1:nltsas
-            % for k = 1:2
-            PARAMS.ltsa.inpath = lpn;
-            PARAMS.ltsa.infile = fnames(k,:);
-            read_ltsahead_GoM
-            sTime(k) = PARAMS.ltsa.start.dnum + doff;  % start time of ltsa files
-            eTime(k) = PARAMS.ltsa.end.dnum + doff;    % end time of ltsa files
-            rfTime{k} = PARAMS.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
-        end
-        
-        % hack fix
-        if strcmp(sdn,'GC02')
-            eTime(2) = sTime(3);
+            hdr = ioReadLTSAHeader(fullfile(lpn,fnames(k,:)));
+            sTime(k) = hdr.ltsa.start.dnum + doff;  % start time of ltsa files
+            eTime(k) = hdr.ltsa.end.dnum + doff;    % end time of ltsa files
+            rfTime{k} = hdr.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
         end
         disp('done reading ltsa headers')
     else
@@ -237,15 +155,15 @@ nb = length(sb);        % number of bouts
 bd = (eb - sb);      % duration of bout in days
 
 % find bouts longer than the minimum
-if ~isempty(minBout)
-    bdI = find(bd > (minBout / (60*60*24)));
+if ~isempty(p.minBout)
+    bdI = find(bd > (p.minBout / (60*60*24)));
     bd = bd(bdI);
     sb = sb(bdI);
     eb = eb(bdI);
     nb = length(sb);        % number of bouts
 end
 % limit the length of a bout
-blim = ltsamax/24;       % 6 hr bout length limit
+blim = p.ltsaMax/24;       % 6 hr bout length limit
 ib = 1;
 while ib <= nb
     % disp([' ib = ',num2str(ib)]);
@@ -275,12 +193,12 @@ bd = (eb - sb);   %duration bout in sec
 disp(['Number Bouts : ',num2str(nb)])
 
 %Attempt to create a minimum bout duration
-if exist('minDur','var')
+if ~isempty(p.minDur)
     minbcount = 1;  %counter for while loop
     while minbcount <= nb
-        if bd(minbcount) <= (minDur/(60*24))
-            sb(minbcount) = sb(minbcount) - ((minDur./2)./(60*24)); %subtracts half minDur from end time
-            eb(minbcount) = eb(minbcount) + ((minDur./2)./(60*24)); %adds half minDur to end time
+        if bd(minbcount) <= (p.minDur/(60*24))
+            sb(minbcount) = sb(minbcount) - ((p.minDur./2)./(60*24)); %subtracts half p.minDur from end time
+            eb(minbcount) = eb(minbcount) + ((p.minDur./2)./(60*24)); %adds half p.minDur to end time
         end
         minbcount = minbcount + 1;
     end
@@ -288,8 +206,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 k = 1;
-% for debugging only
-% k = 200;fprintf('DEBUGGING VARIABLE IN PLACE, STARTING AT SESSIONS %d\n',k);
 % loop over the number of bouts (sessions)
 while (k <= nb)
     %      if eb(k) - sb(k) < 1 / (60*60*24)
@@ -312,20 +228,18 @@ while (k <= nb)
         if ~isempty(L)
             L = [L(1)-1,L]; % get rawfile from before sb(k)
             % grab the ltsa pwr matrix to plot
-            PARAMS.ltsa.inpath = lpn;
-            PARAMS.ltsa.infile = fnames(K,:);
-            read_ltsahead_GoM % get some stuff we'll need
-            nbin = length(L) * PARAMS.ltsa.nave(L(1));    % number of time bins to get
-            fid = fopen([PARAMS.ltsa.inpath,PARAMS.ltsa.infile],'r');
+            hdr = ioReadLTSAHeader(fullfile(lpn,fnames(K,:))); % get some stuff we'll need
+            nbin = length(L) * hdr.ltsa.nave(L(1));    % number of time bins to get
+            fid = fopen(fullfile(hdr.ltsa.inpath,hdr.ltsa.infile),'r');
             % samples to skip over in ltsa file
-            skip = PARAMS.ltsa.byteloc(L(1));
+            skip = hdr.ltsa.byteloc(L(1));
             fseek(fid,skip,-1);    % skip over header + other data
-            pwr{k} = fread(fid,[PARAMS.ltsa.nf,nbin],'int8');   % read data
+            pwr{k} = fread(fid,[hdr.ltsa.nf,nbin],'int8');   % read data
             fclose(fid);
             % make time vector
             t1 = rfTime{K}(L(1));
             dt = datenum([0 0 0 0 0 5]);
-            [ pt{k}, pwr{k} ] = padLTSAGaps(PARAMS, L,pwr{k});
+            [ pt{k}, pwr{k} ] = padLTSAGaps(hdr, L,pwr{k});
             %   pt{k} = [t1:dt:t1 + (nbin-1)*dt]; % does not account for duty
             %   cycle
         else
@@ -359,15 +273,13 @@ while (k <= nb)
         if ~isempty(Ls)
             Ls = [Ls(1)-1,Ls]; % get rawfile from before sb(k)
             % grab the ltsa pwr matrix to plot
-            PARAMS.ltsa.inpath = lpn;
-            PARAMS.ltsa.infile = fnames(Ks,:);
-            read_ltsahead_GoM % get some stuff we'll need
-            nbin = length(Ls) * PARAMS.ltsa.nave(Ls(1));    % number of time bins to get
-            fid = fopen([PARAMS.ltsa.inpath,PARAMS.ltsa.infile],'r');
+            hdr = ioReadLTSAHeader(fullfile(lpn,fnames(Ks,:))); % get some stuff we'll need
+            nbin = length(Ls) * hdr.ltsa.nave(Ls(1));    % number of time bins to get
+            fid = fopen(fullfile(hdr.ltsa.inpath,hdr.ltsa.infile),'r');
             % samples to skip over in ltsa file
-            skip = PARAMS.ltsa.byteloc(Ls(1));
+            skip = hdr.ltsa.byteloc(Ls(1));
             fseek(fid,skip,-1);    % skip over header + other data
-            pwrLs = fread(fid,[PARAMS.ltsa.nf,nbin],'int8');   % read data
+            pwrLs = fread(fid,[hdr.ltsa.nf,nbin],'int8');   % read data
             fclose(fid);
             % make time vector
             t1 = rfTime{Ks}(Ls(1));
@@ -376,15 +288,13 @@ while (k <= nb)
         end
         if ~isempty(Le)
             % grab the ltsa pwr matrix to plot
-            PARAMS.ltsa.inpath = lpn;
-            PARAMS.ltsa.infile = fnames(Ke,:);
-            read_ltsahead_GoM % get some stuff we'll need
-            nbin = length(Le) * PARAMS.ltsa.nave(Le(1));    % number of time bins to get
-            fid = fopen([PARAMS.ltsa.inpath,PARAMS.ltsa.infile],'r');
+            hdr = ioReadLTSAHeader(fullfile(lpn,fnames(Ke,:))); % get some stuff we'll need
+            nbin = length(Le) * hdr.ltsa.nave(Le(1));    % number of time bins to get
+            fid = fopen(fullfile(hdr.ltsa.inpath,hdr.ltsa.infile),'r');
             % samples to skip over in ltsa file
-            skip = PARAMS.ltsa.byteloc(Le(1));
+            skip = hdr.ltsa.byteloc(Le(1));
             fseek(fid,skip,-1);    % skip over header + other data
-            pwrLe = fread(fid,[PARAMS.ltsa.nf,nbin],'int8');   % read data
+            pwrLe = fread(fid,[hdr.ltsa.nf,nbin],'int8');   % read data
             fclose(fid);
             % make time vector
             t1 = rfTime{Ke}(Le(1));
@@ -424,14 +334,14 @@ end
 %%%%%%%%%                   Subroutines                           %%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-function [ pt, pwr ] = padLTSAGaps(PARAMS,L,pwr)
+function [ pt, pwr ] = padLTSAGaps(hdr,L,pwr)
 %
 % Takes LTSA raw file start times and returns a vector of start times for
 % the individual spectral averages.  Accounts for duty cycle
 %
 % pt = vector containing start times of spectral averages
 %
-% PARAMS = Struct containing LTSA metadata
+% hdr = Struct containing LTSA metadata
 % L = vector of raw file indexes
 %
 
@@ -440,15 +350,15 @@ mnum2secs = 24*60*60;
 Y2K = datenum([ 2000 0 0 0 0 0 ]);
 date_fmt = 'mm/dd/yy HH:MM:SS';
 
-rfStarts = PARAMS.ltsa.dnumStart(L) + Y2K;
+rfStarts = hdr.ltsa.dnumStart(L) + Y2K;
 diffRF_s = round(diff(rfStarts)*mnum2secs);
 rfDurs = unique(diffRF_s);
-nbin = length(L) * PARAMS.ltsa.nave(L(1));
+nbin = length(L) * hdr.ltsa.nave(L(1));
 t1 = rfStarts(1);
-dt_dnum = datenum([ 0 0 0 0 0 PARAMS.ltsa.tave ]);
-fs = PARAMS.ltsa.fs;
+dt_dnum = datenum([ 0 0 0 0 0 hdr.ltsa.tave ]);
+fs = hdr.ltsa.fs;
 
-rfdt = (PARAMS.ltsa.dnumEnd(1) - PARAMS.ltsa.dnumStart(1))*(24*60*60);
+rfdt = (hdr.ltsa.dnumEnd(1) - hdr.ltsa.dnumStart(1))*(24*60*60);
 % if fs == 200e3
 %     rfdt = 75; % 75 second raw file duration
 % else
@@ -471,7 +381,7 @@ if size(rfDurs, 2) > 1
     while rf <= length(L)
         if ismember(rf,gapsidx+1) % if there's a duty cycle or gap, pad pwr for later
             tdt = round((rfStarts(rf) - rfStarts(rf-1))*mnum2secs-rfdt);
-            numaves2pad = ceil(tdt/PARAMS.ltsa.tave);
+            numaves2pad = ceil(tdt/hdr.ltsa.tave);
             pwrpad = ones(nfreq,numaves2pad).*-128;
             gaveidx = length(pt); % last average before gap
             pwr = [ pwr(:,1:gaveidx), pwrpad, pwr(:,gaveidx+1:end)];

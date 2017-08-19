@@ -15,23 +15,20 @@ clearvars
 % utSetDesktopTitle('detEdit');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Load default settings
-spParamsUser = [];
-
 % Load user input. Has to happen first so you know species.
 detEdit_settings
 
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
-p = sp_setting_defaults(sp,spParamsUser,srate);
+p = sp_setting_defaults(sp,srate);
 
 %% Check if TPWS file exists
 % Concatenate parts of file name
 if isempty(p.speName)
     detfn = [filePrefix,'.*','TPWS',itnum,'.mat'];
 else
-    detfn = [filePrefix,'.*',p.speName,'_TPWS',itnum,'.mat'];
+    detfn = [filePrefix,'.*',p.speName,'.*TPWS',itnum,'.mat'];
 end
 % Get a list of all the files in the start directory
 fileList = cellstr(ls(sdir));
@@ -56,7 +53,7 @@ if p.tfSelect > 0
         [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
         tffn = fullfile(pname,fname);
     else % or get it automatically from tf directory provided in settings
-        stndeploy = strsplit(stn,'_'); % get only station and deployment
+        stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
         tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
     end
     

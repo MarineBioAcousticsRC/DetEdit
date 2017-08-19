@@ -5,29 +5,45 @@
 
 clearvars
 clear global
-% setup info - modify to fit your site, species and path
-stn = 'MC'; % sitename
-dpn = '01'; % deployment code
-sp = 'De'; % your species code
-itnum = 2; % which iteration you are looking for
-LTSApath = 'G:\ltsa\MC\MC01'; % directory containing all LTSAs for this deployment
-tpwsPath = 'I:\MC\MC01_TPWS2'; %directory of TPWS files
+filePrefix = 'GofMX_GC03'; % File name to match. 
+% File prefix should include deployment, site, (disk is optional). 
+% Example: 
+% File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
+%                    -> filePrefix = 'GofMX_DT01'
+sp = 'Pm'; % your species code
+itnum = '1'; % which iteration you are looking for
+srate = 200; % sample rate
+LTSApath = 'E:\LTSA\GC'; % directory containing all LTSAs for this deployment
+% LTSA folder should match the site specified in prefix
+tpwsPath = 'E:\TPWS'; %directory of TPWS files
+%tfName = 'E:\TF_files'; % Directory ...
+% with .tf files (directory containing folders with different series ...
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 % Find all TPWS files that fit your specifications (does not look in subdirectories)
-diskList = dir(fullfile(tpwsPath,[stn,dpn,'_*TPWS',num2str(itnum),'.mat']));
+% Concatenate parts of file name
+if isempty(sp)
+    detfn = [filePrefix,'.*','TPWS',itnum,'.mat'];
+else
+    detfn = [filePrefix,'.*',sp,'.*TPWS',itnum,'.mat'];
+end
+% Get a list of all the files in the start directory
+fileList = cellstr(ls(tpwsPath));
+% Find the file name that matches the filePrefix
+fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
+if isempty(fileMatchIdx)
+    % if no matches, throw error
+    error('No files matching filePrefix found!')
+end
 
 % for each TPWS file found, make LTSA.mat file
-for iD = 1:length(diskList);
-    % if there's any extra info in your file name, between the deployment
-    % code and species name (eg. disk number in dolphin detections), parse that out here. 
-    extraTextLoc = strfind(diskList(iD).name,dpn)+length(dpn)+1;
-    nextUscore = strfind(diskList(iD).name(extraTextLoc:end),'_');
-    dsk = diskList(iD).name(extraTextLoc:(extraTextLoc+nextUscore(1)-1));
+for iD = 1:length(fileMatchIdx);
+    matchingFile = fileList{fileMatchIdx(iD)};
+    detfn = dir(fullfile(tpwsPath,matchingFile));
     
-    mkLTSAsessions('stn', stn, 'dpn', dpn, 'disk',dsk,'itnum', num2str(itnum),...
-       'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath)
+    mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
+       'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate)
 end

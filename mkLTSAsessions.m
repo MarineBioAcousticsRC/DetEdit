@@ -76,7 +76,7 @@ end
 
 % LTSA session output file
 lsfn = strrep(detfn,'TPWS','LTSA');
-fn2 = fullfile(lpn,lsfn);
+fn2 = fullfile(sdir,lsfn);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % load detections

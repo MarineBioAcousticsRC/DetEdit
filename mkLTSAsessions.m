@@ -39,6 +39,14 @@ if A1 ~= 2
     return
 end
 
+% ltsa file for GOM are named with GofMX and without underscore, and tf as
+% well.
+% E.g. GOM_DT_09 -> ltsa is GofMX_DT09
+if findstr(detfn,'GOM')
+    unscores = strfind(filePrefix,'_');
+    filePrefix(unscores(2)) = '';
+    filePrefix = regexprep(filePrefix,'GOM','GofMX');
+end
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
@@ -114,8 +122,6 @@ nltsas = length(d);
 % load up rawfile start times
 doff = datenum([2000 0 0 0 0 0]);   % convert ltsa time to millenium time
 
-global hdr
-
 % make the variables that hold the ltsa header info persistent, in case
 % you are running itr_mkLTSA.m, this way you don't have to read the header
 % info every time.
@@ -133,7 +139,7 @@ if isempty(sTime)
         end
         disp('done reading ltsa headers')
     else
-        disp(['No LTSAs found to match wildcard: ', [lpn,sdn,'*']])
+        disp(['No LTSAs found to match wildcard: ', [lpn,filePrefix,'*']])
         return
     end
 end

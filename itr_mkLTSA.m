@@ -5,15 +5,16 @@
 
 clearvars
 clear global
-filePrefix = 'GofMX_GC03'; % File name to match. 
+filePrefix = 'GOM_DT_09'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
 %                    -> filePrefix = 'GofMX_DT01'
+% or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
 itnum = '1'; % which iteration you are looking for
 srate = 200; % sample rate
-LTSApath = 'E:\LTSA\GC'; % directory containing all LTSAs for this deployment
+LTSApath = 'E:\LTSA\DT'; % directory containing all LTSAs for this deployment
 % LTSA folder should match the site specified in prefix
 tpwsPath = 'E:\TPWS'; %directory of TPWS files
 %tfName = 'E:\TF_files'; % Directory ...

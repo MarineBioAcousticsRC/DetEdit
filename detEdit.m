@@ -929,7 +929,7 @@ while (k <= nb)
     datetick('x',15,'keeplimits')
     grid on
     tstr(1) = {fnTPWS};
-    tstr(2) = {['Session: ',num2str(k),' Start Time ',...
+    tstr(2) = {['Session: ',num2str(k),'/',num2str(nb),' Start Time ',...
         datestr(sb(k)),' Detect = ',num2str(nd)]};
     title(tstr);
     ylabel('RL [dB re 1\muPa]')

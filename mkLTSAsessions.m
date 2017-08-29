@@ -208,6 +208,10 @@ if ~isempty(p.minDur)
         end
         minbcount = minbcount + 1;
     end
+    % only if start or end time pass the ltsa time after adding minimum
+    % duration
+    sb(sb<sTime(1)) = sTime(1);
+    eb(eb>eTime(end)) = eTime(end);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

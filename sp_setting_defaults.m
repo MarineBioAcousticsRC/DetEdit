@@ -1,7 +1,24 @@
-function spParams = sp_setting_defaults(sp,srate,analysis)
+function spParams = sp_setting_defaults(varargin)
 % Establish basic parameter settings, then update for species
 % specific defaults, and user preferences.
 % Pulled into subroutine kf 10/4/2016
+
+% get user input and set up file names
+n = 1;
+while n <= length(varargin)
+    switch varargin{n}
+        case 'sp'
+            sp = varargin{n+1}; n=n+2;
+        case 'srate'
+            srate = varargin{n+1}; n=n+2;
+        case 'analysis'
+            analysis = varargin{n+1}; n=n+2;
+        case 'spParamsUser'
+            spParamsUser = varargin{n+1}; n=n+2;
+        otherwise
+            error('Bad optional argument: "%s"', varargin{n});
+    end
+end
 
 % Set default parameters
 spParams = [];
@@ -171,6 +188,13 @@ switch analysis
         spParams.minBout = minBout;
         spParams.minDur = minDur;
         spParams.slope = slope;
+        
+        % apply default if user has not specified a value
+        if exist('spParamsUser','var')
+            for fn = fieldnames(spParamsUser)'
+                spParams.(fn{1}) = spParamsUser.(fn{1});
+            end
+        end
     case {'modDet'} 
         spParams.tfSelect = tfSelect;
         spParams.dbRange = dbRange;

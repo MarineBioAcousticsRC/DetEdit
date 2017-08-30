@@ -1,73 +1,29 @@
-function [ ] = CalPARAMSfunc(itnumo,MTT,MPP,MSN,stn,dpn,spe,...
-    pn1,fs,tffreq,tfuppc)
-% Calculate the ICI and the PP 
+function [ ] = CalPARAMSfunc(ct,cpp,csn,filePrefix,sp,sdir,detfn,p,tf,srate)
+% Calculate inter-click interval, peak-to-peak, peak frequency, center 
+% frequency, 3dB and 10 dB bandwidth, duration and rms amplitude.
+% Create a figure of all the parameters.
+
 %jah 5-6-14 modified 12-15-14 modified 5-23-15 for Kogia
-% 8-7-15 modified for pp 8-3-2016 modified for Simone tfParameters
+% 8-7-15 modified for cpp 8-3-2016 modified for Simone tfParameters
 % 1-16-2017 improved to work with detMOD
-% DEFINE FILES
-% ici=inter-click-interval; pp = peak-peak
-icifn = [stn,dpn,'_',spe,'_ici',num2str(itnumo)];
-icifnfig = [stn,dpn,'_',spe,'_ici',num2str(itnumo),'.pdf'];
-xlsfn = [stn,dpn,'_',spe,'params.xls'];
-ppfn = [stn,dpn,'_',spe,'_pp',num2str(itnumo)];
-ppfnfig = [stn,dpn,'_',spe,'_pp',num2str(itnumo),'.pdf'];
-% pf = peak-frequency; cf = center-frequency
-pffn = [stn,dpn,'_',spe,'_pf',num2str(itnumo)];
-pffnfig = [stn,dpn,'_',spe,'_pf',num2str(itnumo),'.pdf'];
-cffn = [stn,dpn,'_',spe,'_cf',num2str(itnumo)];
-cffnfig = [stn,dpn,'_',spe,'_cf',num2str(itnumo),'.pdf'];
-% 3db = 3dB-bandwidth; 10db = 10dB-bandwidth
-bw3dbfn = [stn,dpn,'_',spe,'_3db',num2str(itnumo)];
-bw3dbfnfig = [stn,dpn,'_',spe,'_3db',num2str(itnumo),'.pdf'];
-bw10dbfn = [stn,dpn,'_',spe,'_10db',num2str(itnumo)];
-bw10dbfnfig = [stn,dpn,'_',spe,'_10db',num2str(itnumo),'.pdf'];
-% dur = duration  rms= rms ampltidue
-durfn = [stn,dpn,'_',spe,'_dur',num2str(itnumo)];
-durfnfig = [stn,dpn,'_',spe,'_dur',num2str(itnumo),'.pdf'];
-rmsfn = [stn,dpn,'_',spe,'_rms',num2str(itnumo)];
-rmsfnfig = [stn,dpn,'_',spe,'_rms',num2str(itnumo),'.pdf'];
-% all plots
-allfn = [stn,dpn,'_',spe,'_all',num2str(itnumo)];
-allfnfig = [stn,dpn,'_',spe,'_all',num2str(itnumo),'.pdf'];
-% fn = fullfile(detpn,detfn);
-fn1 = fullfile(pn1,'\',icifn);
-fn2 = fullfile(pn1,'\',icifnfig);
-fn3 = fullfile(pn1,'\',xlsfn);
-fn4 = fullfile(pn1,'\',ppfn);
-fn5 = fullfile(pn1,'\',ppfnfig);
-fn6 = fullfile(pn1,'\',pffn);
-fn7 = fullfile(pn1,'\',pffnfig);
-fn8 = fullfile(pn1,'\',cffn);
-fn9 = fullfile(pn1,'\',cffnfig);
-fn10 = fullfile(pn1,'\',bw3dbfn);
-fn11 = fullfile(pn1,'\',bw3dbfnfig);
-fn12 = fullfile(pn1,'\',bw10dbfn);
-fn13 = fullfile(pn1,'\',bw10dbfnfig);
-fn14 = fullfile(pn1,'\',durfn);
-fn15 = fullfile(pn1,'\',durfnfig);
-fn16 = fullfile(pn1,'\',rmsfn);
-fn17 = fullfile(pn1,'\',rmsfnfig);
-ct = MTT; 
-pp = MPP; % needs to be TF corrected version of pp
-sn = MSN;
-%Calculate duration
+% 8-28-2017 modified by asb to work with grateful detEdit
+
+%% Calculate teager energy and start end click
 posClick = []; rmsClick = [];
-for Cidx = 1:size(MSN,1)
-    hpdata = MSN(Cidx,:).';
+for Cidx = 1:size(csn,1)
+    hpdata = csn(Cidx,:).';
     teagerH = [];
     energy = spTeagerEnergy(hpdata);
 
     % Since we are operating on the high pass data, we'll
     % set the delay to zero.
-    [SClicks, CClicks, noise, SNR] = dtHighResClick(fs, energy, 0, hpdata, ...
-                                                 teagerH, 0.001);
+    [SClicks, CClicks, noise, SNR] = dtHighResClick(srate*1000, energy, 0, hpdata, ...
+                                                 teagerH, 0.001); % why 0.001? in triton is 0.015
     if isempty(CClicks)
         CClicks = [NaN NaN];
         SClicks = [NaN NaN];
     end
     posClick = [posClick;CClicks(1,:)];    
-%      display([num2str(CClicks(1)),' click #',num2str(Cidx),...
-%          '  ',num2str(size(posClick))]);
     rmsClick = [rmsClick;SClicks(1,:)]; 
 
     %plot teager energy and start and of single (SClicks) or full (CClicks)
@@ -82,230 +38,319 @@ for Cidx = 1:size(MSN,1)
 end
 %Get rid of NaN data without duration
 [nonan] = find(~isnan(posClick(:,1)) == 1);
-%
-% CALCULTE rms pf cf 3db 10db dur
-[rms,peakFr,bw10db,bw3db,F0,dur] = ...
-    paramDetEdit(MSN,posClick,rmsClick,fs,tffreq,tfuppc); 
-idur = find(~isnan(dur) > 0);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%plot histograms in one Figure(30)
-figure(30)
-if strcmp(spe, 'Kogia')
-    fpcrange = 80: 1 : 160 ; % freq range for peak and center in kHz
-    f310range = 0: 1 : 80 ; % freq range for -3 and -10 bw in kHz
-    dbrange = 100 : 1 : 150; % dB range for pp and rms
-    drange = 30 : 3 : 111; % duration range in us
-    ipirange = 40 : 1 :130; % ici range in ms
-end
-if (strcmp(spe, 'Gervais') || strcmp(spe, 'Cuviers'))
-    fpcrange = 0: 1 : 100 ; % freq range for peak and center in kHz
-    f310range = 0: 1 : 80 ; % freq range for -3 and -10 bw in kHz
-    dbrange = 90 : 1 : 170; % dB range for pp and rms
-    drange = 30 : 2 : 300; % duration range in us
-    ipirange = 40 : 1 :750; % ici range in ms
-end
-if (strcmp(spe, 'Beluga'))
-    fpcrange = 0: 1 : 100 ; % freq range for peak and center in kHz
-    f310range = 0: 1 : 80 ; % freq range for -3 and -10 bw in kHz
-    dbrange = 90 : 1 : 170; % dB range for pp and rms
-    drange = 10 : 2 : 300; % duration range in us
-    ipirange = 20 : 1 :500; % ici range in ms
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
-% Save peak-peak data
-figure(23)
-[y,centers] = hist(pp,dbrange);
-bar(centers,y)
-mpp = mean(pp); 
-sdpp = std(pp);
-imax = find(y == max(y)); mepp = median(pp);
-ppstr=['Mean= ',num2str(mpp),' Median= ',num2str(mepp),...
-    ' Mode= ',num2str(dbrange(imax)),...
-    ' StDev= ',num2str(sdpp),' Number= ',num2str(length(pp))];
-title(ppstr)
-xlabel('Peak-Peak Amplitude (dB)')
-save(fn4,'pp')
-saveas(gcf,fn5,'pdf')
-figure(30)
-subplot(2,4,1),hist(pp,dbrange,'k')
-xlabel('peak-peak amplitude dB')
-xlim([min(dbrange),max(dbrange)]);
-ylabel('counts')
-strp=strcat('n=',num2str(length(pp)));
-title(strp);
 
-% Save pf data
-figure(24)
-[y,centers] = hist(peakFr(idur),fpcrange);
-bar(centers,y);
+%% Calculate parameters: rms, pf, cf, 3db, 10db, dur
+[rms,peakFr,bw10db,bw3db,F0,dur] = ...
+    paramDetEdit(csn,posClick,rmsClick,srate,tf,p.N);
+
+%*****************************************************************
+%% Peak-to-peak
+% apply user range for db
+if isempty(p.dbRange)
+    p.dbRange = [min(cpp) max(cpp)];
+end
+% statistics
+mpp = mean(cpp); 
+sdpp = std(cpp);
+mopp = mode(cpp); 
+mepp = median(cpp);
+
+% Plot histogram
+figure(23);
+nbinsdb = (p.dbRange(1):p.dbRange(2));
+[y,centers] = hist(cpp,nbinsdb);
+bar(centers,y)
+title(sprintf('N=%d',length(cpp)))
+xlabel('Peak-Peak Amplitude (dB)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mpp);
+stdlabel = sprintf('Std = %0.2f', sdpp);
+melabel = sprintf('Median = %0.2f', mepp);
+molabel = sprintf('Mode = %0.2f', mopp);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+ppfn = strrep(detfn,'TPWS','pp');
+saveas(fullfile(sdir,ppfn),'m') % save as matlab fig
+
+%% RMS amplitude
+% apply user range for db
+if isempty(p.dbRange)
+    p.dbRange = [min(rms) max(rms)];
+end
+% statistics
+mrms = mean(rms); 
+sdrms = std(rms);
+morms = mode(rms); 
+merms = median(rms);
+
+% Plot histogram
+figure(27);
+nbinsdb = (p.dbRange(1):p.dbRange(2));
+[y,centers] = hist(rms,nbinsdb);
+bar(centers,y)
+title(sprintf('N=%d',length(rms)))
+xlabel('RMS Amplitude (dB)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mrms);
+stdlabel = sprintf('Std = %0.2f', sdrms);
+melabel = sprintf('Median = %0.2f', merms);
+molabel = sprintf('Mode = %0.2f', morms);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+rmsfn = strrep(detfn,'TPWS','rms');
+saveas(fullfile(sdir,rmsfn),'m')
+
+%% Peak frequency
+% statistics
 mpeakFr = mean(peakFr(idur));
 sdpeakFr = std(peakFr(idur));
-imax = find(y == max(y)); mepeakFr = median(peakFr(idur));
-ppstr=['Mean= ',num2str(mpeakFr),'Median= ',num2str(mepeakFr),...
-    'Mode= ',fpcrange(imax),...
-    'dB  StDev= ',num2str(sdpeakFr),' Number= ',...
-    num2str(length(peakFr(idur)))];
-title(ppstr)
+mepeakFr = median(peakFr(idur));
+mopeakFr = mode(peakFr(idur));
+
+% Plot histogram
+figure(24)
+nbinsfr = (p.frRange(1):p.frRange(2));
+[y,centers] = hist(peakFr(idur),nbinsfr);
+bar(centers,y);
+title(sprintf('N=%d',length(peakFr(idur))));
 xlabel('Peak Frequency (kHz)')
-save(fn6,'peakFr')
-saveas(gcf,fn7,'pdf')
-figure(30)
-subplot(2,4,2),hist(peakFr(idur),fpcrange)
-xlabel('peak frequency (kHz)')
-xlim([min(fpcrange),max(fpcrange)]);
-ylabel('counts')
-strp=strcat('n=',num2str(length(peakFr(idur))));
-title(strp);
 
-% Save 3 dB bandwidth data
-figure(25)
-[y,centers] = hist(bw3db(idur,3),f310range);
-bar(centers,y);
-mbw3db = mean(bw3db(idur,3));
-sdbw3db = std(bw3db(idur,3));
-imax = find(y == max(y)); mebw3 = median(bw3db(idur,3));
-ppstr=[' Mean= ',num2str(mbw3db),' Median= ',num2str(mebw3),...
-    ' Mode= ',num2str(f310range(imax)),...
-    'dB  StDev= ',num2str(sdbw3db),' Number= ',...
-    num2str(length(bw3db(idur,3)))];
-title(ppstr)
-xlabel('3 dB Bandwidth (kHz)')
-save(fn10,'bw3db')
-saveas(gcf,fn11,'pdf')
-figure(30)
-subplot(2,4,3),hist(bw3db(idur,3),f310range)
-xlabel('-3dB Bandwidth(kHz)')
-xlim([min(f310range),max(f310range)]);
-ylabel('counts')
-strp=strcat('n=',num2str(length(bw3db(idur,3))));
-title(strp);
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mpeakFr);
+stdlabel = sprintf('Std = %0.2f', sdpeakFr);
+melabel = sprintf('Median = %0.2f', mepeakFr);
+molabel = sprintf('Mode = %0.2f', mopeakFr);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
 
-% Save dur data
-figure(26)
-[y,centers] = hist(dur(idur),drange);
-bar(centers,y);
-mdur = mean(dur(idur));
-sddur = std(dur(idur));
-imax = find(y == max(y)); medur = median(dur(idur));
-ppstr=[' Mean= ',num2str(mdur),' Median= ',num2str(medur),...
-    ' Mode= ',num2str(drange(imax)),...
-    'dB  StDev= ',num2str(sddur),' Number= ',...
-    num2str(length(dur(idur)))];
-title(ppstr)
-xlabel('Duration(ns)')
-save(fn14,'dur')
-saveas(gcf,fn15,'pdf')
-figure(30)
-subplot(2,4,4),hist(dur(idur),drange)
-xlabel('duration (us)')
-xlim([min(drange),max(drange)]);
-ylabel('counts')
-strp=strcat('n=',num2str(length(dur(idur))));
-title(strp);
+% Save plot
+pffn = strrep(detfn,'TPWS','pf');
+saveas(fullfile(sdir,pffn),'m')
 
-% RMS amplitude
-figure(27)
-[y,centers] = hist(rms(idur),dbrange);
-bar(centers,y);
-mrms = mean(rms(idur));
-sdrms = std(rms(idur));
-imax = find(y == max(y)); merms = median(rms(idur));
-ppstr=[' Mean= ',num2str(mrms),' Median= ',num2str(merms),...
-    ' Mode= ',num2str(dbrange(imax)),...
-    'dB  StDev= ',num2str(sdrms),' Number= ',num2str(length(rms(idur)))];
-title(ppstr)
-xlabel('RMS Amplitude (dB)')
-save(fn16,'rms')
-saveas(gcf,fn17,'pdf')
-figure(30)
-subplot(2,4,5),hist(rms,dbrange)
-xlabel('RMS amplitude dB')
-xlim([min(dbrange),max(dbrange)]);
-ylabel('counts')
-strp=strcat('n=',num2str(length(rms)));
-title(strp);
-
-% Save cf data
-figure(28)
-[y,centers] = hist(F0(idur),fpcrange);
-bar(centers,y);
+%% Center frequency 
+% statistics
 mF0 = mean(F0(idur));
 sdF0 = std(F0(idur));
-imax = find(y == max(y)); meF0 = median(F0(idur));
-ppstr=[' Mean= ',num2str(mF0),' Median= ',num2str(meF0),...
-    ' Mode= ',num2str(fpcrange(imax)),...
-    'dB  StDev= ',num2str(sdF0),' Number= ',...
-    num2str(length(F0(idur)))];
-title(ppstr)
-xlabel('Center Frequency (kHz)')
-save(fn8,'F0')
-saveas(gcf,fn9,'pdf')
-figure(30)
-subplot(2,4,6),hist(F0(idur),fpcrange)
-xlabel('Center Frequency (kHz)')
-xlim([min(fpcrange),max(fpcrange)]);
-ylabel('counts')
-strp=strcat('n=',num2str(length(F0(idur))));
-title(strp);
+meF0 = median(F0(idur));
+moF0 = mode(F0(idur));
 
-% Save 10 dB bandwidth data
-figure(29)
-[y,centers] = hist(bw10db(idur,3),f310range);
+% Plot histogram
+figure(28)
+nbinsfr = (p.frRange(1):p.frRange(2));
+[y,centers] = hist(F0(idur),nbinsfr);
 bar(centers,y);
+title(sprintf('N=%d',length(F0(idur))));
+xlabel('Center Frequency (kHz)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mF0);
+stdlabel = sprintf('Std = %0.2f', sdF0);
+melabel = sprintf('Median = %0.2f', meF0);
+molabel = sprintf('Mode = %0.2f', moF0);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+pffn = strrep(detfn,'TPWS','cf');
+saveas(fullfile(sdir,pffn),'m')
+
+%% 3 dB Bandwidth
+% statistics
+mbw3db = mean(bw3db(idur,3));
+sdbw3db = std(bw3db(idur,3));
+mebw3db = median(bw3db(idur,3));
+mobw3db = mode(bw3db(idur,3));
+
+% Plot histogram
+figure(25)
+nbinsdbw = (p.frdbwRange(1):p.frdbwRange(2));
+[y,centers] = hist(bw3db(idur,3),nbinsdbw);
+bar(centers,y);
+title(sprintf('N=%d',length(bw3db(idur,3))));
+xlabel('3 dB Bandwidth (kHz)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mbw3db);
+stdlabel = sprintf('Std = %0.2f', sdbw3db);
+melabel = sprintf('Median = %0.2f', mebw3db);
+molabel = sprintf('Mode = %0.2f', mobw3db);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+bw3dbfn = strrep(detfn,'TPWS','3db');
+saveas(fullfile(sdir,bw3dbfn),'m')
+
+%% 10 dB Bandwidth
+% statistics
 mbw10db = mean(bw10db(idur,3));
 sdbw10db = std(bw10db(idur,3));
-imax = find(y == max(y)); mebw10 = median(bw10db(idur,3));
-ppstr=[' Mean= ',num2str(mbw10db),' Median= ',num2str(mebw10),...
-    ' Mode= ',num2str(f310range(imax)),...
-    'dB  StDev= ',num2str(sdbw10db),' Number= ',...
-    num2str(length(bw10db(idur,3)))];
-title(ppstr)
-xlabel('10 dB Bandwidth (kHz)')
-save(fn12,'bw10db')
-saveas(gcf,fn13,'pdf')
-figure(30)
-subplot(2,4,7),hist(bw10db(idur,3),f310range)
-xlabel('-10dB bandwidth (kHz)')
-xlim([min(f310range),max(f310range)]);
-ylabel('counts')
-strp=strcat('n=',num2str(length(bw10db(idur,3))));
-title(strp);
+mebw10db = median(bw10db(idur,3));
+mobw10db = mode(bw10db(idur,3));
 
-% CALCULATE and SAVE ICI
-ici = diff(ct)*24*60*60*1000; % in ms
-%define threshold for short ici to be 10 ms and long to be 300 ms
-iciIdx = find(ici > 10 & ici < max(ipirange));
-figure(22)
-icif = ici(iciIdx);  % select in range
-[y,centers] = hist(icif,ipirange);
+% Plot histogram
+figure(29)
+nbinsdbw = (p.frdbwRange(1):p.frdbwRange(2));
+[y,centers] = hist(bw10db(idur,3),nbinsdbw);
 bar(centers,y);
-xlim([min(ipirange)+10 max(ipirange)-50]);
-micif = mean(icif);
-sdicif = std(icif);
-imax = find(y == max(y)); meicif = median(icif);
-ppstr=[' Mean= ',num2str(micif),' Median= ',num2str(meicif),...
-    ' Mode= ',num2str(ipirange(imax)),...
-    ' StDev= ',num2str(sdicif),' Number= ',num2str(length(icif))];
-title(ppstr)
+title(sprintf('N=%d',length(bw10db(idur,3))));
+xlabel('10 dB Bandwidth (kHz)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mbw10db);
+stdlabel = sprintf('Std = %0.2f', sdbw10db);
+melabel = sprintf('Median = %0.2f', mebw10db);
+molabel = sprintf('Mode = %0.2f', mobw10db);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+bw10dbfn = strrep(detfn,'TPWS','10db');
+saveas(fullfile(sdir,bw10dbfn),'m')
+
+%% Duration
+% apply user range for db
+if isempty(p.durRange)
+    p.durRange = [min(dur) max(dur)];
+end
+% statistics
+mdur = mean(dur(idur));
+sddur = std(dur(idur));
+medur = median(dur(idur));
+modur = mode(dur(idur));
+
+% Plot histogram
+figure(26)
+nbinsdur = (p.durRange(1):durstep:p.durRange(2));
+[y,centers] = hist(dur(idur),nbinsdur);
+bar(centers,y);
+title(sprintf('N=%d',length(dur(idur))));
+xlabel('Duration (\mus)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mdur);
+stdlabel = sprintf('Std = %0.2f', sddur);
+melabel = sprintf('Median = %0.2f', medur);
+molabel = sprintf('Mode = %0.2f', modur);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+durfn = strrep(detfn,'TPWS','dur');
+saveas(fullfile(sdir,durfn),'m')
+
+%% Inter-click interval
+ici = diff(ct)*24*60*60*1000; % in ms
+
+% apply user range for ici
+if isempty(p.iciRange)
+    p.iciRange = [min(ici) max(ici)];
+end
+iciSel = ici(ici > p.iciRange(1) & ici < p.iciRange(2));
+
+% statistics
+miciSel = mean(iciSel);
+sdiciSel = std(iciSel);
+moiciSel = mode(iciSel);
+meiciSel = median(iciSel);
+
+% plot ici histogram
+figure(22);
+nbinsici = (p.iciRange(1):p.iciRange(2));
+[y,centers] = hist(iciSel,nbinsici);
+bar(centers,y);
+xlim(p.iciRange);
+title(sprintf('N=%d',length(ct)))
 xlabel('Inter-Pulse Interval (ms)')
-save(fn1,'icif')
-saveas(gcf,fn2,'pdf')
+ylabel('Counts')
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', miciSel);
+stdlabel = sprintf('Std = %0.2f', sdiciSel);
+melabel = sprintf('Median = %0.2f', meiciSel);
+molabel = sprintf('Mode = %0.2f', moiciSel);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% save ici data and figure
+icifn = strrep(detfn,'TPWS','ici');
+saveas(h22,fullfile(sdir,icifn),'m')
+
+%% multiple plots
 figure(30)
-subplot(2,4,8),hist(icif,ipirange)
-xlim([min(ipirange)+10 max(ipirange)-50]);
-% axis([min(ipirange)+10 max(ipirange) 0 1.1*max(y)]);
-xlabel('inter-click interval (ms)')
-xlim([min(ipirange),max(ipirange)]);
+% peak-to-peak
+subplot(2,4,1),hist(cpp,nbinsdb,'k')
+xlabel('peak-peak amplitude dB')
+xlim([p.dbRange(1),p.dbRange(2)]);
 ylabel('counts')
-strp=strcat('n=',num2str(length(icif)));
-title(strp);
+title(sprintf('N=%d',length(cpp)))
+
+% RMS amplitude
+subplot(2,4,5),hist(rms,p.dbRange)
+xlabel('RMS amplitude dB')
+xlim([p.dbRange(1),p.dbRange(2)]);
+ylabel('counts')
+title(sprintf('N=%d',length(rms)))
+
+% peak frequency
+subplot(2,4,2),hist(peakFr(idur),nbinsfr)
+xlabel('peak frequency (kHz)')
+xlim([p.frRange(1),p.frRange(2)]);
+ylabel('counts')
+title(sprintf('N=%d',length(peakFr(idur))));
+
+% center frequency
+subplot(2,4,6),hist(F0(idur),nbinsfr)
+xlabel('peak frequency (kHz)')
+xlim([p.frRange(1),p.frRange(2)]);
+ylabel('counts')
+title(sprintf('N=%d',length(F0(idur))));
+
+% 3db bandwidth
+subplot(2,4,3),hist(bw3db(idur,3),nbinsdbw)
+xlabel('-3dB Bandwidth(kHz)')
+xlim([p.frdbwRange(1),p.frdbwRange(2)]);
+ylabel('counts')
+title(sprintf('N=%d',length(bw3db(idur,3))));
+
+% 10db bandwidth
+subplot(2,4,7),hist(bw10db(idur,3),nbinsdbw)
+xlabel('-10dB Bandwidth(kHz)')
+xlim([p.frdbwRange(1),p.frdbwRange(2)]);
+ylabel('counts')
+title(sprintf('N=%d',length(bw10db(idur,3))));
+
+% duration
+subplot(2,4,4),hist(dur(idur),nbinsdur)
+xlabel('duration (\mus)')
+xlim([p.durRange(1),p.durRange(2)]);
+ylabel('counts')
+title(sprintf('N=%d',length(dur(idur))));
+
+% inter-click interval
+subplot(2,4,8),hist(iciSel,nbinsici)
+xlim(p.iciRange);
+xlabel('inter-click interval (ms)')
+ylabel('counts')
+title(sprintf('N=%d',length(ct)))
+
+% save figure
+allfn = strrep(detfn,'TPWS','params');
+save(fullfile(sdir,allfn),'rms','peakFr','F0','bw3db','bw10db','dur','iciSel')
+saveas(fullfile(sdir,allfn),'m')
+saveas(fullfile(sdir,allfn),'png') % also save in png
+
 %*****************************************************************
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% xls for Danielle
-icixls = datevec(ct(1:end));
+% Create excel with data parameters
+vecTimes = datevec(ct(1:end));
 ici(end+1) = ici(end);
-icixls = [icixls, 1000*ici',pp,rms,peakFr,F0,bw3db,bw10db,dur'];
-%xlswrite(fn3,icixls);  % write time and click count by bin data to XLS
+xlsParams = [vecTimes, 1000*ici',cpp,rms,peakFr,F0,bw3db,bw10db,dur'];
+%xlswrite(fn3,xlsParams);  % write time and click count by bin data to XLS
 % Open Excel, add workbook, change active worksheet,
 % get/put array, save, and close
 % First open an Excel Server
@@ -322,9 +367,9 @@ invoke(sheet2, 'Activate');
 Activesheet = Excel.Activesheet;
 % Put a MATLAB array into Excel
 %A = [1 2; 3 4];  
-A = icixls;
+A = xlsParams;
 % B = ['Year','Month','Day','Hour','Min','Sec','ici(ms)',...
-%     'pp(dB)','peakFr(kHz)','centerFr(kHz)','bw3db(kHz)','bw10db(kHz)',...
+%     'cpp(dB)','peakFr(kHz)','centerFr(kHz)','bw3db(kHz)','bw10db(kHz)',...
 %     'dur(ns)'];
 la = length(A);
 rstrg = ['A1:N',num2str(la)];
@@ -337,9 +382,9 @@ set(ActivesheetRange, 'Value', A);
 % B = Range.value;
 % % Convert to a double matrix.  The cell array must contain only scalars.
 % B = reshape([B{:}], size(B));
-% Now save the workbook
-%invoke(Workbook, 'SaveAs', 'myfile.xls');
-invoke(Workbook, 'SaveAs', fn3);
+% Save the workbook
+xlsfn = strrep(allfn,'.mat','.xls');
+invoke(Workbook, 'SaveAs', xlsfn);
 % To avoid saving the workbook and being prompted to do so,
 % uncomment the following code.
 Workbook.Saved = 1;

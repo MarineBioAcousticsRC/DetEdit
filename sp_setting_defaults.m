@@ -1,10 +1,10 @@
-function spParams = sp_setting_defaults(sp,srate)
+function spParams = sp_setting_defaults(sp,srate,analysis)
 % Establish basic parameter settings, then update for species
 % specific defaults, and user preferences.
 % Pulled into subroutine kf 10/4/2016
 
+% Set default parameters
 spParams = [];
-
 specChar = 'Unk';  %Simone abbreviation for species
 speName = 'Unknown';  % Species code used in file names 
 tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
@@ -25,16 +25,31 @@ dfManual = []; % LTSA step size in 10 [Hz] bins
 p1Low = threshRL - 5;
 p1Hi = 170; % ??
 minBout = [];% minimum bout duration
+gth = .5;    % gap time in hrs between sessions
 minDur = []; % minimum window duration (if specified in minutes)
-slope = 1;
+slope = 1; % slope for shifting data in plots 51 and 53
+% all parameters for modDet
+iciRange = []; % min/max ici in ms for modDet plots
+dbRange = [];  % min/max db for modDet plots of pp and rms
+frRange = [fLow, fHi];   % min/max frequency for modDet plots of peak and center freq
+frdbwRange = [fLow, fHi]; % min/max frequency for modDet plots of 3/10 db bw
+durRange = []; % min/max duration in us for modDet plots
+durstep = 1; % step range for number bins in histogram 
+N = srate; % FFT size for parameter clicks
 
-
+% Set parameters according to sp
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
     speName = 'Kogia'; specChar = 'K'; 
     tfSelect = 80000; 
     dtHi = 0.5;  
     fLow = 70;   
     threshRL = 116;
+    iciRange = [40, 130];
+    dbRange = [100, 150];
+    frRange = [80, 160];
+    frdbwRange = [0, 80];
+    durRange = [30, 111];
+    durstep = 3;
 elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
     speName = 'Cuviers'; specChar = 'Z'; 
     tfSelect = 40200;
@@ -42,18 +57,28 @@ elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
     fLow = 25;  
     threshRL = 121; 
     ltsaContrast = 200; ltsaBright = 30;
+    iciRange = [40, 750];
+    dbRange = [90, 170];
+    frdbwRange = [0, 80];
+    durRange = [30, 300];
+    durstep = 2;
 elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
     speName = 'Gervais'; specChar = 'M'; 
     tfSelect = 40200;
     dtHi = 1.0; 
     fLow = 25; 
     threshRL = 121;
+    iciRange = [40, 750];
+    dbRange = [90, 170];
+    frdbwRange = [0, 80];
+    durRange = [30, 300];
+    durstep = 2;
 elseif (strcmp(sp,'BWG') || strcmp(sp,'g'))
     speName = 'BWG'; specChar = 'G'; 
     tfSelect = 40200;
-    dtHi = 1.0; % scale for IPI display in sec
-    fLow = 25;   % 25 kHz boundary for spec plot
-    threshRL = 121; % dB threshold
+    dtHi = 1.0; 
+    fLow = 25;   
+    threshRL = 121; 
 elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
     speName = 'BW31'; specChar = 'D'; 
     tfSelect = 40200; 
@@ -99,6 +124,10 @@ elseif strcmpi(sp,'Dl')
     threshRL = 110;
     rlLow = threshRL - 5; rlHi = 170;
     ltsaContrast = 200; ltsaBright = 70;
+    iciRange = [20, 500];
+    dbRange = [90, 170];
+    durRange = [10, 300];
+    durstep = 2;
 elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     speName = 'Pm'; 
     dtHi = 2; 
@@ -109,35 +138,54 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     dfManual = 100;
     minBout = 75; minDur = 60; 
     slope = 1.2;
+    iciRange = [50, 4000];
+    frRange = [fLow fHi];
+    N = 512;
 else
     warning('Unknown Species Type!!!')
 end
 
 %% create struct to return parameters
-spParams.specchar = specChar;
-spParams.speName = speName;
-spParams.tfSelect = tfSelect;
-spParams.dtHi = dtHi;
-spParams.fLow = fLow;
-spParams.fHi = fHi;
-spParams.threshRL = threshRL;
-spParams.threshRMS = threshRMS;
-spParams.threshPP = threshPP;
-spParams.threshHiFreq = threshHiFreq;
-spParams.ltsaContrast = ltsaContrast;
-spParams.ltsaBright = ltsaBright;
-spParams.ltsaLims = ltsaLims;
-spParams.ltsaMax = ltsaMax;
-spParams.rlLow = rlLow;
-spParams.rlHi = rlHi;
-spParams.dfManual = dfManual;
-spParams.dfManual = dfManual;
-spParams.p1Low = p1Low;
-spParams.p1Hi = p1Hi;
-spParams.minBout = minBout;
-spParams.minDur = minDur;
-spParams.slope = slope;
-
+switch analysis
+    case {'detEdit','mkLTSA'} 
+        spParams.specchar = specChar;
+        spParams.speName = speName;
+        spParams.tfSelect = tfSelect;
+        spParams.dtHi = dtHi;
+        spParams.fLow = fLow;
+        spParams.fHi = fHi;
+        spParams.threshRL = threshRL;
+        spParams.threshRMS = threshRMS;
+        spParams.threshPP = threshPP;
+        spParams.threshHiFreq = threshHiFreq;
+        spParams.ltsaContrast = ltsaContrast;
+        spParams.ltsaBright = ltsaBright;
+        spParams.ltsaLims = ltsaLims;
+        spParams.ltsaMax = ltsaMax;
+        spParams.rlLow = rlLow;
+        spParams.rlHi = rlHi;
+        spParams.dfManual = dfManual;
+        spParams.dfManual = dfManual;
+        spParams.p1Low = p1Low;
+        spParams.p1Hi = p1Hi;
+        spParams.minBout = minBout;
+        spParams.minDur = minDur;
+        spParams.slope = slope;
+    case {'modDet'} 
+        spParams.tfSelect = tfSelect;
+        spParams.dbRange = dbRange;
+        spParams.iciRange = iciRange;
+        spParams.frRange = frRange;
+        spParams.frdbwRange = frdbwRange;
+        spParams.durRange = durRange;
+        spParams.durstep = durstep;
+        spParams.N = N;
+        spParams.gth = gth;
+        spParams.minBout = minBout;
+    otherwise
+        sprintf(['No analysis specified. Please add one of these options:\n',...
+        'detEdit, mkLTSA or modDet'])
+end
 
 
 

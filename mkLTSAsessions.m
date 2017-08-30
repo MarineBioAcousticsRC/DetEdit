@@ -50,7 +50,7 @@ end
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
-p = sp_setting_defaults(sp,srate);
+p = sp_setting_defaults(sp,srate,'mkLTSA');
 
 % user interface to get TF file
 if (p.tfSelect > 0)

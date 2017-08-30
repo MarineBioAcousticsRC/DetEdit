@@ -1,51 +1,50 @@
-function [ ] = Calicippfunc(MTT,MPP,stn,dpn,spe,pn1,icimin,icimax)
+function [ ] = Calicippfunc(MTT,MPP,filePrefix,sp,sdir,detfn,p)
 % Calculate the ICI and the PP 
+close all
 
-icifn = [stn,dpn,'_',spe,'_ici'];
-icifnfig = [stn,dpn,'_',spe,'_ici2.pdf'];
-xlsfn = [stn,dpn,'_',spe,'_ici2.xls'];
-ppfn = [stn,dpn,'_',spe,'_pp'];
-ppfnfig = [stn,dpn,'_',spe,'_pp2.pdf'];
-ppxlsfn = [stn,dpn,'_',spe,'_pp2.xls'];
-% fn = fullfile(detpn,detfn);
-fn1 = fullfile(pn1,'\',icifn);
-fn2 = fullfile(pn1,'\',icifnfig);
-fn3 = fullfile(pn1,'\',xlsfn);
-fn4 = fullfile(pn1,'\',ppfn);
-fn5 = fullfile(pn1,'\',ppfnfig);
-%
-ctnf = MTT;
-ppnf = MPP;
-% end
-ici = diff(ctnf)*24*60*60;
-%define threshold for short ici to be 50 ms and long to be 1000 ms
-iciIdx = find(ici > icimin & ici < icimax);
-figure(22)
-hist(ici(iciIdx),100);
-icif = ici(iciIdx);
-micif = mean(icif);
-sdicif = std(icif);
-icistr=[stn,' ',dpn,' ',spe,' ','Mean= ',num2str(micif),...
-    ' StDev= ',num2str(sdicif),' Number= ',num2str(length(ctnf))];
-title(icistr)
-xlabel('Inter-Pulse Interval (s)')
-%save(fn1,'icif','-ascii')
-save(fn1,'icif')
-saveas(gcf,fn2,'pdf')
-% Save peak-peak data
-figure(23)
-hist(ppnf,100);
-mpp = mean(ppnf);
-sdpp = std(ppnf);
-ppstr=[stn,' ',dpn,' ',spe,' ','Mean= ',num2str(mpp),...
-    'dB  StDev= ',num2str(sdpp),' Number= ',num2str(length(ppnf))];
-title(ppstr)
+%% Inter-Click Interval
+ici = diff(MTT)*24*60*60;
+
+%define threshold for ici
+if isempty(p.iciMin)
+    p.iciMin = min(ici);
+end
+if isempty(p.iciMax)
+    p.iciMax = max(ici);
+end
+iciSel = ici(ici > p.iciMin & ici < p.iciMax);
+
+% plot ici histogram
+h22 = figure(22);
+hist(iciSel,100);
+miciSel = mean(iciSel);
+sdiciSel = std(iciSel);
+title(sprintf('\\mu=%0.2f \\sigma=%0.2f N=%d',miciSel,sdiciSel,length(MTT)))
+xlabel(sprintf('Inter-Pulse Interval (s) - thr: %0.2f-%0.2f',p.iciMin,p.iciMax))
+
+% save ici data and figure
+icifn = strrep(detfn,'TPWS','ici');
+save(fullfile(sdir,icifn),'iciSel')
+saveas(h22,fullfile(sdir,icifn),'m')  % save as matlab fig
+
+%% Peak-to-peak
+% Plot peak-peak data
+h23 = figure(23);
+hist(MPP,100);
+mpp = mean(MPP);
+sdpp = std(MPP);
+title(sprintf([filePrefix,' ',sp,' Mean= ',num2str(mpp),...
+    'dB  StDev= ',num2str(sdpp),' Number= ',num2str(length(MPP))]))
+title(sprintf('\\mu=%0.2f \\sigma=%0.2f N=%d',mpp,sdpp,length(MPP)))
 xlabel('Peak-Peak Amplitude')
-save(fn4,'ppnf')
-saveas(gcf,fn5,'pdf')
+
+% save pp figure
+ppfn = strrep(detfn,'TPWS','pp');
+saveas(h23,fullfile(sdir,ppfn),'m') % save as matlab fig
+
 % xls for Danielle
-icixls = datevec(ctnf(1:end-1));
-icixls = [icixls, ici'];
+icixls = datevec(MTT(1:end-1));
+icixls = [icixls, ici];
 %xlswrite(fn3,icixls);  % write time and click count by bin data to XLS
 % Open Excel, add workbook, change active worksheet,
 % get/put array, save, and close

@@ -21,7 +21,7 @@ detEdit_settings
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
-p = sp_setting_defaults(sp,srate,'detEdit');
+p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','detEdit','spParamsUser',spParamsUser);
 
 %% Check if TPWS file exists
 % Concatenate parts of file name

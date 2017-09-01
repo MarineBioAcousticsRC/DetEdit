@@ -181,9 +181,11 @@ if ~ isempty(MTT)
                 fprintf(['Wrong name to call parameters, see itr_modDet:\n -all- for all parameters',...
                     '\n -ici&pp- for computing only ici and pp \n -none- No parameters'])
         end
+    else
+         disp(['No encounter longer than minimum bout (',num2str(p.minBout),') in file: ',outFileTPWS])
     end
 else
-    disp(['No encounter longer than minimum bout (',num2str(p.minBout),') in file: ',outFileTPWS])
+    disp(['No true detections in file: ',outFileTPWS])
 end
 % add this in function Density
 %binDur bin duration = 1 minute

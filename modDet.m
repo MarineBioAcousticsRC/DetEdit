@@ -61,7 +61,7 @@ p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','modDet');
 
 
 %% user interface to get TF file
-if (p.tfSelect > 0) || getParams
+if (p.tfSelect > 0) || ~isempty(strfind(getParams,'all'))
     if ~exist('tfName','var')% user interface to get TF file
         disp('Load Transfer Function File');
         [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
@@ -77,17 +77,17 @@ if (p.tfSelect > 0) || getParams
     tffreq = A(1,:);
     tfuppc = A(2,:);
     fclose(fid);
-
+    
     if(p.tfSelect > 0)
-    tf = interp1(tffreq,tfuppc,p.tfSelect,'linear','extrap');
-    disp(['TF @',num2str(p.tfSelect),' Hz =',num2str(tf)]);
+        tf = interp1(tffreq,tfuppc,p.tfSelect,'linear','extrap');
+        disp(['TF @',num2str(p.tfSelect),' Hz =',num2str(tf)]);
     end
-    if getParams
-    BinkHz = 0:1:srate/2;
-    tf = interp1(tffreq,tfuppc,BinkHz,'linear','extrap');
-    disp('TF Applied to get parameters');
+    if ~isempty(strfind(getParams,'all'))
+        BinkHz = 0:1:srate/2;
+        tf = interp1(tffreq,tfuppc,BinkHz,'linear','extrap');
+        disp('TF Applied to get parameters');
     end
-else 
+else
     tf = 0;
     disp('No TF Applied')
 end
@@ -138,46 +138,57 @@ load(fullfile(sdir,zFDfn)) % false detections vector : zFD
 outFileTPWS = strrep(detfn,inTPWS,outTPWS);
 outFileID = strrep(outFileTPWS,'TPWS','ID');
 
-MTT = DT1';  
-MSN = SN1; 
+MTT = DT1';
+MSN = SN1;
 MSP = SP1;
-if (p.tfSelect > 0); 
-    MPP = RL1 + tf; 
+if (p.tfSelect > 0);
+    MPP = RL1 + tf;
 else
     MPP = RL1;
 end
 
 % check if there is at least one encounter longer than 75s, if not
 % do not store TPWS file
-dt = diff(MTT)*secInDay;
-I = find(dt>p.gth*60*60);
-sb = [MTT(1); MTT(I+1)];
-eb = [MTT(I); MTT(end)];
-bd = (eb - sb);
-bdI = find(bd > (p.minBout / secInDay)); % find bouts longer than the minimum (75s)
-
-if ~isempty(bdI)
-    disp(['Save ',fullfile(outDir,outFileTPWS)])
-    if exist('f','var')
-        save(fullfile(outDir,outFileTPWS),'f','MTT','MPP','MSN','MSP','-v7.3')
-    else
-        warning('no frequency vector available')
-        save(fullfile(outDir,outFileTPWS),'MTT','MPP','MSN','MSP','-v7.3')
+if ~ isempty(MTT)
+    dt = diff(MTT)*secInDay;
+    I = find(dt>p.gth*60*60);
+    sb = [MTT(1); MTT(I+1)];
+    eb = [MTT(I); MTT(end)];
+    bd = (eb - sb);
+    bdI = find(bd > (p.minBout / secInDay)); % find bouts longer than the minimum (75s)
+    
+    if ~isempty(bdI)
+        disp(['Save ',fullfile(outDir,outFileTPWS)])
+        if exist('f','var')
+            save(fullfile(outDir,outFileTPWS),'f','MTT','MPP','MSN','MSP','-v7.3')
+        else
+            warning('no frequency vector available')
+            save(fullfile(outDir,outFileTPWS),'MTT','MPP','MSN','MSP','-v7.3')
+        end
+        disp(['Save ',fullfile(outDir,outFileID)])
+        save(fullfile(outDir,outFileID),'zID','-v7.3')
+        disp('Done Modifying File')
+        
+        % Calculate parameters and make figure if specified by user in itr_modDet
+        switch getParams
+            case 'ici&pp'
+                Calicippfunc(MTT,MPP,filePrefix,sp,outDir,outFileTPWS,p)
+            case 'all'
+                CalPARAMSfunc(MTT,MPP',MSN,filePrefix,sp,outDir,outFileTPWS,p,tf,srate)
+            case 'none'
+                disp('No parameters calculated')
+            otherwise
+                fprintf(['Wrong name to call parameters, see itr_modDet:\n -all- for all parameters',...
+                    '\n -ici&pp- for computing only ici and pp \n -none- No parameters'])
+        end
     end
-    disp(['Save ',fullfile(outDir,outFileID)])
-    save(fullfile(outDir,outFileID),'zID','-v7.3')
-    disp('Done Modifying File')
 else
     disp(['No encounter longer than minimum bout (',num2str(p.minBout),') in file: ',outFileTPWS])
 end
+% add this in function Density
+%binDur bin duration = 1 minute
+%CalBinfun(stn,dpn,itnumo,1)
 
-% Calculate parameters and make figure if specified by user in itr_modDet
-if getParams
-    CalPARAMSfunc(MTT,MPP',MSN,filePrefix,sp,outDir,outFileTPWS,p,tf,srate)
-    %binDur bin duration = 1 minute
-    %CalBinfun(stn,dpn,itnumo,1)
-end
-%
 
 
 

@@ -443,7 +443,11 @@ while (k <= nb)
         [xmspAll,im] = max(xmsp0All(:,fimint:fimaxt),[],2); % maximum between flow-100kHz
         
         % calculate peak-to-peak amplitude including transfer function
-        xmppAll = clickLevels'-tf+ Ptfpp(im + fimint-1); % vectorized version
+        if isrow(clickLevels)
+            xmppAll = clickLevels-tf+ Ptfpp(im + fimint-1); % vectorized version
+        else
+            xmppAll = clickLevels'-tf+ Ptfpp(im + fimint-1); % vectorized version
+        end
         % turn diagonal to vertical (easier way to find thresholds)
         if isrow(xmspAll)
             pxmspAll = xmspAll' - p.slope*(xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
@@ -746,8 +750,11 @@ while (k <= nb)
         % for all detections in this session, calculate xmpp and xmsp
         xmsp0 = cspJ + repmat(Ptfpp,size(cspJ,1),1); % add transfer fun to session's spectra
         [xmsp,im] = max(xmsp0(:,fimint:fimaxt),[],2);
-        xmpp = RL' - tf + Ptfpp([im + fimint - 1]);
-        
+        if isrow(RL)
+            xmpp = RL - tf + Ptfpp([im + fimint - 1]);
+        else
+            xmpp = RL' - tf + Ptfpp([im + fimint - 1]);
+        end
         % turn diagonal to vertical
         if ~isempty(xmsp) && ~isempty(xmpp)
             if isrow(xmsp)

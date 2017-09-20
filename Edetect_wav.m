@@ -1,4 +1,4 @@
-function Edetect_150806
+function Edetect_wav
 % Edetect_150806.m
 %
 % function runs simple energy detector on xwav data.

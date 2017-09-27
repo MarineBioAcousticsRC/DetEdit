@@ -1,4 +1,4 @@
-function [startsSec,stopsSec] = dST_choose_segments(p,hdr)
+function [startsSec,stopsSec] = dST_choose_segments(hdr)
 % Divide acoustic data into smaller chunks to prevent over-committing memory
 % Find a reasonable length of data to handle taking into account that the
 % interleaved channels will also be read. To ensure that analysis
@@ -28,7 +28,7 @@ newIdx = 1;
 % Step through starts, and if multiple segments are required to handle an
 % interval, add intermediate starts/stops, so you end up with smaller
 % chunks.
-for oldIdx = 1:length(starts);
+for oldIdx = 1:length(starts)
     for k=1:segmentsRequired(oldIdx)
         startsSec(newIdx) = starts(oldIdx) + ((k-1)*maxTimeSec);
         stopsSec(newIdx) = min(startsSec(newIdx)+ maxTimeSec-1/hdr.fs, stops(oldIdx));

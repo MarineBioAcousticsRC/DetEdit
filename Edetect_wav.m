@@ -1,55 +1,97 @@
-function Edetect_wav
-% Edetect_150806.m
-%
-% function runs simple energy detector on xwav data.
-% could be modified for typical wav files, but is xwav-centric
-%
-% user selects disk drives with xwav files/folders. The function
-% reads all the xwav rawfile headers and finds rawfile times between user
+function Edetect_wav(varargin)
+% Edetect_wav.m
+% 
+% function runs a simple energy detector on .wav files.
+% It is a modified version of Edetect.m which runs on .x.wav files
+% 
+% user selects disk drives with wav files/folders. The function
+% reads all the wav file headers and finds files times between user
 % defined datenum times (ta and tb) from multiple events.
 % Another function, Edetector (defined after this function) is called
 % and runs a simple energy threshold detector from the time series composed
-% of the multiple raw files between ta and tb.
+% of the multiple wav files between ta and tb.
 % Based on energy detectors for clicks and sonar.
 %
 % User input: detector parameter xls pfile and event time period xls file
-%
+% Input can be done through GUI tools, if not provided in function call. 
+% All arguments are optional.
+% Example function call:
+%   Edetect_wav('paramFile','G:\GofMXArraySpRecs\Pc\MOTU\edetect_test_params.xlsx',...
+%         'tfFile','E:\Code\TF_files\HF631_140122\HF631_140122_sig1_invSensit.tf',...
+%         'timeFile','G:\GofMXArraySpRecs\Pc\MOTU\edetect_test.xlsx',...
+%         'wavDir',{'G:\GofMXArraySpRecs\Pc\MOTU';'G:\GofMXArraySpRecs\Gmsp\MOTU'},...
+%         'channel',1)
+%   paramFile: Spreadsheet containing detector parameters
+%   tfFile: Transfer function
+%   timeFile: Spreadsheet containing bout times
+%   wavDir: Folder name, or cell array of multiple folder names to search
+%       for wav files. NOTE: Search includes this folder specified and any
+%       subfolders (eg: 'E:\myFolder' and 'E:\myFolder\mySubFolder').
+%    channel: Which wav file channel to detect on. Defaults to 1.
+
+
 % Output parameters are saved to a binary matfile as
 % detection times and peak amplitude levels
+
 % 140919 adds addition outputs: snippet time series and spectra (from old Sdetect)
-%150806 reads the transfer much and uses a dB threshold in the parameter
-%file
+% 150806 reads the transfer much and uses a dB threshold in the parameter
+% file
 %
 %
 % <warning: another suite of 'Edetect' code exist for LTSA sonar processing>
 %
 % initial build 130306 smw
-%
+% wav adaptation 17-020 kef
 
-clear all
 clc
 
-%
 tic     % start execution clock
-disp('Edetect_wav')
-disp(' ')
+fprintf('Edetect_wav\n\n')
 
-% user interface get file via dialog box
-% Parameter file
-% [fname, pname] = uigetfile('*.txt','Load Parameter File');
-disp('Load Parameter File');
-[fname, pname] = uigetfile('*.xls;*.xlsx','Load Parameter File');
-pfile = fullfile(pname, fname);
-if strcmp(num2str(fname),'0')
-    disp('Canceled Load Parameter File')
-    return
-else % give user some feedback
-    disp(['Parameter File: ',pfile])
-    disp(' ')
+
+% check for input arguments
+n = 1;
+while n <= length(varargin)
+    switch varargin{n}
+        case 'paramFile'
+            paramFile = varargin{n+1}; n=n+2;
+        case 'tfFile'
+            tfFile = varargin{n+1}; n=n+2;
+        case 'timeFile'
+            timeFile = varargin{n+1}; n=n+2;
+        case 'wavDir'
+            wavDir = varargin{n+1}; n=n+2;
+            if ~iscell(wavDir)
+                % expects a cell array. If no cell array, put the string
+                % into a single cell array.
+                wavDirVec = wavDir;
+                wavDir = cell(1);
+                wavDir{1} = wavDirVec;
+            end
+        case 'channel'
+            channel = varargin{n+1}; n=n+2;
+        otherwise
+            error('Bad optional argument: "%s"', varargin{n});
+    end
 end
-[num,txt] = xlsread(pfile);
-fs = num(1); fa = num(2); fb = num(3); thDB = num(4); tffreq = num(5); ...
+
+% Import detection parameters from spreadsheet
+if ~exist('paramFile','var')
+    % create user interface get file via dialog box
+    [paramFileName, paramFilePath] = uigetfile('*.xls;*.xlsx','Load Parameter File');
+    paramFile = fullfile(paramFilePath, paramFileName);
+    if strcmp(num2str(paramFilePath),'0')
+        disp('Canceled Load Parameter File')
+        return
+    end
+end
+
+fprintf('Parameter File: %s\n',paramFile)
+disp('Loading Parameter File');
+[num,~] = xlsread(paramFile);
+fs = num(1); fa = num(2); fb = num(3); thDB = num(4); tfAdjustFreq = num(5); ...
     lo = num(6); pl = num(7); un = num(8);
+% Definitions: 
 % fs = sample rate;
 % fa fb = band pass filter start end frequency [Hz]
 % thDB = 0-peak threshold [dB counts] for timeseries detections
@@ -58,69 +100,65 @@ fs = num(1); fa = num(2); fb = num(3); thDB = num(4); tffreq = num(5); ...
 % pl = pulse length to measure max ampliude and time [milliseconds]
 % un = 1 for unfiltered data, 0 for no unfiltered
 
-% user interface get file via dialog box
-% Transfer Function file
-% [fname, pname] = uigetfile('*.txt','Load Parameter File');
-disp('Load Transfer Function File');
-[tfFile, tfDir] = uigetfile('*.tf','Load Transfer Function File');
-tfile = fullfile( tfDir, tfFile);
-if strcmp(num2str(tfFile),'0')
-    disp('Canceled Load Transfer Function File')
-    return
-else % give user some feedback
-    disp(['Transfer Function: ',tfile])
-    disp(' ')
+
+% Import transfer function
+if ~exist('tfFile','var')
+    % create user interface get transfer function file via dialog box
+    [tfFileName, tfDir] = uigetfile('*.tf','Load Transfer Function File');
+    tfFile = fullfile(tfDir, tfFileName);
+    if strcmp(num2str(tfFileName),'0')
+        disp('Canceled Load Transfer Function File')
+        return
+    end
 end
 
-%load transfer function
-%N=512;
-%fs = 200000;    %sample rate - should not be hardwired
-% [tfFreq,tfPower] = textread(tfile,'%f %f'); %load transfer function
-tfin = importdata(tfile);
-tfFreq = tfin(:,1) ;  tfPower = tfin(:,2) ;
-F=1:1:fs/2;
+fprintf('Transfer Function: %s\n',tfFile)    
+fprintf('Loading Transfer Function File\n\n')
+tfInput = importdata(tfFile);
+tfFreq = tfInput(:,1) ;  
+tfPower = tfInput(:,2) ;
+F = 1:1:fs/2;
 Ptf = interp1(tfFreq,tfPower,F,'linear','extrap');
 % PtfN = downsample(Ptf,ceil(fs/N));
 % set threshold in counts 0-peak
-th = 10^((thDB - 6 - Ptf(tffreq))/20);
+countThresh = 10^((thDB - 6 - Ptf(tfAdjustFreq))/20);
 
-% user interface get file via dialog box
-% Event Time file
-% [fname, pname] = uigetfile([pname,'*.txt'],'Load Event Time File');
-disp('Load event time file');
-[fname, pname] = uigetfile([pname,'*.xls;*.xlsx'],'Load Event Time File');
-tfile = fullfile(pname, fname);
+
+% Get event times from spreadsheet
+if ~exist('timeFile','var')
+    % create user interface get file via dialog box
+    [timeFileName, timeFileDir] = uigetfile([pname,'*.xls;*.xlsx'],'Load Event Time File');
+    timeFile = fullfile(timeFileDir, timeFileName);
+    if strcmp(num2str(timeFile),'0')
+        disp('Canceled Load Time Event File')
+        return
+    end
+end
+fprintf('Event Time File: %s\n',timeFile)    
+fprintf('Load event time file\n\n');
+[dates2Detect,~] = xlsread(timeFile);
+
+if ~exist('channel','var')
+    fprintf('No channel specified. Detecting on channel 1.\n\n')
+    channel = 1;
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % save command line text to diary text file
-[pathstr, name, ext] = fileparts(tfile);
+[pathstr, name, ~] = fileparts(timeFile);
 dname = fullfile(pathstr,[name,'_Edetect_output.txt']);
 diary(dname)
-disp(dname)
-disp(' ')
-disp('Edetect_151202')
-disp(' ')
-disp(['Parameter File: ',pfile])
-disp(' ')
+fprintf('%s\n\n',dname)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if strcmp(num2str(fname),'0')
-    disp('Canceled Load Event Time File')
-    return
-else % give user some feedback
-    disp(['Event Time File: ',tfile])
-    disp(' ')
-end
-num = []; txt = [];
-[num,txt] = xlsread(tfile);
+
 % drl = txt(2:end,1);
 % fd = txt(2:end,2);
-toff = datenum([1900 0 -1 0 0 0]);   % xls is relative to 01Jan1900
-dn1 = num(:,1) + toff; dn2 = num(:,2) + toff;
-% dn1 = num(:,5) + toff; dn2 = num(:,6) + toff;   % for raw xls from Karli
-% N = length(d1);
-N = length(dn1);
+timeOffset = datenum([1900 0 -1 0 0 0]);   % xls is relative to 01Jan1900
+boutStartDNum = dates2Detect(:,1) + timeOffset; 
+boutEndDNum = dates2Detect(:,2) + timeOffset;
+N = length(boutStartDNum);
 
-disp(['Number of Events to run Edetector : ',num2str(N)])
-disp(' ')
+fprintf('Number of Events to run Edetector : %.0f\n\n', N)
 
 % [fd,d1,t1,d2,t2] = textread(tfile,'%s %s %s %s %s');
 % tfile = path/filename for parameter file
@@ -129,45 +167,57 @@ disp(' ')
 % d2 t2 = date time end of bout   'mm/dd/yy' 'HH:MM:SS'
 
 % get drive letter of XWAV folders
-drl = 1;
-k = 1;
-while ~strcmp(num2str(drl),'0')
-    disp('Select Drive with .wav files');
-    drl = uigetdir('C:\','Select Drive with wav folders');
-    dr{k} = drl;   % save disk names in cell array
-    k = k + 1;
+if ~exist('wavDir','var')
+    wavDir = 1;
+    k = 1;
+    while ~strcmp(num2str(wavDir),'0')
+        disp('Select folder with .wav files');
+        wavDir = uigetdir('C:\','Select folder with wav folders');
+        wavDirList{k} = wavDir;   % save folder names in cell array
+        k = k + 1;
+    end
+    ndr = k- 2;    % number of folders
+
+else
+    k = length(wavDir);
+    wavDirList = wavDir;
+    ndr = k;
 end
-ndr = k - 2;    % number of disks
 
 % load dnumstart and associated fullfilenames
 
 % find folder names based on drive names provided
 fk = 1; % folder counter
 for k = 1: ndr          % loop over disks
-    d = dir(dr{k});     % get directory list into structure d
-    ndl = length(d);    % number of files and folders
-    name = char(d.name);      % get name field of d structure
+    fldrName{fk} = wavDirList{k}; % add base directory to folder list
+    fk = fk + 1;
+    
+    % Now check for subfolders that might contain .wav files
+    subDirList = dir([wavDirList{k},'/']);     % get subdirectory list into structure d
+    subDirList = subDirList(3:end); % get rid of the . and .. folders
+    isDir = [subDirList.isdir];
+    subDirListPrune = subDirList(isDir); % remove anythign that isn't a directory
+    ndl = length(subDirListPrune);    % number of files and folders
+    name = char(subDirListPrune.name);      % get name field of d structure
     for m = 1:ndl       % loop over file and folder names
-        fldn = fullfile(dr{k},name(m,:));
+       	fldn = fullfile(wavDirList{k}, subDirListPrune.name(m,:));
         if isdir(fldn) && isempty(regexpi(fldn,'df'))
             fldrName{fk} = fldn;        % save folder names
             fk = fk + 1;
-        end
-    end
+       	end
+    end 
 end
 nf = fk - 1;
 % char(fldrName)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get dnumstart of all raw files in directories
-NK = 0;  % counter for total number of raw files
-fname = [];
-DateRE = '\d*_\d*';
+DateRE = '\d+_\d+';
 for fk = 1 : nf      % loop over folders
     %%%%%%%%%%%%%%%%%%%%%%%%%%%
     % find wav file names in directory
     d = [];
-    d = dir(fullfile(deblank(char(fldrName{fk})),'*.wav'));    % xwav files
+    d = dir(fullfile(deblank(char(fldrName{fk})),'*.wav'));    % wav files
     
     fn = char(d.name);      % file names in directory
     fnsz = size(fn);        % number of data files in directory
@@ -183,20 +233,29 @@ for fk = 1 : nf      % loop over folders
         disp([num2str(nfiles),'  wav data files in directory ',char(fldrName{fk})])
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % read times from each wav file name
-    m = 0 ; % total number of raw files of all wav files  in this directory
-    channel = 1;
-    
+    % read times from each wav file name    
     % loop over wav files and run detector
     for k = 1:nfiles
-        inFileName = fn(k,:);
+        inFileName = fullfile(fldrName{fk},fn(k,:));
         hdrs(k) = ioReadWavHeader(inFileName, DateRE);
-        dnumStart(k,1) = hdrs(k).start.dnum ;
-        byteLoc = hdrs(k).Chunks(1).StartByte;
-        [TT{k},PP{k},SN{k},USN{k},SP{k},USP{k},NSP{k}] = Edetector(hdrs(k),...
-            inFileName,fa,fb,th,lo,pl,tfFreq,tfPower);
-        disp(['Number of Detections in Event = ',num2str(length(TT{k}))])
-        disp(' ')
+        % check if this file overlaps with a time we are interested in
+        thisFileStart = hdrs(k).start.dnum;
+        thisFileEnd = hdrs(k).end.dnum;
+        afterEndList = thisFileStart>=boutEndDNum;
+        beforeStartList = thisFileEnd<=boutStartDNum;
+        % if sum of these two vectors = 0 anywhere, it means the file
+        % overlaps with a time we're interested in. 
+        overlapBouts = find(afterEndList+beforeStartList==0);
+        
+        if ~isempty(overlapBouts)
+            [TT{k},PP{k},SN{k},USN{k},SP{k},USP{k},NSP{k}] = Edetector(hdrs(k),...
+                inFileName,fa,fb,countThresh,lo,pl,tfFreq,tfPower,channel);
+            fprintf('Number of Detections in Event = %.0f\n\n',length(TT{k}))
+        
+        else
+            fprintf('Skipping file %s\n',inFileName)
+            fprintf('Outside bout ranges.\n\n')
+        end
     end
     
 end
@@ -216,7 +275,7 @@ if (un == 1)
 end
 
 % output file with Time and max RL
-[pathstr, name, ext] = fileparts(tfile);
+[pathstr, name, ext] = fileparts(timeFile);
 oname = fullfile(pathstr,[name,'_TPWS.mat']); % TimePeakWaveformSpectra
 if (un == 1)
     save(oname,'MTT','MPP','MSN','MUSN','MSP','MUSP','MNSP')
@@ -231,7 +290,7 @@ disp(['Runtime : ',num2str(t),' seconds'])
 diary off
 
 function [TT,PP,SN,USN,SP,USP,NSP] = Edetector(hdr,fname,...
-    fa,fb,th,lo,pl,tfFreq,tfPower)
+    fa,fb,th,lo,pl,tfFreq,tfPower,channel)
 %
 % function runs simple energy detector on a group of individual raw files
 % which define a single Event as per calling function Edetect
@@ -306,10 +365,11 @@ for k = 1:NRF
     %     fid = fopen(fullfile(dname,fname(R,:)),'r');
     fid = fopen(fname,'r');
     ts = [];
-    ts = ioReadWav(fid,1,startsSec(k),stopsSec(k),'Units','s','Normalise','unscaled');
+    ts = ioReadWav(fid,hdr,startsSec(k),stopsSec(k),'Channels',channel,...
+    'Units','s','Normalize','unscaled');
 %     skip = byte_loc(R);
 %     fseek(fid,skip,-1);    % skip to correct rawfile
-%     spts = byte_length(R) / bps;
+    spts = hdr.xhd.byte_length/bps;
 %     ts = fread(fid,spts,'int16');   % read one time slice ie one raw file
     fts = [];
     fts = filter(b,a,ts);
@@ -347,7 +407,7 @@ for k = 1:NRF
             % amplitude between the two triggered indices
             J(c) = II(m) + M - 1;  % index sample of max amplitude for this detection
             tds = J(c)/fs;
-            T(c) = datenum([0 0 0 0 0 tds]) + startsSec(k) + hdr.start.dnum; % max amplitude detection datenum time
+            T(c) = datenum([0 0 0 0 0 (tds + startsSec(k))]) + hdr.start.dnum; % max amplitude detection datenum time
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % 140919 smw add timeseries snippet and spectra calc output
             
@@ -387,7 +447,7 @@ for k = 1:NRF
         end
     end
     Ndet = c - 1;
-    disp(['Number of Detections in Raw file = ',num2str(Ndet)])
+    disp(['Number of Detections in file segment = ',num2str(Ndet)])
     %
     if (Ndet > 0)
         ppdb = 20.*log10(pp);     % logify

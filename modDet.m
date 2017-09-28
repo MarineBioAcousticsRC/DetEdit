@@ -179,7 +179,7 @@ if ~ isempty(MTT)
         % Calculate parameters and make figure if specified by user in itr_modDet
         switch getParams
             case 'ici&pp'
-                Calicippfunc(MTT,MPP,MSP,outDir,outFileTPWS,p)
+                Calicippfunc(MTT,MPP,MSP,outDir,outFileTPWS,p,srate)
             case 'all'
                 CalPARAMSfunc(MTT,MPP',MSN,filePrefix,sp,outDir,outFileTPWS,p,tf,srate)
             case 'none'

@@ -1,4 +1,4 @@
-function [ ] = Calicippfunc(MTT,MPP,MSP,sdir,detfn,p)
+function [ ] = Calicippfunc(MTT,MPP,MSP,sdir,detfn,p,srate)
 % Calculate the ICI and the PP 
 close all
 

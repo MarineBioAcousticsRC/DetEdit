@@ -1,4 +1,4 @@
-function [ ] = Calicippfunc(MTT,MPP,filePrefix,sp,sdir,detfn,p)
+function [ ] = Calicippfunc(MTT,MPP,MSP,sdir,detfn,p)
 % Calculate the ICI and the PP 
 close all
 
@@ -37,7 +37,7 @@ axis tight
 
 % save ici data and figure
 icifn = strrep(detfn(1:end-4),'TPWS','ici');
-saveas(h22,fullfile(sdir,icifn),'m')
+saveas(h22,fullfile(sdir,icifn))
 saveas(h22,fullfile(sdir,icifn),'png')
 
 %% Peak-to-peak
@@ -70,8 +70,44 @@ axis tight
 
 % Save plot
 ppfn = strrep(detfn(1:end-4),'TPWS','pp');
-saveas(h23,fullfile(sdir,ppfn),'m') 
+saveas(h23,fullfile(sdir,ppfn)) 
 saveas(h23,fullfile(sdir,ppfn),'png') 
+
+%% Peak Frequency
+smsp2 = size(MSP,2);% 2nd element is num fft points
+ift = 1:smsp2;
+fmsp = ((srate/2)/(smsp2-1))*ift - (srate/2)/(smsp2-1);
+
+[~,im] = max(MSP(:,p.frRange(1):p.frRange(2)),[],2); % maximum between flow-100kHz       
+peakFr = fmsp(im + p.frRange(1)-1);
+
+% statistics
+mpeakFr = mean(peakFr);
+sdpeakFr = std(peakFr);
+mepeakFr = median(peakFr);
+mopeakFr = mode(peakFr);
+
+% Plot histogram
+h24 = figure(24);
+nbinsfr = (p.frRange(1):p.frRange(2));
+[y,centers] = hist(peakFr,nbinsfr);
+bar(centers,y);
+title(sprintf('N=%d',length(peakFr)));
+xlabel('Peak Frequency (kHz)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mpeakFr);
+stdlabel = sprintf('Std = %0.2f', sdpeakFr);
+melabel = sprintf('Median = %0.2f', mepeakFr);
+molabel = sprintf('Mode = %0.2f', mopeakFr);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+% save ici data and figure
+pffn = strrep(detfn(1:end-4),'TPWS','peak');
+saveas(h24,fullfile(sdir,pffn))
+saveas(h24,fullfile(sdir,pffn),'png')
 
 % %% Excel
 % % xls for Danielle

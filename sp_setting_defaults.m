@@ -197,6 +197,7 @@ switch analysis
         end
     case {'modDet'} 
         spParams.tfSelect = tfSelect;
+        spParams.threshRL = threshRL;
         spParams.dbRange = dbRange;
         spParams.iciRange = iciRange;
         spParams.frRange = frRange;

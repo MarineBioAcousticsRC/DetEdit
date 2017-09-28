@@ -1,6 +1,6 @@
 function PathFileList = findTfFile(indir,stationDeploy)
 
-if size(stationDeploy,1) > 1 || size(stationDeploy,2) > 1
+if (size(stationDeploy,1) > 1 || size(stationDeploy,2) > 1) && iscell(stationDeploy)
    stationDeploy = stationDeploy{2}; % skip site name if given 
 end
 if iscell(stationDeploy)

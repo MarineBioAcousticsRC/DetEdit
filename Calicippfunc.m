@@ -37,7 +37,7 @@ axis tight
 
 % save ici data and figure
 icifn = strrep(detfn(1:end-4),'TPWS','ici');
-saveas(h22,fullfile(sdir,icifn))
+%saveas(h22,fullfile(sdir,icifn))
 saveas(h22,fullfile(sdir,icifn),'png')
 
 %% Peak-to-peak
@@ -70,7 +70,7 @@ axis tight
 
 % Save plot
 ppfn = strrep(detfn(1:end-4),'TPWS','pp');
-saveas(h23,fullfile(sdir,ppfn)) 
+%saveas(h23,fullfile(sdir,ppfn)) 
 saveas(h23,fullfile(sdir,ppfn),'png') 
 
 %% Peak Frequency
@@ -92,6 +92,7 @@ h24 = figure(24);
 nbinsfr = (p.frRange(1):p.frRange(2));
 [y,centers] = hist(peakFr,nbinsfr);
 bar(centers,y);
+xlim([0,srate/2])
 title(sprintf('N=%d',length(peakFr)));
 xlabel('Peak Frequency (kHz)')
 
@@ -106,7 +107,7 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
 % Save plot
 % save ici data and figure
 pffn = strrep(detfn(1:end-4),'TPWS','peak');
-saveas(h24,fullfile(sdir,pffn))
+%saveas(h24,fullfile(sdir,pffn))
 saveas(h24,fullfile(sdir,pffn),'png')
 
 % %% Excel

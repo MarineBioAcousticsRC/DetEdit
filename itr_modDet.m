@@ -4,7 +4,7 @@
 
 clearvars
 clear global
-filePrefix = 'GofMX_GC01'; % File name to match. 
+filePrefix = 'GofMX_MC02'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
@@ -14,7 +14,8 @@ sp = 'Pm'; % your species code
 itnum = '1'; % which iteration you are looking for
 getParams = 'ici&pp'; % Calculate Parameterss: 
 %                   -> 'none' do NOT compute parameters
-%                   -> 'ici&pp' only to compute peak-to-peak and ici
+%                   -> 'ici&pp' only to compute peak-to-peak, ici and
+%                   peakFr
 %                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur
 srate = 200; % sample rate
 gth = .5;  % gap time in hrs between sessions
@@ -55,5 +56,5 @@ for iD = 1:length(fileMatchIdx);
             'getParams',getParams)
     end
 end
-
+close all
 disp('Done processing')

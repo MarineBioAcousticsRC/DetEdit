@@ -133,12 +133,8 @@ disp(['Number of Final Detections = ',num2str(length(DT1))]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % ID Detections
-zFDfn = strrep(detfn,inTPWS,['ID',itnum]);
-load(fullfile(sdir,zFDfn)) % false detections vector : zFD
-if ~isempty(zID)
-    [~,II] = setdiff(zID(:,1)',DT0);
-    zID = zID(II,:);
-end
+zIDfn = strrep(detfn,inTPWS,['ID',itnum]);
+load(fullfile(sdir,zIDfn)) % false detections vector : zFD
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % save modified detection to output file
 outFileTPWS = strrep(detfn,inTPWS,outTPWS);

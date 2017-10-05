@@ -21,7 +21,7 @@ detEdit_settings
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
-p = sp_setting_defaults(sp,srate);
+p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','detEdit','spParamsUser',spParamsUser);
 
 %% Check if TPWS file exists
 % Concatenate parts of file name
@@ -37,7 +37,7 @@ fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
     % if no matches, throw error
     error('No files matching filePrefix found!')
-elseif length(fileMatchIdx)>1 
+elseif length(fileMatchIdx)>1
     % if more than one match, throw error
     error('Multiple TPWS files match the filePrefix. Make the prefix more specific.')
 end
@@ -466,11 +466,11 @@ while (k <= nb)
                     badClickTime = clickTimes(pxmspAll < p.threshRMS &...
                         xmppAll' < p.threshPP);  % for all false if below RMS threshold
                 else
-                    badClickTime = clickTimes(pxmspAll < p.threshRMS);  
+                    badClickTime = clickTimes(pxmspAll < p.threshRMS);
                 end
-                    disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
-                    zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-                    save(fnameFD,'zFD')
+                disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
+                zFD = [zFD; badClickTime];   % cummulative False Detection matrix
+                save(fnameFD,'zFD')
             end
             if p.threshPP > 0
                 xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
@@ -620,7 +620,7 @@ while (k <= nb)
         JID = J(K3);
         JMD = J(K4);
         JFIM = union(union(JFD,JID),JMD);
-        JFM = union(JFD,JMD); 
+        JFM = union(JFD,JMD);
         [Jtrue,iJ,~]= setxor(J,JFIM); % find all true detections
         %[JtrueWithID,~,~]= setxor(J,JFM); % find all true detections no ID
         trueTimes = clickTimes(Jtrue);% vector of true times in this session
@@ -692,7 +692,7 @@ while (k <= nb)
         h50 = gca;
         figure(52);clf;set(52,'name','Waveform')
         h52 = gca;
-        trueSpec = [];   
+        trueSpec = [];
         if ~isempty(trueTimes)
             % plot average true click spectrum
             trueSpec = norm_spec_simple(cspJtrue,fimint,fimaxt);
@@ -887,7 +887,7 @@ while (k <= nb)
     grid(h50,'on')
     xlim(h50, 'manual');
     ylim(h50,[0 1]);
-    xlim(h50,[p.fLow,p.fHi]) 
+    xlim(h50,[p.fLow,p.fHi])
     
     xlabel(h51,'dB RMS')
     ylabel(h51,'dB Peak-to-peak')
@@ -1137,7 +1137,7 @@ while (k <= nb)
         onerun = 1;
         
     elseif (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
-                if ~isempty(XFD)
+        if ~isempty(XFD)
             zTD(k,2) = 0;
             for inxfd = 1 : zTD(k,1)
                 axes(hA201(1))
@@ -1148,23 +1148,23 @@ while (k <= nb)
                 disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
                 if (specploton == 1)
                     hold(h50,'on')  % add click to spec plot in BLACK
-                    plot(h50,ft,trueSpec(fi),'Linewidth',2);
+                    plot(h50,ft,trueSpec,'Linewidth',2);
                     clickInBoutIdx = find(t==testTimes);
                     testSnip = csnJtrue(clickInBoutIdx,:);
                     testSpectrum = cspJtrue(clickInBoutIdx,:);
-
+                    
                     
                     % make low freq part = 0
                     tempSPEC = norm_spec_simple(testSpectrum,fimint,fimaxt);
                     xH0 = plot(h50,ft,tempSPEC,'k','Linewidth',4);
                     hold(h50,'off')
-
+                    
                     hold(h52,'on') % add click to waveform plot in BLACK
-                    xH2 = plot(h52,testSnip,'k');
+                    xH2 = plot(h52,norm_wav(testSnip)' + 1.5,'k');
                     hold(h52,'off')
                     
                     hold(h51,'on')
-                    % get click index relative to bout 
+                    % get click index relative to bout
                     xH1 = plot(h51,pxmsp(clickInBoutIdx),xmpp(clickInBoutIdx),'ro','MarkerSize',10,...
                         'LineWidth',2);
                     hold(h51,'off')
@@ -1184,9 +1184,9 @@ while (k <= nb)
             end
             disp([' Tested: ',num2str(zTD(k,1)),' False: ',...
                 num2str(zTD(k,2))]);
-           
+            
         end
-        k = k+1;    
+        k = k+1;
     elseif (strcmp(cc,'w') && (zTD(k,2) > 0));  % test 5 min window
         % Test 5 min window
         zTD = test_false_bins(k,zTD,xt,xPP,binCX);

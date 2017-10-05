@@ -50,7 +50,7 @@ end
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
-p = sp_setting_defaults(sp,srate);
+p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','mkLTSA');
 
 % user interface to get TF file
 if (p.tfSelect > 0)
@@ -208,6 +208,10 @@ if ~isempty(p.minDur)
         end
         minbcount = minbcount + 1;
     end
+    % only if start or end time pass the ltsa time after adding minimum
+    % duration
+    sb(sb<sTime(1)) = sTime(1);
+    eb(eb>eTime(end)) = eTime(end);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -1,89 +1,157 @@
-function [ ] = Calicippfunc(MTT,MPP,stn,dpn,spe,pn1,icimin,icimax)
+function [ ] = Calicippfunc(MTT,MPP,MSP,sdir,detfn,p,srate)
 % Calculate the ICI and the PP 
+close all
 
-icifn = [stn,dpn,'_',spe,'_ici'];
-icifnfig = [stn,dpn,'_',spe,'_ici2.pdf'];
-xlsfn = [stn,dpn,'_',spe,'_ici2.xls'];
-ppfn = [stn,dpn,'_',spe,'_pp'];
-ppfnfig = [stn,dpn,'_',spe,'_pp2.pdf'];
-ppxlsfn = [stn,dpn,'_',spe,'_pp2.xls'];
-% fn = fullfile(detpn,detfn);
-fn1 = fullfile(pn1,'\',icifn);
-fn2 = fullfile(pn1,'\',icifnfig);
-fn3 = fullfile(pn1,'\',xlsfn);
-fn4 = fullfile(pn1,'\',ppfn);
-fn5 = fullfile(pn1,'\',ppfnfig);
-%
-ctnf = MTT;
-ppnf = MPP;
-% end
-ici = diff(ctnf)*24*60*60;
-%define threshold for short ici to be 50 ms and long to be 1000 ms
-iciIdx = find(ici > icimin & ici < icimax);
-figure(22)
-hist(ici(iciIdx),100);
-icif = ici(iciIdx);
-micif = mean(icif);
-sdicif = std(icif);
-icistr=[stn,' ',dpn,' ',spe,' ','Mean= ',num2str(micif),...
-    ' StDev= ',num2str(sdicif),' Number= ',num2str(length(ctnf))];
-title(icistr)
-xlabel('Inter-Pulse Interval (s)')
-%save(fn1,'icif','-ascii')
-save(fn1,'icif')
-saveas(gcf,fn2,'pdf')
-% Save peak-peak data
-figure(23)
-hist(ppnf,100);
-mpp = mean(ppnf);
-sdpp = std(ppnf);
-ppstr=[stn,' ',dpn,' ',spe,' ','Mean= ',num2str(mpp),...
-    'dB  StDev= ',num2str(sdpp),' Number= ',num2str(length(ppnf))];
-title(ppstr)
-xlabel('Peak-Peak Amplitude')
-save(fn4,'ppnf')
-saveas(gcf,fn5,'pdf')
-% xls for Danielle
-icixls = datevec(ctnf(1:end-1));
-icixls = [icixls, ici'];
-%xlswrite(fn3,icixls);  % write time and click count by bin data to XLS
-% Open Excel, add workbook, change active worksheet,
-% get/put array, save, and close
-% First open an Excel Server
-Excel = actxserver('Excel.Application');
-set(Excel, 'Visible', 1);
-% Insert a new workbook
-Workbooks = Excel.Workbooks;
-Workbook = invoke(Workbooks, 'Add');
-% Make the second sheet active
-Sheets = Excel.ActiveWorkBook.Sheets;
-sheet2 = get(Sheets, 'Item', 1);
-invoke(sheet2, 'Activate');
-% Get a handle to the active sheet
-Activesheet = Excel.Activesheet;
-% Put a MATLAB array into Excel
-%A = [1 2; 3 4];  
-A = icixls;
-la = length(A);
-rstrg = ['A1:G',num2str(la)];
-ActivesheetRange = get(Activesheet,'Range',rstrg);
-set(ActivesheetRange, 'Value', A);
-% Get back a range.  It will be a cell array, 
-% since the cell range can
-% contain different types of data.
-% Range = get(Activesheet, 'Range', 'A1:B2');
-% B = Range.value;
-% % Convert to a double matrix.  The cell array must contain only scalars.
-% B = reshape([B{:}], size(B));
-% Now save the workbook
-%invoke(Workbook, 'SaveAs', 'myfile.xls');
-invoke(Workbook, 'SaveAs', fn3);
-% To avoid saving the workbook and being prompted to do so,
-% uncomment the following code.
-Workbook.Saved = 1;
-invoke(Workbook, 'Close');
-% Quit Excel
-invoke(Excel, 'Quit');
-% End process
-delete(Excel);
+%% Inter-Click Interval
+ici = diff(MTT)*24*60*60*1000; % in ms
+
+% apply user range for ici
+if isempty(p.iciRange)
+    p.iciRange = [min(ici) max(ici)];
+end
+iciSel = ici(ici > p.iciRange(1) & ici < p.iciRange(2));
+
+% statistics
+miciSel = mean(iciSel);
+sdiciSel = std(iciSel);
+moiciSel = mode(iciSel);
+meiciSel = median(iciSel);
+
+% plot ici histogram
+h22= figure(22);
+nbinsici = (p.iciRange(1):p.iciRange(2));
+[y,centers] = hist(iciSel,nbinsici);
+bar(centers,y);
+xlim(p.iciRange);
+title(sprintf('N=%d',length(MTT)))
+xlabel('Inter-Pulse Interval (ms)')
+ylabel('Counts')
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', miciSel);
+stdlabel = sprintf('Std = %0.2f', sdiciSel);
+melabel = sprintf('Median = %0.2f', meiciSel);
+molabel = sprintf('Mode = %0.2f', moiciSel);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+axis tight
+
+% save ici data and figure
+icifn = strrep(detfn(1:end-4),'TPWS','ici');
+%saveas(h22,fullfile(sdir,icifn))
+saveas(h22,fullfile(sdir,icifn),'png')
+
+%% Peak-to-peak
+% apply user range for db
+if isempty(p.dbRange)
+    p.dbRange = [min(MPP) max(MPP)];
+end
+% statistics
+mpp = mean(MPP); 
+sdpp = std(MPP);
+mopp = mode(MPP); 
+mepp = median(MPP);
+
+% Plot histogram
+h23 = figure(23);
+nbinsdb = (p.dbRange(1):p.dbRange(2));
+[y,centers] = hist(MPP,nbinsdb);
+bar(centers,y)
+title(sprintf('N=%d',length(MPP)))
+xlabel('Peak-Peak Amplitude (dB)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mpp);
+stdlabel = sprintf('Std = %0.2f', sdpp);
+melabel = sprintf('Median = %0.2f', mepp);
+molabel = sprintf('Mode = %0.2f', mopp);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+axis tight
+
+% Save plot
+ppfn = strrep(detfn(1:end-4),'TPWS','pp');
+%saveas(h23,fullfile(sdir,ppfn)) 
+saveas(h23,fullfile(sdir,ppfn),'png') 
+
+%% Peak Frequency
+smsp2 = size(MSP,2);% 2nd element is num fft points
+ift = 1:smsp2;
+fmsp = ((srate/2)/(smsp2-1))*ift - (srate/2)/(smsp2-1);
+
+[~,im] = max(MSP(:,p.frRange(1):p.frRange(2)),[],2); % maximum between flow-100kHz       
+peakFr = fmsp(im + p.frRange(1)-1);
+
+% statistics
+mpeakFr = mean(peakFr);
+sdpeakFr = std(peakFr);
+mepeakFr = median(peakFr);
+mopeakFr = mode(peakFr);
+
+% Plot histogram
+h24 = figure(24);
+nbinsfr = (p.frRange(1):p.frRange(2));
+[y,centers] = hist(peakFr,nbinsfr);
+bar(centers,y);
+xlim([0,srate/2])
+title(sprintf('N=%d',length(peakFr)));
+xlabel('Peak Frequency (kHz)')
+
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mpeakFr);
+stdlabel = sprintf('Std = %0.2f', sdpeakFr);
+melabel = sprintf('Median = %0.2f', mepeakFr);
+molabel = sprintf('Mode = %0.2f', mopeakFr);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+% save ici data and figure
+pffn = strrep(detfn(1:end-4),'TPWS','peak');
+%saveas(h24,fullfile(sdir,pffn))
+saveas(h24,fullfile(sdir,pffn),'png')
+
+% %% Excel
+% % xls for Danielle
+% vecTimes = datevec(MTT(1:end-1));
+% icixls = [vecTimes, ici];
+% %xlswrite(fn3,icixls);  % write time and click count by bin data to XLS
+% % Open Excel, add workbook, change active worksheet,
+% % get/put array, save, and close
+% % First open an Excel Server
+% Excel = actxserver('Excel.Application');
+% set(Excel, 'Visible', 1);
+% % Insert a new workbook
+% Workbooks = Excel.Workbooks;
+% Workbook = invoke(Workbooks, 'Add');
+% % Make the second sheet active
+% Sheets = Excel.ActiveWorkBook.Sheets;
+% sheet2 = get(Sheets, 'Item', 1);
+% invoke(sheet2, 'Activate');
+% % Get a handle to the active sheet
+% Activesheet = Excel.Activesheet;
+% % Put a MATLAB array into Excel
+% %A = [1 2; 3 4];  
+% A = icixls;
+% la = length(A);
+% rstrg = ['A1:G',num2str(la)];
+% ActivesheetRange = get(Activesheet,'Range',rstrg);
+% set(ActivesheetRange, 'Value', A);
+% % Get back a range.  It will be a cell array, 
+% % since the cell range can
+% % contain different types of data.
+% % Range = get(Activesheet, 'Range', 'A1:B2');
+% % B = Range.value;
+% % % Convert to a double matrix.  The cell array must contain only scalars.
+% % B = reshape([B{:}], size(B));
+% % Now save the workbook
+% xlsfn = strrep(icifn,'.mat','.xls');
+% invoke(Workbook, 'SaveAs', xlsfn);
+% % To avoid saving the workbook and being prompted to do so,
+% % uncomment the following code.
+% Workbook.Saved = 1;
+% invoke(Workbook, 'Close');
+% % Quit Excel
+% invoke(Excel, 'Quit');
+% % End process
+% delete(Excel);
 

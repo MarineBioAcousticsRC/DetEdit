@@ -9,15 +9,14 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-stn = 'MC01_'; % site name
-dpn = 'disk01_'; % deployment number (or disk01-08)
-itnum = '2'; % iteration
+filePrefix = 'MC02_disk15'; % File name to match. should include deployment, site, (disk is optional)
+itnum = '1'; % iteration
 srate = 200; % sample rate
 sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 1000; % Interval to check for false detections
-sdir = 'F:\GOM_clickTypePaper_detections\TPWS\MC01_02_03_TPWS\FP_rate_set'; %Directory with TPWS files
+sdir = 'E:\Data\SpermWhale_Test_Set-20170822T170916Z-001\SpermWhale_Test_Set'; %Directory with TPWS files
 tfName = 'E:\TF_files'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
@@ -40,7 +39,7 @@ colorTab = round(colorTab.*100)/100;
 % Comment these in as needed to override detEdit defaults
 
 spParamsUser.ltsaLims = [0,100]; % min and max ylimits in kHz for ltsa plot
-spParamsUser.ltsaMax = 6; % ltsa maximum duration per session
+spParamsUser.ltsaMax = 3; % ltsa maximum duration per session
 spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 % spParamsUser.specChar = 'Unk';  %Simone abbreviation for species
 spParamsUser.speName = '';%Delphin';  % Species code used in file names 

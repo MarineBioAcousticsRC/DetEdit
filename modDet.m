@@ -1,145 +1,199 @@
-% modDetKO.m
+function modDet(varargin)
+% modDet.m
 % modify detections based on analyst input
 % originally based on jah/smw GoM beaked whale detector work
-% JAH
+%
 % 140305 smw
-% 140318 jah  141003 jah modified for TPWS files 
+% 140318 jah  141003 jah modified for TPWS files
 % 150813 jah for KO
 %
 % algorithm:
 % per site and species
-% DT1 = DT0 - FD 
+% DT1 = DT0 - zFD
 % where
 % DT0 = current true detection times
 % DT1 = modifed detection times
 % from analyst input :
-% FD = false detections times (eg ships, others species)
-%
-clear all
-% thres = 116;  % detection threshold 116 dB
+% zFD = false detections times (eg ships, others species)
+
 % get user input and set up file names
-stn = input('Enter Site name (MC GC DT): ','s'); % site name
-dpn = input('Enter Deployment number (01 02 ...): ','s');     % deployment number
-itnum = input('Enter Iteration number (1 2 ...) IN: ','s');  
-itnumo = input('Enter Iteration number (1 2 ...) OUT: ','s');  
-sp = input('Enter Species: Zc Me BWG Md Ko De ','s');
-if (strcmp(sp,'Ko') || strcmp(sp,'k'))
-    specchar = 'K'; %Simone abbreviation for species
-    spe = 'Kogia';  tfselect = 80000; % freq used for transfer function
-    icimin = 0.05; icimax = .3;
-    thres = 116; % dB threshold
-elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
-    specchar = 'Z'; %Simone abbreviations for BW species
-    spe = 'Cuviers';  tfselect = 40200; % freq used for transfer function
-    icimin = 0.05; icimax = .7;
-    thres = 121; % dB threshold
-elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
-    specchar = 'M'; %Simone abbreviations for BW species
-    spe = 'Gervais'; tfselect = 40200; % freq used for transfer function
-    icimin = 0.05; icimax = .5;
-    thres = 121; % dB threshold
-elseif (strcmp(sp,'BWG') || strcmp(sp,'g'))
-    specchar = 'G'; %Simone abbreviations for BW species
-    spe = 'BWG';  tfselect = 40200; % freq used for transfer function
-elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
-    specchar = 'D'; %Simone abbreviations for BW species
-    spe = 'BW31';  tfselect = 40200; % freq used for transfer function
-elseif (strcmp(sp,'De') || strcmp(sp,'de'))
-    %specchar = 'D'; %Simone abbreviations for BW species
-    spe = 'Delphin';  tfselect = 0; % freq used for transfer function
-    icimin = 0.05; icimax = .3;
-    thres = 136.9; % dB threshold
-else
-    disp(' Bad Species type')
-    return
+n = 1;
+while n <= length(varargin)
+    switch varargin{n}
+        case 'filePrefix'
+            filePrefix = varargin{n+1}; n=n+2;
+        case 'detfn'
+            detfn = varargin{n+1}; n=n+2;
+        case 'sp'
+            sp = varargin{n+1}; n=n+2;
+        case 'sdir'
+            sdir = varargin{n+1}; n=n+2;
+        case 'srate'
+            srate = varargin{n+1}; n=n+2;
+        case 'itnum'
+            itnum = varargin{n+1}; n=n+2;
+        case 'getParams'
+            getParams = varargin{n+1}; n=n+2;
+        case 'tfName'
+            tfName = varargin{n+1}; n=n+2;
+        otherwise
+            error('Bad optional argument: "%s"', varargin{n});
+    end
 end
-%  Transfer Function
-disp('Load Transfer Function File');
-[fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
-tffn = fullfile(pname,fname);
-if strcmp(num2str(fname),'0')
-    disp('Cancelled TF File');
-    return
-else %give feedback
+
+secInDay = 60*60*24; % convert seconds to days
+
+%% define output directory
+newitnum = num2str(str2double(itnum)+1);
+inTPWS = ['TPWS',itnum];
+outTPWS = ['TPWS',newitnum];
+
+outDir = fullfile(sdir,outTPWS);
+if ~isdir(outDir)
+    disp(['Make new folder: ',outDir])
+    mkdir(outDir)
+end
+
+%% Load Settings preferences
+% Get parameter settings worked out between user preferences, defaults, and
+% species-specific settings:
+p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','modDet');
+
+
+%% user interface to get TF file
+if (p.tfSelect > 0) || ~isempty(strfind(getParams,'all'))
+    if ~exist('tfName','var')% user interface to get TF file
+        disp('Load Transfer Function File');
+        [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
+        tffn = fullfile(pname,fname);
+    else % or get it automatically from tf directory provided in settings
+        stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
+        tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
+    end
     disp(['TF File: ',tffn]);
-end
-fid = fopen(tffn);
-[A,count] = fscanf(fid,'%f %f',[2,inf]);
-tffreq = A(1,:);
-tfuppc = A(2,:);
-fclose(fid);
-if (tfselect > 0)
-    tf = interp1(tffreq,tfuppc,tfselect,'linear','extrap');
-    disp(['TF @',num2str(tfselect),' Hz =',num2str(tf)]);
+    
+    fid = fopen(tffn);
+    [A,~] = fscanf(fid,'%f %f',[2,inf]);
+    tffreq = A(1,:);
+    tfuppc = A(2,:);
+    fclose(fid);
+    
+    if(p.tfSelect > 0)
+        tf = interp1(tffreq,tfuppc,p.tfSelect,'linear','extrap');
+        disp(['TF @',num2str(p.tfSelect),' Hz =',num2str(tf)]);
+    end
+    if ~isempty(strfind(getParams,'all'))
+        BinkHz = 0:1:srate/2;
+        tf = interp1(tffreq,tfuppc,BinkHz,'linear','extrap');
+        disp('TF Applied to get parameters');
+    end
 else
     tf = 0;
-    disp('No TF Applied');
+    disp('No TF Applied')
 end
-% detection file
-disp('Select Directory with Detections');
-sdir = uigetdir('I:\','Select Directory with Detections');
-pn1 = [sdir,'\'];
-dpst = [stn,dpn];
-% Current Detections
-MTT = [];  MPP = [];  MSN = [];  MSP =[];
-ia = []; ic = [];
-fn1 = [dpst,'_',spe,'_TPWS',itnum,'.mat'];
-DTfn = fullfile(pn1,fn1);% detection time file
-load(DTfn)  % detection time and RL vectors: MTT, MPP, MSN, MSP
-[DT0,ia,ic] = unique(MTT);   
-disp([' non-unique removed: ',num2str(length(ic)- length(ia))]);
-RL0 = MPP(ia)' + tf;
-SN0 = MSN(ia,:);  % n by 202
-SP0 = MSP(ia,:);  % n by 101
-disp([' DT0: ',num2str(length(DT0))]);
-% remove low amplitude 
-ib = find(RL0 >= thres);
-disp([' Removed too low:',num2str(length(ia)-length(ib))]);
-DTb = DT0(ib);
-RLb = RL0(ib)';
-SNb = SN0(ib,:);  
-SPb = SP0(ib,:);  
-% False Detections
-fn2 = [dpst,'_',spe,'_FD',itnum,'.mat'];
-FDfn = fullfile(pn1,fn2); % false detection time file
-load(FDfn)  % false detections vector : zFD
-FD = unique(zFD);
-disp([' FD: ',num2str(length(FD)),' Current: ', ...
-     num2str(length(intersect(DTb,FD)))]);
+
+%% load original TPWS file
+try
+    load(fullfile(sdir,detfn))
+catch
+    error('Unable to read file %s. Not such file in directory: %s',detfn,sdir)
+end
+
+% inititalize
+DT0 = []; DT1 = [];
+RL0 = []; RL1 = [];
+SN0 = []; SN1 = [];
+SP0 = []; SP1 = [];
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-DTa = [];  
-RLa = [];  
-SNa = [];  
-SPa = [];  
-% remove false detections 
-IA = [];
-[DTa,IA] = setdiff(DTb',FD); % data in DT0 that is not in FD
-RLa = RLb(IA);
-SNa = SNb(IA,:);
-SPa = SPb(IA,:);
-disp([' DTb - FD: ',num2str(length(DTa))]);
-% make unique and sort by time
-IC = []; IA = [];
-DT1 = []; RL1 = []; SN1 = []; SP1 = [];
-[DT1,IA,IC] = unique(DTa,'sorted');
-nonu = length(IC)- length(IA);
-disp([' non-unique removed: ',num2str(nonu)]);
-RL1 = RLa(IA);
-SN1 = SNa(IA,:);
-SP1 = SPa(IA,:);
-disp([' Final Detections: ',num2str(length(DT1))]);
-% save modified detection file out
+% remove low amplitude (if threshold is changed)
+ib = find(MPP >= p.threshRL);
+disp([' Removed too low:',num2str(length(MPP)-length(ib))]);
+DT0 = MTT(ib);
+RL0 = MPP(ib);
+SN0 = MSN(ib,:);
+SP0 = MSP(ib,:);
+
+% empty variables to fill later with modified detections
 MTT = []; MPP = []; MSN = [];  MSP = [];
-MTT = DT1'; MPP = RL1' - tf; MSN = SN1; MSP = SP1;
-fn8 = [dpst,'_',spe,'_TPWS',itnumo,'.mat'];
-ofn = fullfile(pn1,fn8);
-save(ofn,'MTT','MPP','MSN','MSP');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%    
+% False Detections
+zFDfn = strrep(detfn,inTPWS,['FD',itnum]);
+load(fullfile(sdir,zFDfn)) % false detections vector : zFD
+
+% remove false detections
+% DT1 = % data in DT0 that is not in zFD
+[DT1,IA] = setdiff(DT0',zFD); % setdiff already sorts the data
+RL1 = RL0(IA);
+SN1 = SN0(IA,:);
+SP1 = SP0(IA,:);
+disp(['Number of Starting Detections = ',num2str(length(DT0))]);
+disp(['Number of Final Detections = ',num2str(length(DT1))]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ID Detections
+zIDfn = strrep(detfn,inTPWS,['ID',itnum]);
+load(fullfile(sdir,zIDfn)) % false detections vector : zFD
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% save modified detection to output file
+outFileTPWS = strrep(detfn,inTPWS,outTPWS);
+outFileID = strrep(outFileTPWS,'TPWS','ID');
+
+MTT = DT1';
+MSN = SN1;
+MSP = SP1;
+if (p.tfSelect > 0);
+    MPP = RL1 + tf;
+else
+    MPP = RL1;
+end
+
+% check if there is at least one encounter longer than 75s, if not
+% do not store TPWS file
+disp(['Save ',fullfile(outDir,outFileID)])
+save(fullfile(outDir,outFileID),'zID','-v7.3')
 disp('Done Modifying File')
-% Make ICI and PP plots and 5 min bins
-Calicippfunc(MTT,RL1',stn,dpn,spe,pn1,icimin,icimax)
+        
+if ~ isempty(MTT)
+    dt = diff(MTT)*secInDay;
+    I = find(dt>p.gth*60*60);
+    sb = [MTT(1); MTT(I+1)];
+    eb = [MTT(I); MTT(end)];
+    bd = (eb - sb);
+    bdI = find(bd > (p.minBout / secInDay)); % find bouts longer than the minimum (75s)
+    
+    if ~isempty(bdI)
+        disp(['Save ',fullfile(outDir,outFileTPWS)])
+        if exist('f','var')
+            save(fullfile(outDir,outFileTPWS),'f','MTT','MPP','MSN','MSP','-v7.3')
+        else
+            warning('no frequency vector available')
+            save(fullfile(outDir,outFileTPWS),'MTT','MPP','MSN','MSP','-v7.3')
+        end
+        
+        % Calculate parameters and make figure if specified by user in itr_modDet
+        switch getParams
+            case 'ici&pp'
+                Calicippfunc(MTT,MPP,MSP,outDir,outFileTPWS,p,srate)
+            case 'all'
+                CalPARAMSfunc(MTT,MPP',MSN,filePrefix,sp,outDir,outFileTPWS,p,tf,srate)
+            case 'none'
+                disp('No parameters calculated')
+            otherwise
+                fprintf(['Wrong name to call parameters, see itr_modDet:\n -all- for all parameters',...
+                    '\n -ici&pp- for computing only ici and pp \n -none- No parameters'])
+        end
+    else
+         disp(['No encounter longer than minimum bout (',num2str(p.minBout),') in file: ',outFileTPWS])
+    end
+else
+    disp(['No true detections in file: ',outFileTPWS])
+end
+% add this in function Density
 %binDur bin duration = 1 minute
 %CalBinfun(stn,dpn,itnumo,1)
-%
+
 
 
 

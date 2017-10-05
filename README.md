@@ -2,6 +2,9 @@
 
 Visual user-interface for acoustic detection annotation designed for use with HARP data (x.wav files).
 
+Examples of detEdit with different species:
+https://drive.google.com/drive/folders/0B1N3RJM5Uw4ha25lVEhLRF9FMUk
+
 ----------
 Author: John A. Hildebrand, based on initial version by Sean M. Wiggins.
 

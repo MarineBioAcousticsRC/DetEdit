@@ -905,11 +905,10 @@ while (k <= nb)
     figure(201);clf
     set(201,'name','LTSA and time series')
     hA201 = subplot_layout; % Top panel, Figure 201: Received Level
-    axes(hA201(1))
-    plot(t,RL,'b.','UserData',t)
-    hold on
+    plot(hA201(1),t,RL,'b.','UserData',t)
+    hold(hA201(1),'on')
     if ff2 % plot False detections in red
-        plot(tfd,rlFD,'r.','UserData',tfd)
+        plot(hA201(1),tfd,rlFD,'r.','UserData',tfd)
         % disp([' false det plotted:',num2str(length(tfd))])
     end
     if ff3 % plot ID'd detections in associated color
@@ -917,34 +916,34 @@ while (k <= nb)
         specIDs = unique(spCodeSet); % get unigue species codes
         for iC2 = 1:length(specIDs) % set colors
             thisIDset = spCodeSet ==specIDs(iC2);
-            hRLID = plot(tID(thisIDset),rlID(thisIDset),'.','UserData',tID(thisIDset));
+            hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.','UserData',tID(thisIDset));
             set(hRLID,'Color',colorTab(specIDs(iC2),:))
         end
     end
     if ff4 % plot MD detections in green
-        plot(tMD,rlMD,'g.','UserData',tfd)
+        plot(hA201(1),tMD,rlMD,'g.','UserData',tfd)
     end
-    hold off
-    axis([PT(1) PT(end) p.rlLow p.rlHi])
-    datetick('x',15,'keeplimits')
-    grid on
+    hold(hA201(1),'off')
+    axis(hA201(1),[PT(1) PT(end) p.rlLow p.rlHi])
+    datetick(hA201(1),'x',15,'keeplimits')
+    grid(hA201(1),'on')
     tstr(1) = {fnTPWS};
     tstr(2) = {['Session: ',num2str(k),'/',num2str(nb),' Start Time ',...
         datestr(sb(k)),' Detect = ',num2str(nd)]};
-    title(tstr);
-    ylabel('RL [dB re 1\muPa]')
+    title(hA201(1),tstr);
+    ylabel(hA201(1),'RL [dB re 1\muPa]')
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    axes(hA201(2))% middle panel LTSA
+    % middle panel LTSA
     c = (p.ltsaContrast/100) .* pwr1 + p.ltsaBright;
-    image(PT,f/1000,c)
-    set(gca,'yDir','normal')
-    axis([PT(1) PT(end) p.ltsaLims])%v2(4)
-    ylabel('Frequency (kHz)')
-    datetick('keeplimits')
+    image(PT,f/1000,c,'parent',hA201(2))
+    set(hA201(2),'yDir','normal')
+    axis(hA201(2),[PT(1) PT(end) p.ltsaLims])%v2(4)
+    ylabel(hA201(2),'Frequency (kHz)')
+    datetick(hA201(2),'keeplimits')
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    axes(hA201(3)) % Bottom panel, Figure 201: Inter-Detection Interval
+    % Bottom panel, Figure 201: Inter-Detection Interval
     % make two copies of dt points for brush
     tdt2 = [];
     dt2 = [];
@@ -953,7 +952,7 @@ while (k <= nb)
         tdt2 = reshape([t(1:ldt),t((1:ldt)+1)]',2*ldt,1);
         dt2 = reshape([dt,dt]',2*ldt,1);
         
-        [AX,H1,H2] = plotyy(tdt2,dt2,binT,binC,'plot','semilogy');
+        [AX,H1,H2] = plotyy(hA201(3),tdt2,dt2,binT,binC,'plot','semilogy');
         set(H1,'Marker','.','MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
         set(H2,'Marker','o','MarkerFaceColor','c','LineStyle','none',...
             'Markersize',4.5,'UserData',dt2)
@@ -961,29 +960,26 @@ while (k <= nb)
         % using "axes" and avoid calls to "subplot"
         
         % Do setup for 1st axes
-        axes(AX(1))
-        axis([PT(1) PT(end) 0 p.dtHi])
-        datetick('x',15,'keeplimits')
+        axis(AX(1),[PT(1) PT(end) 0 p.dtHi])
+        datetick(AX(1),'x',15,'keeplimits')
         Ytick = 0:p.dtHi/10:p.dtHi; % make 0.05 Kogia, 0.2 BW
-        set(gca,'YTick',Ytick)
-        datetick('x',15,'keeplimits')
-        grid on
-        ylabel('Time between detections [s]')
+        set(AX(1),'YTick',Ytick)
+        datetick(AX(1),'x',15,'keeplimits')
+        grid(AX(1),'on')
+        ylabel(AX(1),'Time between detections [s]')
         
         % Do setup for 2nd axes
-        axes(AX(2))
-        axis([PT(1), PT(end), 1, 100])
-        datetick('x',15,'keeplimits')
+        axis(AX(2),[PT(1), PT(end), 1, 100])
+        datetick(AX(2),'x',15,'keeplimits')
         Ytick2 = [.1 1 10 100 1000 10000];
-        set(gca,'YTick',Ytick2)
-        ylabel('Det/bin')
-        xlabel('Time [GMT]')
-        title('Inter-Detection Interval (IDI)')
-        grid on
+        set(AX(2),'YTick',Ytick2)
+        ylabel(AX(2),'Det/bin')
+        xlabel(AX(2),'Time [GMT]')
+        title(AX(2),'Inter-Detection Interval (IDI)')
+        %grid(AX(2),'on')
         
         %%% plot FD, ID, MD
-        axes(AX(1))
-        hold on
+        hold(AX(1),'on')
         if ff2
             plot(AX(1),tfd(2:end),dtFD,'.r','UserData',tfd(2:end))
             % no need to double FD since only the blue points are brush captured
@@ -999,26 +995,23 @@ while (k <= nb)
         if ff4 % plot MDs in bright green
             plot(AX(1),tMD(2:end),dtMD,'.g','UserData',tMD(2:end));
         end
-        hold off
+        hold(AX(1),'off')
     else
         plot(0,0);
     end
     
     % if you have items brushed in yellow, highlight those on each plot
     if specploton && ~isempty(yell) && ~isempty(csnJ)
-        figure(201)
-        axes(hA201(1))
-        hold on
-        plot(t(yell),RL(yell),'ko','MarkerSize',6,'UserData',t(yell));
-        hold off;
+        hold(hA201(1),'on')
+        plot(hA201(1),t(yell),RL(yell),'ko','MarkerSize',6,'UserData',t(yell));
+        hold(hA201(1),'off');
         
         % for diffs, yell can't exceed length dt, which could happen if you
         % grabbed the last point in the vector, so:
         yellDT = yell(yell<length(dt));
-        axes(AX(1))
-        hold on
-        plot(t(yellDT),dt(yellDT),'ko','MarkerSize',6,'UserData',t(yell));
-        hold off
+        hold(AX(1),'on')
+        plot(AX(1),t(yellDT),dt(yellDT),'ko','MarkerSize',6,'UserData',t(yell));
+        hold(AX(1),'off')
         
         hold(h50,'on') % add click to spec plot in BLACK
         cspJy = mean(cspJ(yell,:),1);
@@ -1133,11 +1126,14 @@ while (k <= nb)
         if ~isempty(XFD)
             zTD(k,2) = 0;
             for inxfd = 1 : zTD(k,1)
-                axes(hA201(1))
-                hold on
+                hold(hA201(1),'on')
                 testTimes = xt(inxfd);
-                plot(testTimes,xPP(inxfd),'ro','MarkerSize',10);
-                hold off
+                plot(hA201(1),testTimes,xPP(inxfd),'ro','MarkerSize',10);
+                hold(hA201(1),'off')
+                inxfdDT = inxfd(inxfd<length(dt));
+                hold(AX(1),'on')
+                plot(AX(1),testTimes,dt(inxfdDT),'ro','MarkerSize',10);
+                hold(AX(1),'off')
                 disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
                 if (specploton == 1)
                     hold(h50,'on')  % add click to spec plot in BLACK

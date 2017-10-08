@@ -20,7 +20,7 @@ detEdit_settings
 
 % define subfolder that fit specified iteration
 if itnum > 1
-   for id = 2: itnum % iternate id times according to itnum
+   for id = 2: str2num(itnum); % iternate id times according to itnum
        subfolder = ['TPWS',num2str(id)];
        sdir = (fullfile(sdir,subfolder));
    end

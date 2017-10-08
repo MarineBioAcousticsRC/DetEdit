@@ -152,7 +152,7 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     speName = 'Pm'; 
     dtHi = 2; 
     fLow = 5;
-    threshRL = 120; threshHiFreq = 20;
+    threshRL = 125; threshHiFreq = 20;
     threshRMS = 95; threshPP = 145;
     ltsaContrast = 180; ltsaBright = 73;
     dfManual = 100;
@@ -212,7 +212,8 @@ switch analysis
         spParams.minBout = minBout;
     case {'SumPPICIBin'}
         spParams.iciRange = iciRange;
-        
+        spParams.speName = speName;
+        spParams.threshRL = threshRL;
         % apply default if user has not specified a value
         if exist('spParamsUser','var')
             for fn = fieldnames(spParamsUser)'

@@ -24,6 +24,9 @@ end
 spParams = [];
 specChar = 'Unk';  %Simone abbreviation for species
 speName = 'Unknown';  % Species code used in file names 
+if ~exist('srate','var')
+    srate = 200;
+end
 tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 dtHi = .5; % max yaxis value for IPI display in sec
 fLow = 0; % Minimum frequency of interest
@@ -149,7 +152,7 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     speName = 'Pm'; 
     dtHi = 2; 
     fLow = 5;
-    threshRL = 125; threshHiFreq = 20;
+    threshRL = 120; threshHiFreq = 20;
     threshRMS = 95; threshPP = 145;
     ltsaContrast = 180; ltsaBright = 73;
     dfManual = 100;
@@ -207,6 +210,15 @@ switch analysis
         spParams.N = N;
         spParams.gth = gth;
         spParams.minBout = minBout;
+    case {'SumPPICIBin'}
+        spParams.iciRange = iciRange;
+        
+        % apply default if user has not specified a value
+        if exist('spParamsUser','var')
+            for fn = fieldnames(spParamsUser)'
+                spParams.(fn{1}) = spParamsUser.(fn{1});
+            end
+        end
     otherwise
         sprintf(['No analysis specified. Please add one of these options:\n',...
         'detEdit, mkLTSA or modDet'])

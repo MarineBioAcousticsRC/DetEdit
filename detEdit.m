@@ -18,6 +18,14 @@ clearvars
 % Load user input. Has to happen first so you know species.
 detEdit_settings
 
+% define subfolder that fit specified iteration
+if itnum > 1
+   for id = 2: itnum % iternate id times according to itnum
+       subfolder = ['TPWS',num2str(id)];
+       sdir = (fullfile(sdir,subfolder));
+   end
+end
+
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:

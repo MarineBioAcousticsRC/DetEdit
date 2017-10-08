@@ -36,6 +36,8 @@ while n <= length(varargin)
             getParams = varargin{n+1}; n=n+2;
         case 'tfName'
             tfName = varargin{n+1}; n=n+2;
+        case 'excludeID'
+            excludeID = varargin{n+1}; n=n+2;
         otherwise
             error('Bad optional argument: "%s"', varargin{n});
     end
@@ -128,13 +130,22 @@ load(fullfile(sdir,zFDfn)) % false detections vector : zFD
 RL1 = RL0(IA);
 SN1 = SN0(IA,:);
 SP1 = SP0(IA,:);
-disp(['Number of Starting Detections = ',num2str(length(DT0))]);
-disp(['Number of Final Detections = ',num2str(length(DT1))]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % ID Detections
 zIDfn = strrep(detfn,inTPWS,['ID',itnum]);
-load(fullfile(sdir,zIDfn)) % false detections vector : zFD
+load(fullfile(sdir,zIDfn)) % ID detections vector : zID
+
+% remove ID detections if specified
+if excludeID
+    [DT1,IB] = setdiff(DT1,zID); % setdiff already sorts the data
+    RL1 = RL1(IB);
+    SN1 = SN1(IB,:);
+    SP1 = SP1(IB,:);
+end
+
+disp(['Number of Starting Detections = ',num2str(length(DT0))]);
+disp(['Number of Final Detections = ',num2str(length(DT1))]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % save modified detection to output file
 outFileTPWS = strrep(detfn,inTPWS,outTPWS);

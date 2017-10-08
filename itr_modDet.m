@@ -12,11 +12,12 @@ filePrefix = 'GofMX_MC02'; % File name to match.
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
 itnum = '1'; % which iteration you are looking for
-getParams = 'ici&pp'; % Calculate Parameterss: 
+getParams = 'none'; % Calculate Parameterss: 
 %                   -> 'none' do NOT compute parameters
 %                   -> 'ici&pp' only to compute peak-to-peak, ici and
 %                   peakFr
 %                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur
+excludeID = 1; % yes - 1 | no - 0. Exclude ID times from MTT files 
 srate = 200; % sample rate
 gth = .5;  % gap time in hrs between sessions
 tpwsPath = 'E:\TPWS'; %directory of TPWS files
@@ -24,6 +25,13 @@ tpwsPath = 'E:\TPWS'; %directory of TPWS files
 % with .tf files (directory containing folders with different series ...
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% define subfolder that fit specified iteration
+if itnum > 1
+   for id = 2: itnum % iternate id times according to itnum
+       subfolder = ['TPWS',num2str(id)];
+       tpwsPath = (fullfile(tpwsPath,subfolder));
+   end
+end
 
 % Find all TPWS files that fit your specifications (does not look in subdirectories)
 % Concatenate parts of file name
@@ -49,11 +57,11 @@ for iD = 1:length(fileMatchIdx);
     if exist('tfName','var')
     modDet('filePrefix', filePrefix, 'detfn',detfn.name,...
        'sp', sp, 'sdir', tpwsPath,'srate',srate,'itnum', itnum,...
-       'getParams',getParams,'tfName',tfName)
+       'getParams',getParams,'tfName',tfName,'excludeID',excludeID)
     else
         modDet('filePrefix', filePrefix, 'detfn',detfn.name,...
             'sp', sp, 'sdir', tpwsPath,'srate',srate,'itnum', itnum,...
-            'getParams',getParams)
+            'getParams',getParams,'excludeID',excludeID)
     end
 end
 close all

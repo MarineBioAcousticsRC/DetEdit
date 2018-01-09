@@ -152,12 +152,12 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     speName = 'Pm'; 
     dtHi = 2; 
     fLow = 5;
-    threshRL = 125; threshHiFreq = 20;
-    threshRMS = 95; threshPP = 145;
+    threshRL = 120; threshHiFreq = 25;
+    threshRMS = 95; threshPP = 140;
     ltsaContrast = 180; ltsaBright = 73;
     dfManual = 100;
     minBout = 75; minDur = 60; 
-    slope = 1.2;
+    slope = 1.05;
     iciRange = [50, 4000];
     frRange = [fLow fHi];
     N = 512;

@@ -152,7 +152,7 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     speName = 'Pm'; 
     dtHi = 2; 
     fLow = 5;
-    threshRL = 120; threshHiFreq = 25;
+    threshRL = 125; threshHiFreq = 25;
     threshRMS = 95; threshPP = 140;
     ltsaContrast = 180; ltsaBright = 73;
     dfManual = 100;

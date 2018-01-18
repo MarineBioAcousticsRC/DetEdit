@@ -236,7 +236,7 @@ while (k <= nb)
             L = find(rfTime{K} >= sb(k) & rfTime{K} <= eb(k));
         end
         if ~isempty(L)
-            L = [L(1)-1,L]; % get rawfile from before sb(k)
+            %L = [L(1)-1,L]; % get rawfile from before sb(k)
             % grab the ltsa pwr matrix to plot
             hdr = ioReadLTSAHeader(fullfile(lpn,fnames(K,:))); % get some stuff we'll need
             nbin = length(L) * hdr.ltsa.nave(L(1));    % number of time bins to get

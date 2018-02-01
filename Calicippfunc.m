@@ -53,9 +53,12 @@ mepp = median(MPP);
 
 % Plot histogram
 h23 = figure(23);
-nbinsdb = (p.dbRange(1):p.dbRange(2));
-[y,centers] = hist(MPP,nbinsdb);
-bar(centers,y)
+% nbinsdb = (p.dbRange(1):p.dbRange(2));
+% [y,centers] = hist(MPP,nbinsdb);
+% bar(centers,y)
+center = p.threshRL:1:170;
+[nhist] = histc(MPP,center);
+bar(center, nhist, 'barwidth', 1, 'basevalue', 1)
 title(sprintf('N=%d',length(MPP)))
 xlabel('Peak-Peak Amplitude (dB)')
 

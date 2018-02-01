@@ -214,6 +214,7 @@ switch analysis
         spParams.iciRange = iciRange;
         spParams.speName = speName;
         spParams.threshRL = threshRL;
+        spParams.gth = gth;
         % apply default if user has not specified a value
         if exist('spParamsUser','var')
             for fn = fieldnames(spParamsUser)'

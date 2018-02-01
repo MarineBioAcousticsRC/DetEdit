@@ -10,7 +10,7 @@ end
 switch stationDeploy
     % site DT
     case {'DT01','DT02','DT03'} 
-        tfnum = 589;
+        tfnum = 585;
         serie = '500_series';
     case {'DT04','DT05','DT06','DT07','DT08'} 
         tfnum = 638;

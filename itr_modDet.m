@@ -1,10 +1,10 @@
-% itr_mkLTSA.m
-% Iterates over a directory of TPWS files and calls mkLTSAsessions for each
+% itr_modDet
+% Iterates over a directory of TPWS files and calls modDet for each
 % one.
 
 clearvars
 clear global
-filePrefix = 'GofMX_MC03'; % File name to match. 
+filePrefix = 'GofMX_MC02'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
@@ -12,13 +12,17 @@ filePrefix = 'GofMX_MC03'; % File name to match.
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
 itnum = '1'; % which iteration you are looking for
+getParams = 'none'; % Calculate Parameterss: 
+%                   -> 'none' do NOT compute parameters
+%                   -> 'ici&pp' only to compute peak-to-peak, ici and
+%                   peakFr
+%                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur
+excludeID = 1; % yes - 1 | no - 0. Exclude ID times from MTT files 
 srate = 200; % sample rate
-LTSApath = 'E:\LTSA\MC'; % directory containing all LTSAs for this deployment
-% LTSA folder should match the site specified in prefix
+gth = .5;  % gap time in hrs between sessions
 tpwsPath = 'E:\TPWS'; %directory of TPWS files
-%tfName = 'E:\TF_files'; % Directory ...
+%tfName = 'E:\transfer_functions'; % Directory ...
 % with .tf files (directory containing folders with different series ...
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % define subfolder that fit specified iteration
@@ -45,11 +49,20 @@ if isempty(fileMatchIdx)
     error('No files matching filePrefix found!')
 end
 
-% for each TPWS file found, make LTSA.mat file
+% for each TPWS file found, make TPWS(itnum+1).mat file
 for iD = 1:length(fileMatchIdx)
     matchingFile = fileList{fileMatchIdx(iD)};
     detfn = dir(fullfile(tpwsPath,matchingFile));
     
-    mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
-       'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate
+    if exist('tfName','var')
+    modDet('filePrefix', filePrefix, 'detfn',detfn.name,...
+       'sp', sp, 'sdir', tpwsPath,'srate',srate,'itnum', itnum,...
+       'getParams',getParams,'tfName',tfName,'excludeID',excludeID)
+    else
+        modDet('filePrefix', filePrefix, 'detfn',detfn.name,...
+            'sp', sp, 'sdir', tpwsPath,'srate',srate,'itnum', itnum,...
+            'getParams',getParams,'excludeID',excludeID)
+    end
 end
+close all
+disp('Done processing')

@@ -1,4 +1,3 @@
-
 % itr_mkLTSA.m
 % Iterates over a directory of TPWS files and calls mkLTSAsessions for each
 % one.
@@ -12,7 +11,7 @@ filePrefix = 'GofMX_MC03'; % File name to match.
 %                    -> filePrefix = 'GofMX_DT01'
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
-itnum = '2'; % which iteration you are looking for
+itnum = '1'; % which iteration you are looking for
 srate = 200; % sample rate
 LTSApath = 'E:\LTSA\MC'; % directory containing all LTSAs for this deployment
 % LTSA folder should match the site specified in prefix
@@ -52,5 +51,5 @@ for iD = 1:length(fileMatchIdx)
     detfn = dir(fullfile(tpwsPath,matchingFile));
     
     mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
-       'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate)
+       'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate
 end

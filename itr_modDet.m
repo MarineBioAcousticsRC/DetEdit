@@ -50,7 +50,7 @@ if isempty(fileMatchIdx)
 end
 
 % for each TPWS file found, make TPWS(itnum+1).mat file
-for iD = 1:length(fileMatchIdx);
+for iD = 1:length(fileMatchIdx)
     matchingFile = fileList{fileMatchIdx(iD)};
     detfn = dir(fullfile(tpwsPath,matchingFile));
     

@@ -18,6 +18,8 @@ Date: 1/26/2016
 
 ##### Edetect.m  
   `Edetect` is a basic energy detector designed for use with xwav files.
+  *For sperm whales: instead use the sperm whale detector following these steps: 	https://drive.google.com/drive/folders/1g1zpYMDO3sd32hSft4MFqCrZFxzdGom4 
+  
   
   - **Input:**  
     User is prompted to supply inputs including:  

@@ -16,7 +16,7 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings_jah
+detEdit_settings
 
 % define subfolder that fit specified iteration
 if itnum > 1

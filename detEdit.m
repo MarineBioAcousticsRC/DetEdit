@@ -56,9 +56,9 @@ fnTPWS = fullfile(sdir,matchingFile);
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
-    if ~exist('tfName','var')% user interface to get TF file
+    if exist('tfName','var')% user interface to get TF file
         disp('Load Transfer Function File');
-        [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
+        [fname,pname] = uigetfile(fullfile(tfName,'*.tf'),'Load TF File');
         tffn = fullfile(pname,fname);
     else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(filePrefix,'_'); % get only station and deployment

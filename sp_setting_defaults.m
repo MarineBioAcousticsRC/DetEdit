@@ -43,7 +43,7 @@ rlLow = 110; % PP plot window low limit
 rlHi = 170; % PP plot window high limit
 dfManual = []; % LTSA step size in 10 [Hz] bins
 p1Low = threshRL - 5;
-p1Hi = 170; % ??
+p1Hi = 170; % max pp
 minBout = [];% minimum bout duration
 gth = .5;    % gap time in hrs between sessions
 minDur = []; % minimum window duration (if specified in minutes)
@@ -56,6 +56,7 @@ frdbwRange = [fLow, fHi]; % min/max frequency for modDet plots of 3/10 db bw
 durRange = []; % min/max duration in us for modDet plots
 durstep = 1; % step range for number bins in histogram 
 N = srate; % FFT size for parameter clicks
+rawFileDur = []; % raw file length, default 75s
 
 % Set parameters according to sp
 if (strcmp(sp,'Ko') || strcmp(sp,'k'))
@@ -74,14 +75,17 @@ elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
     speName = 'Cuviers'; specChar = 'Z'; 
     tfSelect = 40200;
     dtHi = 1.0; 
-    fLow = 25;  
+    fLow = 10;  
     threshRL = 121; 
-    ltsaContrast = 200; ltsaBright = 30;
+    threshRMS = 55;
+    ltsaContrast = 150; ltsaBright = 50;
     iciRange = [40, 750];
     dbRange = [90, 170];
     frdbwRange = [0, 80];
     durRange = [30, 300];
     durstep = 2;
+    minDur = 60;
+    dfManual = 100;
 elseif (strcmp(sp,'Me') || strcmp(sp,'m'))
     speName = 'Gervais'; specChar = 'M'; 
     tfSelect = 40200;
@@ -136,7 +140,7 @@ elseif strcmpi(sp,'whs')
     dfManual = 10;   
     ltsaContrast = 310; ltsaBright = 100; 
     ltsaLims = [5,30];
-elseif strcmpi(sp,'Dl')
+elseif strcmpi(sp,'Dl') 
     speName = 'Beluga'; 
     tfSelect = 45000;
     dtHi = 0.5;
@@ -148,6 +152,22 @@ elseif strcmpi(sp,'Dl')
     dbRange = [90, 170];
     durRange = [10, 300];
     durstep = 2;
+elseif (strcmp(sp,'Mm') || strcmp(sp,'Narwhal'))
+    speName = 'Narwhal';
+    tfSelect = 48000;
+    dtHi = 1; 
+    fLow = 2;
+    threshRL = 100; %threshHiFreq = 25;
+    %threshRMS = 95; threshPP = 140;
+    ltsaContrast = 240; ltsaBright = 35;
+%     dfManual = 100;
+    minBout = 75; %minDur = 30; 
+    %slope = 1.05;
+    iciRange = [40, 1000];
+    durRange = [10, 300];
+    frRange = [fLow fHi];
+    rawFileDur = 300; % it is not HARP data
+%     N = 512;
 elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     speName = 'Pm'; 
     dtHi = 2; 
@@ -191,6 +211,7 @@ switch analysis
         spParams.minBout = minBout;
         spParams.minDur = minDur;
         spParams.slope = slope;
+        spParams.rawFileDur = rawFileDur;
         
         % apply default if user has not specified a value
         if exist('spParamsUser','var')

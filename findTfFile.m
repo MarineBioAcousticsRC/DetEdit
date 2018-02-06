@@ -60,9 +60,25 @@ switch stationDeploy
     case {'Antarc01EIE'}
         tfnum = 729;
         serie = '700_series';
+        
+    % site SOCAL
+    case{'SOCAL35'}
+        tfnum = 492;
+        serie = '400_series';
+    case{'SOCAL61E'}
+        tfnum = 830;
+        serie = '800_series';
+    case{'SOCAL61N'}
+        tfnum = 857;
+        serie = '800_series';
+    case{'SOCAL61H'}
+        tfnum = 844;
+        serie = '800_series';
+        
     otherwise
         tfnum = [];
         disp('Transfer function folder not found or site matches')
+        
 end
 
 pathSeries = fullfile(indir,serie);

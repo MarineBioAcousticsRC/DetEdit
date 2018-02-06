@@ -27,6 +27,8 @@ while n <= length(varargin)
             sdir = varargin{n+1}; n=n+2;
         case 'srate'
             srate = varargin{n+1}; n=n+2;
+        case 'tfName'
+            tfName = varargin{n+1}; n=n+2;
         otherwise
             error('Bad optional argument: "%s"', varargin{n});
     end
@@ -55,9 +57,9 @@ p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','mkLTSA');
 % user interface to get TF file
 if (p.tfSelect > 0)
     disp('Load Transfer Function');
-    if ~exist('tfName','var')% user interface to get TF file
+    if exist('tfName','var')% user interface to get TF file
         disp('Load Transfer Function File');
-        [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
+        [fname,pname] = uigetfile(fullfile(tfName,'*.tf'),'Select TF File');
         tffn = fullfile(pname,fname);
     else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
@@ -230,13 +232,13 @@ while (k <= nb)
     % find which rawfiles to plot ltsa
     if ~isempty(K) && length(K) == 1
         L = [];
-        if eb(k) -sb(k) < 75/ (60*60*24)
+        if eb(k) -sb(k) < p.rawFileDur/ (60*60*24)
             L = find(rfTime{K} >= sb(k),1,'first');
         else
             L = find(rfTime{K} >= sb(k) & rfTime{K} <= eb(k));
         end
         if ~isempty(L)
-            %L = [L(1)-1,L]; % get rawfile from before sb(k)
+            L = [L(1)-1,L]; % get rawfile from before sb(k)
             % grab the ltsa pwr matrix to plot
             hdr = ioReadLTSAHeader(fullfile(lpn,fnames(K,:))); % get some stuff we'll need
             nbin = length(L) * hdr.ltsa.nave(L(1));    % number of time bins to get

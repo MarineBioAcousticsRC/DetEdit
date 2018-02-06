@@ -64,9 +64,9 @@ p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','modDet');
 
 %% user interface to get TF file
 if (p.tfSelect > 0) || ~isempty(strfind(getParams,'all'))
-    if ~exist('tfName','var')% user interface to get TF file
+    if exist('tfName','var')% user interface to get TF file
         disp('Load Transfer Function File');
-        [fname,pname] = uigetfile('I:\Harp_TF\*.tf','Load TF File');
+        [fname,pname] = uigetfile(fullfile(tfName,'*.tf'),'Load TF File');
         tffn = fullfile(pname,fname);
     else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
@@ -108,6 +108,9 @@ SN0 = []; SN1 = [];
 SP0 = []; SP1 = [];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
+% apply tf if defined
+MPP = MPP + tf;
+
 % remove low amplitude (if threshold is changed)
 ib = find(MPP >= p.threshRL);
 disp([' Removed too low:',num2str(length(MPP)-length(ib))]);
@@ -154,11 +157,8 @@ outFileID = strrep(outFileTPWS,'TPWS','ID');
 MTT = DT1';
 MSN = SN1;
 MSP = SP1;
-if (p.tfSelect > 0);
-    MPP = RL1 + tf;
-else
-    MPP = RL1;
-end
+MPP = RL1;
+
 
 % check if there is at least one encounter longer than 75s, if not
 % do not store TPWS file

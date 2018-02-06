@@ -71,7 +71,7 @@ if (strcmp(sp,'Ko') || strcmp(sp,'k'))
     frdbwRange = [0, 80];
     durRange = [30, 111];
     durstep = 3;
-elseif (strcmp(sp,'Zc') || strcmp(sp,'z'))
+elseif (strcmp(sp,'Zc') || strcmp(sp,'z') || strcmp(sp,'Cuviers'))
     speName = 'Cuviers'; specChar = 'Z'; 
     tfSelect = 40200;
     dtHi = 1.0; 

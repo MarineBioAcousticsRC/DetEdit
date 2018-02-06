@@ -16,7 +16,7 @@ srate = 200; % sample rate
 LTSApath = 'E:\LTSA\MC'; % directory containing all LTSAs for this deployment
 % LTSA folder should match the site specified in prefix
 tpwsPath = 'E:\TPWS'; %directory of TPWS files
-%tfName = 'E:\TF_files'; % Directory ...
+% tfName = 'E:\TF_files'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 
 
@@ -50,6 +50,12 @@ for iD = 1:length(fileMatchIdx)
     matchingFile = fileList{fileMatchIdx(iD)};
     detfn = dir(fullfile(tpwsPath,matchingFile));
     
-    mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
-       'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate
+    if exist('tfName','var')
+        mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
+            'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate,'tfName',tfName);
+    else
+        mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
+            'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate);
+    end
+    
 end

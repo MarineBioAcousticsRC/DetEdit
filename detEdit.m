@@ -16,7 +16,7 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings
+detEdit_settings_jah
 
 % define subfolder that fit specified iteration
 if itnum > 1
@@ -56,21 +56,14 @@ fnTPWS = fullfile(sdir,matchingFile);
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
-    if exist('tfName','var')% user interface to get TF file
+    if exist('tfName','var')
         disp('Load Transfer Function File');
-        [fname,pname] = uigetfile(fullfile(tfName,'*.tf'),'Load TF File');
-        tffn = fullfile(pname,fname);
-    else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
         tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
+    else
+        error('No path specified for transfer function files. Add tfName')
     end
     
-    if strcmp(num2str(fname),'0')
-        disp('Cancelled TF File');
-        return
-    else %give feedback
-        disp(['TF File: ',tffn]);
-    end
     fid = fopen(tffn);
     [A,count] = fscanf(fid,'%f %f',[2,inf]);
     tffreq = A(1,:);

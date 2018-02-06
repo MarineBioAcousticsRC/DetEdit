@@ -7,6 +7,7 @@ if iscell(stationDeploy)
     stationDeploy = stationDeploy{:};
 end
 % select which tf corresponds to station/deployment
+autoSel = true; % by default select file automatically based on case
 switch stationDeploy
     % site DT
     case {'DT01','DT02','DT03'} 
@@ -62,7 +63,7 @@ switch stationDeploy
         serie = '700_series';
         
     % site SOCAL
-    case{'SOCAL35'}
+    case{'SOCAL35S'}
         tfnum = 492;
         serie = '400_series';
     case{'SOCAL61E'}
@@ -76,29 +77,37 @@ switch stationDeploy
         serie = '800_series';
         
     otherwise
-        tfnum = [];
-        disp('Transfer function folder not found or site matches')
+        % select manually
+        autoSel = false;
+        disp(['Transfer function not specified for automatic selection. ',...
+        'Add path in findTfFile for automatic selection ']);
+        [fname,pname] = uigetfile(fullfile(indir,'*.tf'),'Select TF File');
         
 end
 
-pathSeries = fullfile(indir,serie);
-folders = dir(pathSeries);
-folders = ({folders.name})' ;
-folders = folders(3:end);
-
-foldNums = cell2mat(strtok(folders,'_')); % get part of number
-tfnumFold = find(str2num(foldNums) == tfnum,1,'last'); 
-
-pathTfFile = fullfile(pathSeries,folders{tfnumFold});
-
-SearchFileMask = {'*.tf'};
-SearchPathMask = {pathTfFile};
-SearchRecursiv = 1;
-
-[PathFileList, ~, ~] = ...
-    utFindFiles(SearchFileMask, SearchPathMask, SearchRecursiv);
-
-PathFileList = cell2mat(PathFileList);
+if autoSel
+    pathSeries = fullfile(indir,serie);
+    folders = dir(pathSeries);
+    folders = ({folders.name})' ;
+    folders = folders(3:end);
+    
+    foldNums = cell2mat(strtok(folders,'_')); % get part of number
+    tfnumFold = find(str2num(foldNums) == tfnum,1,'last');
+    
+    pathTfFile = fullfile(pathSeries,folders{tfnumFold});
+    
+    SearchFileMask = {'*.tf'};
+    SearchPathMask = {pathTfFile};
+    SearchRecursiv = 1;
+    
+    [PathFileList, ~, ~] = ...
+        utFindFiles(SearchFileMask, SearchPathMask, SearchRecursiv);
+    
+    PathFileList = cell2mat(PathFileList);
+    
+else
+    PathFileList = fullfile(pname,fname);
+end
 
 
 

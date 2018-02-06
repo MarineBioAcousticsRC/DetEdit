@@ -50,6 +50,12 @@ for iD = 1:length(fileMatchIdx)
     matchingFile = fileList{fileMatchIdx(iD)};
     detfn = dir(fullfile(tpwsPath,matchingFile));
     
-    mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
-       'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate
+    if exist('tfName','var')
+        mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
+            'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate,'tfName',tfName);
+    else
+        mkLTSAsessions('filePrefix', filePrefix, 'detfn',detfn.name,...
+            'sp', sp, 'lpn', LTSApath, 'sdir', tpwsPath,'srate',srate);
+    end
+    
 end

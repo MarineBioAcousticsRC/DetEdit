@@ -64,13 +64,12 @@ p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','modDet');
 
 %% user interface to get TF file
 if (p.tfSelect > 0) || ~isempty(strfind(getParams,'all'))
-    if exist('tfName','var')% user interface to get TF file
+    if exist('tfName','var')
         disp('Load Transfer Function File');
-        [fname,pname] = uigetfile(fullfile(tfName,'*.tf'),'Load TF File');
-        tffn = fullfile(pname,fname);
-    else % or get it automatically from tf directory provided in settings
         stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
         tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
+    else
+        error('No path specified for transfer function files. Add tfName')
     end
     disp(['TF File: ',tffn]);
     

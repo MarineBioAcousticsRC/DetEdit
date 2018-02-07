@@ -4,7 +4,7 @@
 
 clearvars
 clear global
-filePrefix = 'GofMX_MC03'; % File name to match. 
+filePrefix = 'GofMX_DT01'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 

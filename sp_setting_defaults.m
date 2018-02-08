@@ -106,9 +106,18 @@ elseif (strcmp(sp,'BWG') || strcmp(sp,'g'))
 elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
     speName = 'BW31'; specChar = 'D'; 
     tfSelect = 40200; 
-    dtHi = 1.0;
-    fLow = 25; 
-    threshRL = 121;
+    dtHi = 1.0; 
+    fLow = 10;  
+    threshRL = 121; 
+    threshRMS = 55;
+    ltsaContrast = 150; ltsaBright = 50;
+    iciRange = [40, 750];
+    dbRange = [90, 170];
+    frdbwRange = [0, 80];
+    durRange = [30, 300];
+    durstep = 2;
+    minDur = 60;
+    dfManual = 100;
 elseif strcmpi(sp,'De')
     speName = 'Delphin';  
     dtHi = 0.6; 

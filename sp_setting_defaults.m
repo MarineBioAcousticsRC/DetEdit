@@ -48,6 +48,7 @@ minBout = [];% minimum bout duration
 gth = .5;    % gap time in hrs between sessions
 minDur = []; % minimum window duration (if specified in minutes)
 slope = 1; % slope for shifting data in plots 51 and 53
+binDur = 5; % bin duration in minutes
 % all parameters for modDet
 iciRange = []; % min/max ici in ms for modDet plots
 dbRange = [];  % min/max db for modDet plots of pp and rms
@@ -210,17 +211,14 @@ switch analysis
         spParams.N = N;
         spParams.gth = gth;
         spParams.minBout = minBout;
+        spParams.p1Hi = p1Hi;
     case {'SumPPICIBin'}
         spParams.iciRange = iciRange;
         spParams.speName = speName;
         spParams.threshRL = threshRL;
         spParams.gth = gth;
-        % apply default if user has not specified a value
-        if exist('spParamsUser','var')
-            for fn = fieldnames(spParamsUser)'
-                spParams.(fn{1}) = spParamsUser.(fn{1});
-            end
-        end
+        spParams.p1Hi = p1Hi;
+        spParams.binDur = binDur;
     otherwise
         sprintf(['No analysis specified. Please add one of these options:\n',...
         'detEdit, mkLTSA or modDet'])

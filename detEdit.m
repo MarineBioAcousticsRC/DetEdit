@@ -660,7 +660,7 @@ while (k <= nb)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % calculate number of detections per bin
-    [KB,binCX,binT,binC] = ndets_per_bin(t,xt,RL,dt,minNdet,nd);
+    [KB,binCX,binT,binC] = ndets_per_bin(t,xt,RL,dt,minNdet,nd,p.binDur);
     % filter empty and low number bins
     if isempty(KB) % not sure what this case does?
         disp(['No bins with at least ',num2str(minNdet),' detections'])

@@ -15,40 +15,57 @@ while n <= length(varargin)
             concatFiles = varargin{n+1}; n=n+2;
         case 'countType'
             countType = varargin{n+1}; n=n+2;
-        case 'spParamsUser'
-            spParamsUser = varargin{n+1}; n=n+2;
+        case 'effort'
+            effort = varargin{n+1}; n=n+2;
+        case 'refTime'
+            refStartTime = varargin{n+1}; n=n+2;
         otherwise
             error('Bad optional argument: "%s"', varargin{n});
     end
 end
 
-p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin','spParamsUser',spParamsUser);
+p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
 
-ppAll = []; ttAll = [];
-iciAll = [];
+PPall = []; TTall = [];
+ICIall = [];
 bdAll = [];
 bin =[]; diel =[]; tdAll = [];
 for idsk = 1 : length(concatFiles)
+    % Load file
+    sprintf('Loading file %s',fullfile(sdir,concatFiles{idsk}))
     load(fullfile(sdir,concatFiles{idsk}));
     
     % Group times and peak-to-peak
-    ppAll = [ppAll; MPP];
-    ttAll = [ttAll; MTT];
+    PPall = [PPall; MPP];
+    TTall = [TTall; MTT];
     
     if countType == 'C' || countType =='B'
         % Inter-Click Interval
         ici = diff(MTT)*24*60*60*1000; % in ms
-        iciAll = [iciAll;ici];
-    end
-    if countType == 'G' || countType =='B' %%%%%%%%%%%%%%%%%%%%%%%% to modify
-        % find edges (start and end times) of bouts or sessions
-        dt = diff(MTT)*24*60*60; % calculate time between detections in seconds
-        I = find(dt > p.gth*60*60);  % find start of gaps
-        sb = [MTT(1); MTT(I+1)];   % start time of bout
-        eb = [MTT(I); MTT(end)];   % end time of bout
-        bdAll = [bdAll; (eb - sb)*24*60];      % duration of bout in minuts
+        ICIall = [ICIall;ici];
     end
 end
+
+% exclude times outside of effort
+outeff = find(TTall >= effort.Start & TTall <= effort.End);
+
+    if countType == 'G' || countType =='B'
+        % convert times to bin vector times
+        vTT = datevec(TTall);
+        tbin = datetime([vTT(:,1:4), floor(vTT(:,5)/p.binDur)*p.binDur, ...
+            zeros(length(vTT),1)]);
+        
+        % create table and get click counts and max pp per bin
+        TTall = MPP; PPall = MPP;
+        data = timetable(tbin,TTall,PPall);
+        binData = varfun(@max,data,'GroupingVariable','tbin','InputVariable','PPall');
+        binData.Properties.VariableNames{'GroupCount'} = 'ClickCount';
+        binData.Properties.VariableNames{'max_ppAll'} = 'maxPP';
+        
+        % group data by days
+        dayData = retime(binData,'daily','count');
+        
+    end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create plots, binlog and pplog files 
@@ -56,19 +73,19 @@ end
 
 if countType == 'C' || countType =='B'
     %% Plot ici
-    iciIdx = find(iciAll > p.iciRange(1) & iciAll < p.iciRange(2));
+    iciIdx = find(ICIall > p.iciRange(1) & ICIall < p.iciRange(2));
     % statistics
-    miciSel = mean(iciAll(iciIdx));
-    sdiciSel = std(iciAll(iciIdx));
-    moiciSel = mode(iciAll(iciIdx));
-    meiciSel = median(iciAll(iciIdx));
+    miciSel = mean(ICIall(iciIdx));
+    sdiciSel = std(ICIall(iciIdx));
+    moiciSel = mode(ICIall(iciIdx));
+    meiciSel = median(ICIall(iciIdx));
     
     h1 = figure(fignum); fignum = fignum +1;
     nbinsici = (p.iciRange(1):p.iciRange(2));
-    [y,centers] = hist(iciAll(iciIdx),nbinsici);
+    [y,centers] = hist(ICIall(iciIdx),nbinsici);
     bar(centers,y);
     xlim(p.iciRange);
-    title(sprintf('%s N=%d',filePrefix,length(iciAll)), 'Interpreter', 'none')
+    title(sprintf('%s N=%d',filePrefix,length(ICIall)), 'Interpreter', 'none')
     xlabel('Inter-Pulse Interval (ms)')
     ylabel('Counts')
     % create labels and textbox
@@ -86,17 +103,17 @@ if countType == 'C' || countType =='B'
     
     %% Plot pp click data
     % statistics
-    mpp = mean(ppAll);
-    sdpp = std(ppAll);
-    mopp = mode(ppAll);
-    mepp = median(ppAll);
+    mpp = mean(PPall);
+    sdpp = std(PPall);
+    mopp = mode(PPall);
+    mepp = median(PPall);
     
     % Plot histogram
     h2 = figure(fignum); fignum = fignum +1; %linear histogram
-    center = p.threshRL:1:170;
-    [nhist] = histc(ppAll,center);
+    center = p.threshRL:1:p.p1Hi;
+    [nhist] = histc(PPall,center);
     bar(center, nhist, 'barwidth', 1, 'basevalue', 1)
-    title(sprintf('%s N=%d',filePrefix,length(ppAll)), 'Interpreter', 'none')
+    title(sprintf('%s N=%d',filePrefix,length(PPall)), 'Interpreter', 'none')
     xlabel('Peak-Peak Amplitude (dB)')
     
     % create labels and textbox
@@ -114,19 +131,22 @@ if countType == 'C' || countType =='B'
     
     %% Percent log histogram PP click
     h3 = figure(fignum); fignum = fignum +1; %percent log histogram PP click
-    nper = nhist*100/length(ppAll); % percentage
+    nper = nhist*100/length(PPall); % percentage
     bar(center,nper, 'barwidth', 1, 'basevalue', 1,'EdgeColor','k','FaceColor','w');
     set(gca,'YScale','log')
     xlim([min(center)-0.5,max(center)+0.5])
     %ylim([.1,50])
     set(gca,'FontSize',12)
-    title(sprintf('%s N=%d',filePrefix,length(ppAll)), 'Interpreter', 'none')
+    title(sprintf('%s N=%d',filePrefix,length(PPall)), 'Interpreter', 'none')
     ylabel('Percent of detections','FontSize',16)
     xlabel('Peak-Peak Amplitude (dB)','FontSize',16);
+    
+    % Save plot and pplog values in a mat file
     pplog = [filePrefix,'_',p.speName,'_pplog'];
     save(fullfile(sdir,pplog),'center','nper')
-    saveas(h3,fullfile(sdir,pplog),'png')
+    saveas(h3,fullfile(sdir,pplog),'png')   
 end
+
 if countType == 'G' || countType =='B' %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% to modify
     
     

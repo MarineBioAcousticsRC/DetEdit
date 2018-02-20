@@ -192,6 +192,7 @@ switch analysis
         spParams.minBout = minBout;
         spParams.minDur = minDur;
         spParams.slope = slope;
+        spParams.binDur = binDur;
         
         % apply default if user has not specified a value
         if exist('spParamsUser','var')

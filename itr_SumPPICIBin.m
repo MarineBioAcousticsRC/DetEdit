@@ -1,8 +1,8 @@
-% itr_SumPPICIBin
-% Iterates over a directory of TPWS files and calls modDet for each
-% one.
+%% itr_SumPPICIBin
 
 clearvars
+
+%% Parameters defined by user
 filePrefix = 'GofMX_MC'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
@@ -11,20 +11,14 @@ filePrefix = 'GofMX_MC'; % File name to match.
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
 itnum = '3'; % which iteration you are looking for
-countType = 'C'; % Tpype of counting
-% Example:
-%                   -> 'C' - Click counting
-%                   -> 'G' - Group counting
-%                   -> 'B' - Both counting
 srate = 200; % sample rate
 tpwsPath = 'E:\TPWS'; %directory of TPWS files
 %tfName = 'E:\transfer_functions'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 effortXls = 'E:\Pm_Effort.xls'; % specify excel file with effort times
-refStartTime = '2010-May-01'; % specify start reference date for all plots
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% define subfolder that fit specified iteration
+%% define subfolder that fit specified iteration
 if itnum > 1
    for id = 2: str2num(itnum) % iternate id times according to itnum
        subfolder = ['TPWS',num2str(id)];
@@ -32,7 +26,7 @@ if itnum > 1
    end
 end
 
-% Find all TPWS files that fit your specifications (does not look in subdirectories)
+%% Find all TPWS files that fit your specifications (does not look in subdirectories)
 % Concatenate parts of file name
 if isempty(sp)
     detfn = [filePrefix,'.*','TPWS',itnum,'.mat'];
@@ -48,7 +42,7 @@ if isempty(fileMatchIdx)
     error('No files matching filePrefix found!')
 end
 
-% Get effort times matching prefix file
+%% Get effort times matching prefix file
 allEfforts = readtable(effortXls);
 site = strsplit(filePrefix,'_');
 effTable = allEfforts(ismember(allEfforts.Sites,site(2)),:);
@@ -59,18 +53,16 @@ endVar = find(~cellfun(@isempty,regexp(effTable.Properties.VariableNames,'End.*E
 effTable.Properties.VariableNames{startVar} = 'Start';
 effTable.Properties.VariableNames{endVar} = 'End';
 
-effort = effTable(:,[startVar,endVar]);
-% startEffort = datetime(effTable.StartEffort,'ConvertFrom','datenum');
-% endEffort = datetime(effTable.EndEffort,'ConvertFrom','datenum');
-% 
-% effort = timetable(startEffort,endEffort);
+Start = datetime(x2mdate(effTable.Start),'ConvertFrom','datenum');
+End = datetime(x2mdate(effTable.End),'ConvertFrom','datenum');
 
-% concatenate all true detections from the same site and create the plots
+effort = timetable(Start,End);
+
+%% Concatenate all detections from the same site and create the plots
 concatFiles = fileList(fileMatchIdx);
 
 SumPPICIBin('filePrefix',filePrefix,'concatFiles', concatFiles,'sp', sp,...
-    'sdir', tpwsPath,'countType',countType,'effort',effort,...
-    'refTime',refStartTime);
+    'sdir', tpwsPath,'effort',effort);
 
 
 disp('Done processing')

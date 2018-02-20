@@ -63,6 +63,9 @@ switch stationDeploy
         serie = '700_series';
         
     % site SOCAL
+    case{'SOCAL34M'}
+        tfnum = 452;
+        serie = '400_series';
     case{'SOCAL35S'}
         tfnum = 492;
         serie = '400_series';

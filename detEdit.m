@@ -16,7 +16,7 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings_SpermWhale_Test_without_threshold
+detEdit_settings
 
 % define subfolder that fit specified iteration
 if itnum > 1
@@ -90,7 +90,7 @@ if loadMSP
         disp([' TimeLevel Data NOT UNIQUE - removed:   ', ...
             num2str(length(ic1) - length(ia1))]);
     end
-    load(fnTPWS,'MSP','MSN')
+    load(fNameList.TPWS,'MSP','MSN')
 else
     ia1 = [1:length(MTT)]';
 end
@@ -153,7 +153,7 @@ zID = rmUnmatchedDetections(MTT, zID);
 save(fNameList.ID,'zID');
 
 % Make MD file intersect with MTT
-load(fnameMD)  % identified detection times zMD
+load(fNameList.MD)  % identified detection times zMD
 zMD = rmUnmatchedDetections(MTT, zID);
 save(fNameList.MD,'zMD');
 
@@ -205,7 +205,7 @@ if (A6 ~= 2)
     save(fNameList.TD,'zTD');    % create new TD
     disp(' Make new TD file');
 else
-    load(fnameTD)
+    load(fNameList.TD)
     if (length(zTD(:,1)) ~= nb)
         disp([' Problem with TD file:',fNameList.TD]);
         return
@@ -286,7 +286,7 @@ if (size(zTD,2) == 2) % this seems to patch on extra columns
     % to old zTD matrices that maybe only had the first two. Probably
     % only needed for backward compatibility
     zTD = [zTD,-1.*ones(length(zTD),2)];
-    save(fnameTD,'zTD');
+    save(fNameList.TD,'zTD');
 end
 %% Main Loop
 % loop over the number of bouts (sessions)
@@ -347,7 +347,7 @@ while (k <= nb)
                 end
                 disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
                 zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-                save(fnameFD,'zFD')
+                save(fNameList.FD,'zFD')
             end
             if p.threshPP > 0
                 xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmppAll),p.threshPP];
@@ -370,7 +370,7 @@ while (k <= nb)
                 badClickTime = clickTimes(freqAll > p.threshHiFreq);  % for all false if below RMS threshold
                 disp(['Number of Detections Below Freq threshold = ',num2str(length(badClickTime))])
                 zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-                save(fnameFD,'zFD')
+                save(fNameList.FD,'zFD')
                 %p.threshHiFreq = 0;
             end
         end
@@ -544,7 +544,7 @@ while (k <= nb)
             num2str(length(binCX)),' but NO False']);
         zTD(k,3) = length(binCX);
         zTD(k,4) = 0;
-        save(fnameTD,'zTD');
+        save(fNameList.TD,'zTD');
         k = k + 1;
         continue
     end
@@ -658,7 +658,7 @@ while (k <= nb)
                     end
                     disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
                     zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-                    save(fnameFD,'zFD')
+                    save(fNameList.FD,'zFD')
                     if ~isempty(zFD) % get times and indices of false detections
                         [tfd,K2,~] = intersect(t,zFD(:,1));
                         rlFD = RL(K2);
@@ -712,7 +712,7 @@ while (k <= nb)
                     badClickTime = t(freq > p.threshHiFreq);  % for all false if below RMS threshold
                     disp(['Number of Detections Below Freq threshold = ',num2str(length(badClickTime))])
                     zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-                    save(fnameFD,'zFD')
+                    save(fNameList.FD,'zFD')
                     if ~isempty(zFD) % get times and indices of false detections
                         [tfd,K2,~] = intersect(t,zFD(:,1));
                         rlFD = RL(K2);
@@ -813,7 +813,7 @@ while (k <= nb)
     axis(hA201(1),[PT(1) PT(end) p.rlLow p.rlHi])
     datetick(hA201(1),'x',15,'keeplimits')
     grid(hA201(1),'on')
-    tstr(1) = {fnTPWS};
+    tstr(1) = {fNameList.TPWS};
     tstr(2) = {['Session: ',num2str(k),'/',num2str(nb),' Start Time ',...
         datestr(sb(k)),' Detect = ',num2str(nd)]};
     title(hA201(1),tstr);
@@ -1083,10 +1083,10 @@ while (k <= nb)
     if ~isempty(zMD)
         zMD = unique(zMD);
     end
-    save(fnameFD,'zFD')
-    save(fnameID,'zID')
-    save(fnameMD,'zMD')
-    save(fnameTD,'zTD');
+    save(fNameList.FD,'zFD')
+    save(fNameList.ID,'zID')
+    save(fNameList.MD,'zMD')
+    save(fNameList.TD,'zTD');
     
     % don't end if you used paintbrush on last record
     if (k > nb) && bFlag
@@ -1100,14 +1100,14 @@ pause off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %make zFD unique
 uZFD = [];  ia = []; ic = [];
-load(fnameFD);   % load false detections
+load(fNameList.FD);   % load false detections
 [uzFD,ia,ic] = unique(zFD);     % make zFD have unique entries
 if (length(ia) ~= length(ic))
     disp([' False Detect NOT UNIQUE - removed:   ', ...
         num2str(length(ic) - length(ia))]);
 end
 zFD = uzFD;
-save(fnameFD,'zFD');
+save(fNameList.FD,'zFD');
 tfinal = find(zTD(:,1) > 0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(' ')
@@ -1121,6 +1121,6 @@ disp(' ')
 % disp(' ')
 disp(['Number of Test Detections & False Detect = ',num2str(sum(zTD(tfinal,:)))])
 disp(' ')
-disp(['Done with file ',fnTPWS])
+disp(['Done with file ',fNameList.TPWS])
 
 commandwindow;

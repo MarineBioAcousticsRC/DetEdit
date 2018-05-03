@@ -1,4 +1,8 @@
 function [zFD, zID,zMD,fNameList]= buildLabelFiles(matchingFile, sdir)
+% initialize variables
+zFD = [];
+zID = [];
+zMD = [];
 
 % Name and build false detection file
 ffn = strrep(matchingFile,'TPWS','FD');

@@ -16,11 +16,11 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings
+detEdit_settings_SpermWhale_Test_without_threshold
 
 % define subfolder that fit specified iteration
 if itnum > 1
-   for id = 2: str2num(itnum); % iternate id times according to itnum
+   for id = 2: str2num(itnum) % iterate id times according to itnum
        subfolder = ['TPWS',num2str(id)];
        sdir = (fullfile(sdir,subfolder));
    end
@@ -30,7 +30,6 @@ end
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
 p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','detEdit','spParamsUser',spParamsUser);
-
 %% Check if TPWS file exists
 % Concatenate parts of file name
 if isempty(p.speName)
@@ -44,80 +43,30 @@ fileList = cellstr(ls(sdir));
 fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
     % if no matches, throw error
-    error('No files matching filePrefix found!')
+    error(sprintf('No files matching file prefix ''%s'' found!',detfn))
 elseif length(fileMatchIdx)>1
     % if more than one match, throw error
-    error('Multiple TPWS files match the filePrefix. Make the prefix more specific.')
+    error(sprintf('Multiple TPWS files match the file prefix ''%s''.\n Make the prefix more specific.',detfn))
 end
 
 matchingFile = fileList{fileMatchIdx};
-fnTPWS = fullfile(sdir,matchingFile);
 
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
-    if exist('tfName','var')
-        disp('Load Transfer Function File');
-        stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
-        tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
-    else
-        error('No path specified for transfer function files. Add tfName')
-    end
-    
-    fid = fopen(tffn);
-    [A,count] = fscanf(fid,'%f %f',[2,inf]);
-    tffreq = A(1,:);
-    tfuppc = A(2,:);
-    fclose(fid);
-    
-    tf = interp1(tffreq,tfuppc,p.tfSelect,'linear','extrap');
-    disp(['TF @',num2str(p.tfSelect),' Hz =',num2str(tf)]);
+    tf = tfSelect(filePrefix, tfName);
 else
     tf = 0;
     disp('No TF Applied');
 end
 %% Generate FD, TD, and ID files if needed
+[zFD,zID,zMD,fNameList] = buildLabelFiles(matchingFile, sdir);
 
-% Name and build false detection file
-ffn = strrep(matchingFile,'TPWS','FD');
-fnameFD = fullfile(sdir,ffn);
-AFD = exist(fnameFD,'file');
-if (AFD ~= 2) % if it doesn't exist, make it
-    zFD(1,1) = 1;
-    save(fnameFD,'zFD');
-    disp('Make new FD file');
-end
-
-% Name true detection file
-tfn = strrep(matchingFile,'TPWS','TD');
-fnameTD = fullfile(sdir,tfn);
-% NOTE: TD file is made below because it depends on a later variable
-
-
-% Name and build ID file
-idfn = strrep(matchingFile,'TPWS','ID');
-fnameID = fullfile(sdir,idfn);
-AID = exist(fnameID,'file');
-if (AID ~= 2)% if it doesn't exist, make it
-    zID = [];
-    save(fnameID,'zID');
-    disp('Make new ID file');
-end
-
-% Name and build ID file
-mdfn = strrep(matchingFile,'TPWS','MD');
-fnameMD = fullfile(sdir,mdfn);
-AMD = exist(fnameMD,'file');
-if (AMD ~= 2)% if it doesn't exist, make it
-    zMD = [];
-    save(fnameMD,'zMD');
-    disp('Make new MD file');
-end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
-load(fnTPWS,'MTT','MPP')
-
+fNameList.TPWS = fullfile(sdir,matchingFile);
+load(fNameList.TPWS,'MTT','MPP')
 
 % if you have more than "maxDetLoad" detections, don't load all spectra and
 % time series into memory. You can access them from the disk instead.
@@ -160,7 +109,7 @@ if specploton && loadMSP
     csn = MSN(ia1,:);
     csp = MSP(ia1,:);
 else
-    disp('No Waveform or Spectra');
+    disp('Number of detections exceeds max for loading');
 end
 
 %% apply tf and remove low amplitude detections
@@ -194,110 +143,38 @@ else
 end
 
 %% Make FD file intersect with MTT
-load(fnameFD)  % false detection times zFD
-jFD = []; ia = []; ic = [];
-if (~isempty(zFD))
-    [jFD,ia,ic] = intersect(MTT,zFD);
-    rFD = length(zFD) - length(jFD);
-    disp([' Removed ',num2str(rFD),...
-        ' FD detections that do not match detection times']);
-    if size(jFD,1)<size(jFD,2)
-        jFD = jFD';
-    end
-    zFD = jFD;
-    save(fnameFD,'zFD');
-end
+load(fNameList.FD)  % false detection times zFD
+zFD = rmUnmatchedDetections(MTT, zFD);
+save(fNameList.FD,'zFD');
 
-%% Make ID file intersect with MTT
-load(fnameID)  % identified detection times zID
-if (~isempty(zID))
-    [jID,ia,ic] = intersect(MTT,zID(:,1));
-    rID = length(zID) - length(jID);
-    disp([' Removed ',num2str(rID),...
-        ' ID detections that do not match detection times']);
-    if size(jID,1)<size(jID,2)
-        jID = jID';
-    end
-    zID = zID(ic,:);
-    save(fnameID,'zID');
-end
+% Make ID file intersect with MTT
+load(fNameList.ID)  % identified detection times zID
+zID = rmUnmatchedDetections(MTT, zID);
+save(fNameList.ID,'zID');
 
-%% Make MD file intersect with MTT
+% Make MD file intersect with MTT
 load(fnameMD)  % identified detection times zMD
-if (~isempty(zMD))
-    [jMD,ia,ic] = intersect(MTT,zMD(:,1));
-    rMD = length(zMD) - length(jMD);
-    disp([' Removed ',num2str(rMD),...
-        ' MD detections that do not match detection times']);
-    if size(jMD,1)<size(jMD,2)
-        jMD = jMD';
-    end
-    zMD = zMD(ic,:);
-    save(fnameMD,'zMD');
-end
+zMD = rmUnmatchedDetections(MTT, zID);
+save(fNameList.MD,'zMD');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Calculate bout starts and ends
 % TODO: this is calculated in mkLTSA, we should save it there instead of
 % recalculating here but would create backward compatibility issues
-% TODO: Should be a function
+
+[nb,eb,sb,bd] = calculate_bouts(clickTimes,gth,p);
 bFlag = 0;
-% find edges (start and end times) of bouts or sessions
-dt = diff(clickTimes)*24*60*60; % calculate time between detections in seconds
-gt = gth*60*60;    % gap time in sec
-I = find(dt>gt);  % find start of gaps
-sb = [clickTimes(1);clickTimes(I+1)];   % start time of bout
-eb = [clickTimes(I);clickTimes(end)];   % end time of bout
-dd = clickTimes(end)-clickTimes(1);     % deployment duration [d]
-nb = length(sb);        % number of bouts
-bd = (eb - sb);      % duration of bout in days
-
-% find bouts longer than the minimum
-if ~isempty(p.minBout)
-    bdI = find(bd > (p.minBout / (60*60*24)));
-    bd = bd(bdI);
-    sb = sb(bdI);
-    eb = eb(bdI);
-    nb = length(sb);        % number of bouts
-end
-
-% limit the length of a bout
-blim = p.ltsaMax/24;       % 6 hr bout length limit in days
-ib = 1;
-while ib <= nb
-    bd = (eb - sb);   %duration bout in days
-    if (bd(ib) > blim)      % find long bouts
-        nadd = ceil(bd(ib)/blim) - 1; % number of bouts to add
-        for imove = nb : -1: (ib +1)
-            sb(imove+nadd)= sb(imove);
-        end
-        for iadd = 1 : 1: nadd
-            sb(ib+iadd) = sb(ib) + blim*iadd;
-        end
-        for imove = nb : -1 : ib
-            eb(imove+nadd) = eb(imove);
-        end
-        for iadd = 0 : 1 : (nadd - 1)
-            eb(ib+iadd) = sb(ib) + blim*(iadd+1);
-        end
-        nb = nb + nadd;
-        ib = ib + nadd;
-    end
-    ib = ib + 1;
-end
-
-disp(['Number Bouts : ',num2str(nb)])
 
 %% Make LTSA session file
 lsfn = strrep(matchingFile,'TPWS','LTSA');
-fnameLTSA = fullfile(sdir,lsfn);
-Altsa = exist(fnameLTSA,'file');
+fNameList.LTSA = fullfile(sdir,lsfn);
+Altsa = exist(fNameList.LTSA,'file');
 if Altsa ~= 2
-    disp(['Error: LTSA Sessions File Does Not Exist: ',fnameLTSA])
+    disp(['Error: LTSA Sessions File Does Not Exist: ',fNameList.LTSA])
     return
 else
     disp('Loading LTSA Sessions, please wait ...')
-    load(fnameLTSA)   % LTSA sessions: pwr and pt structures
+    load(fNameList.LTSA)   % LTSA sessions: pwr and pt structures
     disp('Done Loading LTSA Sessions')
     sltsa = size(pt);
     if (sltsa(2) ~= nb)
@@ -315,22 +192,22 @@ end
 % adjust. Provide a warning to tell the user there might be an issue.
 if ~isempty(zFD)
     disp(strcat('WARNING: This dataset contains false-flagged detections.  ', ...
-        ' It is recommended that you remove them using modDet prior to ',...
-        'estimating false positive rate.'))
+        'Remove them using modDet prior to estimating false positive rate.'))
 end
+
 [~,trueClickIDx] = setdiff(clickTimes, zFD);
 ixfd = (1: c4fd : length(trueClickIDx));  % selected to test for False Det
 testClickIdx = trueClickIDx(ixfd);
 
-A6 = exist(fnameTD,'file');
+A6 = exist(fNameList.TD,'file');
 if (A6 ~= 2)
     zTD = -1.*ones(nb,4);
-    save(fnameTD,'zTD');    % create new TD
+    save(fNameList.TD,'zTD');    % create new TD
     disp(' Make new TD file');
 else
     load(fnameTD)
     if (length(zTD(:,1)) ~= nb)
-        disp([' Problem with TD file:',fnameTD]);
+        disp([' Problem with TD file:',fNameList.TD]);
         return
     end
 end
@@ -365,9 +242,9 @@ else
     tfLTSA = zeros(size(f))';
 end
 
-if specploton
+if specploton %Does anyone ever turn specploton off??
     % check length of MSP
-    inFileMat = matfile(fnTPWS);
+    inFileMat = matfile(fNameList.TPWS);
     if ~loadMSP
         MSP = inFileMat.MSP(1,:);
     end
@@ -397,13 +274,12 @@ if specploton
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-kstart = input('Starting Session:  ');
+k = input('Starting Session:  ');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 pause on
 disp('Press ''b'' key to go backward ')
 disp('Press any other key to go forward')
 cc = ' ';  % avoids crash when first bout too short
-k = kstart;
 yell = [];
 blag = 0;
 if (size(zTD,2) == 2) % this seems to patch on extra columns
@@ -419,10 +295,10 @@ onerun = 1; % What does this do?
 while (k <= nb)
     disp([' BEGIN SESSION: ',num2str(k)]);
     % load in FD, MD and TD each session in case these have been modified
-    load(fnameFD); % brings in zFD
-    load(fnameID); % brings in zID
-    load(fnameMD); % brings in zMD
-    load(fnameTD); % brings in zTD
+    load(fNameList.FD); % brings in zFD
+    load(fNameList.ID); % brings in zID
+    load(fNameList.MD); % brings in zMD
+    load(fNameList.TD); % brings in zTD
     
     % If all time series are loaded:
     % Make PP versus RMS plot for all clicks, if all time series are loaded
@@ -911,7 +787,9 @@ while (k <= nb)
     warning('off')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     figure(201);clf
-    set(201,'name','LTSA and time series')
+    colormap(201, jet)
+    
+    set(201,'name','LTSA and time series','KeyPressFcn',@myfigfcn)
     hA201 = subplot_layout; % Top panel, Figure 201: Received Level
     plot(hA201(1),t,RL,'b.','UserData',t)
     hold(hA201(1),'on')

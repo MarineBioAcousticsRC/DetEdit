@@ -17,7 +17,7 @@ getParams = 'none'; % Calculate Parameterss:
 %                   -> 'ici&pp' only to compute peak-to-peak, ici and
 %                   peakFr
 %                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur
-excludeID = 1; % yes - 1 | no - 0. Exclude ID times from MTT files 
+excludeID = 0; % yes - 1 | no - 0. Exclude ID times from MTT files 
 srate = 200; % sample rate
 gth = .5;  % gap time in hrs between sessions
 tpwsPath = 'E:\TPWS'; %directory of TPWS files

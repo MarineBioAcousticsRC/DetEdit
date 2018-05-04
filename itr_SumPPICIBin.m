@@ -1,9 +1,10 @@
 %% itr_SumPPICIBin
 
 clearvars
+close all
 
 %% Parameters defined by user
-filePrefix = 'GofMX_MC'; % File name to match. 
+filePrefix = 'GOM_MC'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
@@ -12,11 +13,11 @@ filePrefix = 'GofMX_MC'; % File name to match.
 sp = 'Pm'; % your species code
 itnum = '3'; % which iteration you are looking for
 srate = 200; % sample rate
-tpwsPath = 'E:\TPWS'; %directory of TPWS files
+tpwsPath = 'G:\TPWS'; %directory of TPWS files
 %tfName = 'E:\transfer_functions'; % Directory ...
 % with .tf files (directory containing folders with different series ...
-effortXls = 'E:\Pm_Effort.xls'; % specify excel file with effort times
-
+effortXls = 'G:\Pm_Effort.xls'; % specify excel file with effort times
+% !!! if not effort times: run groupID_noEffortTimes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 %% define subfolder that fit specified iteration
 if itnum > 1
@@ -46,6 +47,7 @@ end
 allEfforts = readtable(effortXls);
 site = strsplit(filePrefix,'_');
 effTable = allEfforts(ismember(allEfforts.Sites,site(2)),:);
+% effTable = allEfforts(ismember(allEfforts.Deployments,site(2)),:);
 
 % make Variable Names consistent
 startVar = find(~cellfun(@isempty,regexp(effTable.Properties.VariableNames,'Start.*Effort'))>0,1,'first');

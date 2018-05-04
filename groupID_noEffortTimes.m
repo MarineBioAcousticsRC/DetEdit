@@ -1,11 +1,11 @@
 % select directory where ship files are located
-shipDir = 'E:\metadata';
-shipTimesDir = 'E:\ShipTimes'; % directory where to save ship times .mat files
+shipDir = 'F:\metadata_reduced';
+shipTimesDir = 'G:\ShipTimes'; % directory where to save ship times .mat files
 
-IDDir = 'E:\TPWS\TPWS2\';
-IDTimesDir = 'E:\IDTimes'; % directory where to save ID times .mat files
+IDDir = 'G:\TPWS\TPWS2\';
+IDTimesDir = 'G:\IDTimes'; % directory where to save ID times .mat files
 
-saveTable = 'E:\Pm_Effort.xls'; % directory where to save excel file with effort times
+saveTable = 'G:\Pm_Effort.xls'; % directory where to save excel file with effort times
 
 %% write ship file times
 %writeSFilesTimes(shipDir,shipTimesDir);
@@ -52,7 +52,7 @@ for n = 1:length(nameLoc)
             ID.times = []; 
         end
         
-        % check if multiple multiple edgeffort times (some disk are corrupted)
+        % check if multiple edgeffort times (some disk are corrupted)
         if length(ieff) > 1
             addInterval = [edgeffort(ieff(1:end-1),2) + datenum(0,0,0,0,0,1/1000), edgeffort(ieff(2:end),1)];
             % group all times
@@ -65,29 +65,33 @@ for n = 1:length(nameLoc)
         % group overlapping intervals of no effort
         times = groupoverlaps(times);
 
-%         figure
-%         nline  = repmat((1:size(times,1))',1,2);
-%         plot(times',nline','bo-')
-%         title(loc)
-%         hold on
-%         nline  = repmat((1:size(ship.times,1))',1,2);
-%         plot(ship.times',nline','r.-')
-%         nline  = repmat((1:size(ID.times,1))',1,2);
-%         plot(ID.times',nline','g.-')
-%         xlim([edgeffort(ieff(1),1) edgeffort(ieff(end),2)])
+        %{
+        figure
+        nline  = repmat((1:size(times,1))',1,2);
+        plot(times',nline','bo-')
+        title(loc)
+        hold on
+        nline  = repmat((1:size(ship.times,1))',1,2);
+        plot(ship.times',nline','r.-')
+        nline  = repmat((1:size(ID.times,1))',1,2);
+        plot(ID.times',nline','g.-')
+        xlim([edgeffort(ieff(1),1) edgeffort(ieff(end),2)])
+        %}
         
         % get times between no effort intervals
         effort = [];
         effort(:,1) = [edgeffort(ieff(1),1); times(:,2) + datenum(0,0,0,0,0,1/1000)]; % add a ms
         effort(:,2) = [times(:,1) - datenum(0,0,0,0,0,1/1000); edgeffort(ieff(end),2)]; % extract a ms
         
-%         figure
-%         nline  = repmat((1:size(effort,1))',1,2);
-%         plot(effort',nline','bo-')
-%         title(loc)
-%         hold on
-%         nline  = repmat((1:size(times,1))',1,2);
-%         plot(times',nline','r.-')        
+        %{
+        figure
+        nline  = repmat((1:size(effort,1))',1,2);
+        plot(effort',nline','bo-')
+        title(loc)
+        hold on
+        nline  = repmat((1:size(times,1))',1,2);
+        plot(times',nline','r.-') 
+        %}
         
         S = cell(length(effort),1);
         LOC = cell(length(effort),1);

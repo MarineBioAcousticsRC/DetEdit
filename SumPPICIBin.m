@@ -24,18 +24,32 @@ p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
 
 %% Concatenate variables
 PPall = []; TTall = []; ICIall = []; % initialize matrices
-for idsk = 1 : length(concatFiles)
+parfor idsk = 1 : length(concatFiles)
     % Load file
     fprintf('Loading %d/%d file %s\n',idsk,length(concatFiles),fullfile(sdir,concatFiles{idsk}))
-    load(fullfile(sdir,concatFiles{idsk}));
+    D = load(fullfile(sdir,concatFiles{idsk}));
     
-    PPall = [PPall; MPP];   % group peak-to-peak
+    % find times outside effort (sometimes there are detections
+    % which are from the audio test at the beggining of the wav file)
+    within = cell2mat(arrayfun(@(x)sum(isbetween(x,datenum(effort.Start),datenum(effort.End))),D.MTT,'uni',false));
+    goodIdx = find(within ~= 0);
+    MTT = D.MTT(goodIdx); % only keep the good detections
+    MPP = D.MPP(goodIdx);
+    
+    % concatenate
     TTall = [TTall; MTT];   % group start times
+    PPall = [PPall; MPP];   % group peak-to-peak
     
     % Inter-Click Interval
     ici = diff(MTT)*24*60*60*1000; % in ms
-    ICIall = [ICIall;ici];  % group inter-click interval
+    ICIall = [ICIall;[ici; nan]];  % group inter-click interval
 end
+
+%% After parfor data may not be sorted. Sort all the variables
+[~,sorted] = sort(TTall);
+TTall = TTall(sorted);
+PPall = PPall(sorted);
+ICIall = ICIall(sorted);
 
 %% Convert times to bin vector times
 vTT = datevec(TTall);
@@ -59,6 +73,10 @@ effort.roundbin = round(effort.diffSec/(60*p.binDur));
 secMonitEffort = sum(effort.diffSec);
 binMonitEffort = sum(effort.roundbin);
 
+% convert intervals in bins 
+binEffort = intervalToBinTimetable(effort.Start,effort.End,p); 
+binEffort.sec = binEffort.bin*(p.binDur*60);
+
 %% get average of detection by effort
 NktTkt = positiveCounts/secMonitEffort;
 NktTktbin = positiveBins/binMonitEffort;
@@ -68,8 +86,12 @@ disp(['Nkt/Tkt for group counting: ',num2str(NktTktbin)]);
 %% group data by days and weeks
 Click = retime(binData(:,1),'daily','sum'); % #click per day
 Bin = retime(binData(:,1),'daily','count'); % #bin per day
+
 dayData = synchronize(Click,Bin);
+dayEffort = retime(binEffort,'daily','sum');
+
 weekData = retime(dayData,'weekly','mean');
+weekEffort = retime(binEffort,'weekly','sum');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Create plots, binlog and pplog files
@@ -104,6 +126,7 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
 icifn = [filePrefix,'_',p.speName,'_ici'];
 saveas(h1,fullfile(sdir,icifn),'png')
 
+
 %% Plot Peak-to-peak per click
 % statistics
 mpp = mean(PPall);
@@ -131,23 +154,8 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
 
 % Save plot
 ppfn = [filePrefix,'_',p.speName,'_pp'];
+% saveas(h2,fullfile(sdir,ppfn),'png')
 saveas(h2,fullfile(sdir,ppfn),'png')
-
-%% Percent log histogram PP click counting
-figure(3); set(3,'name','Received Levels in logarithmic scale')
-h3 = gca;
-nper = nhist*100/length(PPall); % percentage
-bar(h3,center,nper, 'barwidth', 1, 'basevalue', 1,'EdgeColor','k','FaceColor','w');
-set(h3,'YScale','log')
-xlim(h3,[min(center)-0.5,max(center)+0.5]) % center is in the middle of the bin
-title(h3,sprintf('%s N=%d',filePrefix,length(PPall)), 'Interpreter', 'none')
-ylabel(h3,'Percent of detections')
-xlabel(h3,'Peak-Peak Amplitude (dB)');
-
-% Save plot and pplog values in a mat file
-pplog = [filePrefix,'_',p.speName,'_pplog'];
-save(fullfile(sdir,pplog),'center','nper')
-saveas(h3,fullfile(sdir,pplog),'png')
 
 %% Plot Peak-to-peak per bin
 % statistics
@@ -157,15 +165,15 @@ moppBin = mode(binData.maxPP);
 meppBin = median(binData.maxPP);
 
 % Plot histogram
-figure(4); set(4,'name','Received Levels per Bin')
-h4 = gca;
+figure(3); set(3,'name','Received Levels per Bin')
+h3 = gca;
 centerBin = p.threshRL:1:p.p1Hi;
 [nhistBin] = histc(binData.maxPP,centerBin);
-bar(h4,centerBin, nhistBin, 'barwidth', 1, 'basevalue', 1)
-title(h4,sprintf('%s N=%d',filePrefix,length(binData.maxPP)), 'Interpreter', 'none')
-xlabel(h4,'Peak-Peak Amplitude (dB)')
-ylabel(h4,[num2str(p.binDur),' min Bin Counts'])
-xlim(h4,[p.threshRL, p.p1Hi])
+bar(h3,centerBin, nhistBin, 'barwidth', 1, 'basevalue', 1)
+title(h3,sprintf('%s N=%d',filePrefix,length(binData.maxPP)), 'Interpreter', 'none')
+xlabel(h3,'Peak-Peak Amplitude (dB)')
+ylabel(h3,[num2str(p.binDur),' min Bin Counts'])
+xlim(h3,[p.threshRL, p.p1Hi])
 % create labels and textbox
 mnlabelBin = sprintf('Mean = %0.2f', mppBin);
 stdlabelBin = sprintf('Std = %0.2f', sdppBin);
@@ -176,37 +184,28 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabelBin,stdlabelBin,...
 
 % Save plot
 binfn = [filePrefix,'_',p.speName,'_bin'];
-saveas(h4,fullfile(sdir,binfn),'png')
-
-%% Percent log histogram PP group counting
-figure(5); set(5,'name','Received Levels per bin in logarithmic scale')
-h5 = gca;
-nperBin = nhistBin*100/length(binData.maxPP); % percentage
-bar(h5,centerBin,nperBin, 'barwidth', 1, 'basevalue', 1,'EdgeColor','k','FaceColor','w');
-set(h5,'YScale','log')
-xlim(h5,[min(centerBin)-0.5,max(centerBin)+0.5]) % center is in the middle of the bin
-title(h5,sprintf('%s N=%d',filePrefix,length(binData.maxPP)), 'Interpreter', 'none')
-ylabel(h5,['Percent of ', num2str(p.binDur),' min bins'])
-xlabel(h5,'Peak-Peak Amplitude (dB)');
-
-% Save plot and pplog values in a mat file
-binlog = [filePrefix,'_',p.speName,'_binlog'];
-save(fullfile(sdir,binlog),'centerBin','nper')
-saveas(h5,fullfile(sdir,binlog),'png')
+saveas(h3,fullfile(sdir,binfn),'png')
 
 %% Plot weekly mean of detections 
-figure(6); set(6,'name','Weekly presence') 
-h6(1) = subplot(2,1,1);
-h6(2) = subplot(2,1,2);
-bar(h6(1),weekData.tbin,weekData.Count_Click)
-bar(h6(2),weekData.tbin,weekData.Count_Bin)
-set(h6(1),'xticklabel', '');
-ylabel(h6(1),{'Weekly mean';'of clicks per day'})
-ylabel(h6(2),{'Weekly mean';['of ', num2str(p.binDur), ' min bins per day']})
-title(h6(1),'Click Counting')
-title(h6(2),'Group Counting');
-axis (h6(1),'tight')
-axis (h6(2),'tight')
+figure(5); set(5,'name','Weekly presence','DefaultAxesColor',[.8 .8 .8]) 
+set(gca,'defaultAxesColorOrder',[0 0 0; 0 0 0]);
+h5(1) = subplot(2,1,1);
+h5(2) = subplot(2,1,2);
+hold(h5(1), 'on')
+bar(h5(1),weekEffort.tbin,weekEffort.sec,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+bar(h5(1),weekData.tbin,weekData.Count_Click,'BarWidth', 1)
+hold(h5(1), 'off')
+hold(h5(2), 'on')
+bar(h5(2),weekEffort.tbin,weekEffort.bin,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+bar(h5(2),weekData.tbin,weekData.Count_Bin,'BarWidth', 1)
+hold(h5(2), 'off')
+%set(h5(1),'xticklabel', '');
+ylabel(h5(1),{'Weekly mean';'of clicks per day'})
+ylabel(h5(2),{'Weekly mean';['of ', num2str(p.binDur), ' min bins per day']})
+title(h5(1),'Click Counting')
+title(h5(2),'Group Counting');
+axis (h5(1),'tight')
+axis (h5(2),'tight')
 
 % define step according to number of weeks
 if length(weekData.tbin) > 53 && length(weekData.tbin) <= 104 % 2 years
@@ -227,7 +226,25 @@ if length(weekData.tbin) > 53
     xtickangle(45)
 end
 
-%% Plot diel pattern
+
+%% Plot weekly mean of detections 
+% figure(5); set(5,'name','Weekly presence','DefaultAxesColor',[.8 .8 .8]) 
+% set(gca,'defaultAxesColorOrder',[0 0 0; 0 0 0]);
+% h5(1) = subplot(2,1,1);
+% h5(2) = subplot(2,1,2);
+% hold(h5(1), 'on')
+% bar(h5(1),dayEffort.tbin,dayEffort.sec,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+% bar(h5(1),dayData.tbin,dayData.Count_Click,'BarWidth', 1)
+% hold(h5(1), 'off')
+% hold(h5(2), 'on')
+% bar(h5(2),dayEffort.tbin,dayEffort.bin,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+% bar(h5(2),dayData.tbin,dayData.Count_Bin,'BarWidth', 1)
+% hold(h5(2), 'off')
+% set(h5(1),'xticklabel', '');
+% ylabel(h5(1),{'Weekly mean';'of clicks per day'})
+% ylabel(h5(2),{'Weekly mean';['of ', num2str(p.binDur), ' min bins per day']})
+% title(h5(1),'Click Counting')
+% title(h5(2),'Group Counting');
 
 
 end

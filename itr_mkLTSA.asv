@@ -11,12 +11,12 @@ filePrefix = 'GofMX_MC03'; % File name to match.
 %                    -> filePrefix = 'GofMX_DT01'
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
-itnum = '1'; % which iteration you are looking for
+itnum = '2'; % which iteration you are looking for
 srate = 200; % sample rate
-LTSApath = 'E:\LTSA\MC'; % directory containing all LTSAs for this deployment
+LTSApath = 'E:\JAH\BW\Detections\SOCAL_Cuviers\SOCAL_S\SOCAL_35_S\SOCAL35S_LTSAs'; % directory containing all LTSAs for this deployment
 % LTSA folder should match the site specified in prefix
-tpwsPath = 'E:\TPWS'; %directory of TPWS files
-% tfName = 'E:\TF_files'; % Directory ...
+tpwsPath = 'E:\JAH\BW\Detections\SOCAL_Cuviers\SOCAL_S\SOCAL_35_S\TPWS'; %directory of TPWS files
+tfName = 'E:\Harp_TF'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 
 

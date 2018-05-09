@@ -1,10 +1,10 @@
-function [KB,binCX,binT,binC] = ndets_per_bin(t,xt,y,dt,minNdet,nd)
+function [KB,binCX,binT,binC] = ndets_per_bin(t,xt,y,dt,minNdet,nd,binDur)
 % Calculate the number detection per bin
 % moved into subroutine kf 9/30/2016
 
 dur = t(end) - t(1);    % session duration
 % sort detections into time bins, get max RL for time bin
-binDur = 5;     % bin duration [minutes] use 5 for density est
+%binDur = 5;     % bin duration [minutes] use 5 for density est
 nbin = ceil(dur*24*60/binDur);
 % interDetection Interval threshold
 dtTH = 1 ;  % [seconds] 1

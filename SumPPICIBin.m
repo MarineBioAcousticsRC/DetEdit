@@ -1,187 +1,251 @@
-clear all; % clear data
-clf; % clear all figures
-fignum = 200;
-spe = 'Kogia';
-icimin = 0.05; icimax = .3;
-stn = input('Enter Project Name (SOCAL or GOM): ','s'); % site name
-if (strcmp(stn,'SOCAL'))
-    tj10 = datenum([2009 1 1 0 0 0]);   %Jan 2009 is time = 0
-elseif (strcmp(stn,'GOM'))
-    tj10 = datenum([2010 1 1 0 0 0]);   %Jan 2010 is time = 0
+function SumPPICIBin(varargin)
+
+%% get user input and set up file names
+n = 1;
+while n <= length(varargin)
+    switch varargin{n}
+        case 'filePrefix'
+            filePrefix = varargin{n+1}; n=n+2;
+        case 'sp'
+            sp = varargin{n+1}; n=n+2;
+        case 'sdir'
+            sdir = varargin{n+1}; n=n+2;
+        case 'concatFiles'
+            concatFiles = varargin{n+1}; n=n+2;
+        case 'effort'
+            effort = varargin{n+1}; n=n+2;
+        otherwise
+            error('Bad optional argument: "%s"', varargin{n});
+    end
 end
-site = input('Enter site (N, M, H): ','s');
-dpnfs = input('Enter First Deployment number (01 02 ...): ','s');
-dpnf = str2double(dpnfs);
-dpnls = input('Enter Last Deployment number (01 02 ...): ','s');
-dpnl = str2double(dpnls);
-disp('Select Directory with Detections');
-sdir = uigetdir('I:\','Select Directory with Detections');
-pp = []; ici = []; bin =[]; diel =[]; td = [];
-for n = dpnf:dpnl
-    if (site == 'MC')% GOM MC 1:11
-        if ( n ~= 8);
-            dpn = num2str(n);
-            if (n < 10)
-                dpn = ['0',dpn];
-            end
-        end
-    elseif (site == 'GC')
-        dpn = num2str(n);
-        if (n < 10)
-            dpn = ['0',dpn];
-        end
-    elseif (site == 'DT')
-        dpn = num2str(n);
-        if (n < 10)
-            dpn = ['0',dpn];
-        end
-    end
-    detpn = [sdir,'\'];
-    % read Test Detection data
-    ppfn = [site,dpn,'_',spe,'_TD4.mat'];
-    fn0 = fullfile(detpn,ppfn);
-    load(fn0);
-    itd = find(zTD(:,1) > 0 & zTD(:,2) > -0.5);
-    ntest = sum(zTD(itd,:));
-    disp([site,dpn,' Num False = ',num2str(ntest(2)),...
-        '  Num Tested = ',num2str(ntest(1)),...
-        ' False Percent = ',num2str(100*ntest(2)/ntest(1))]);
-    td = [td;zTD];
-    % read pp data
-    ppfn = [site,dpn,'_',spe,'_pp.mat'];
-    fn1 = fullfile(detpn,ppfn);
-    ldata = load(fn1);
-    x = ldata.ppnf;
-    if isrow(x)
-        pp = [pp; x'];
-    else
-        pp = [pp; x];
-    end
-    % read ici data
-    icifn = [site,dpn,'_',spe,'_ici2.xls'];
-    fn2 = fullfile(detpn,icifn);
-    icidata = xlsread(fn2);
-    ici = [ici;icidata(:,7)];
+
+%% get default parameters
+p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
+
+%% Concatenate variables
+PPall = []; TTall = []; ICIall = []; % initialize matrices
+parfor idsk = 1 : length(concatFiles)
+    % Load file
+    fprintf('Loading %d/%d file %s\n',idsk,length(concatFiles),fullfile(sdir,concatFiles{idsk}))
+    D = load(fullfile(sdir,concatFiles{idsk}));
     
-    % read Max PP by bin data
-    binfn = [site,dpn,'_',spe,'_bin.xls'];
-    fn3 = fullfile(detpn,binfn);
-    bindata = xlsread(fn3);
-    bin = [bin;bindata(:,8)];
-    diel = [diel;bindata(:,4)+(bindata(:,5)/60)];
+    % find times outside effort (sometimes there are detections
+    % which are from the audio test at the beggining of the wav file)
+    within = cell2mat(arrayfun(@(x)sum(isbetween(x,datenum(effort.Start),datenum(effort.End))),D.MTT,'uni',false));
+    goodIdx = find(within ~= 0);
+    MTT = D.MTT(goodIdx); % only keep the good detections
+    MPP = D.MPP(goodIdx);
+    
+    % concatenate
+    TTall = [TTall; MTT];   % group start times
+    PPall = [PPall; MPP];   % group peak-to-peak
+    
+    % Inter-Click Interval
+    ici = diff(MTT)*24*60*60*1000; % in ms
+    ICIall = [ICIall;[ici; nan]];  % group inter-click interval
 end
-%
-%Calculate False positive rate
-id = find(td(:,1) > 0 & td(:,2) > -0.5);
-false = sum(td(id,:));
-disp([' Num False = ',num2str(false(2)),...
-    '  Num Tested = ',num2str(false(1)),...
-    ' False Percent = ',num2str(100*false(2)/false(1))]);
-%plot ici
-iciIdx = find(ici > icimin & ici < icimax);
-figure(fignum); fignum = fignum +1;
-hist(ici(iciIdx),200);
-%set(gca,'EdgeColor','k','FaceColor','w')
-icif = ici(iciIdx);
-micif = mean(icif);
-sdicif = std(icif);
-icistr=[spe,' ',site,' ','Mean= ',num2str(micif),...
-    ' StDev= ',num2str(sdicif),' Number= ',num2str(length(iciIdx))];
-title(icistr)
-xlabel('Inter-Pulse Interval (s)');
-icifn = [site,'_',spe,'_ici.pdf'];
-fn1 = fullfile(detpn,icifn);
-saveas(gcf,fn1,'pdf')
 
-%plot pp click data
-figure(fignum); fignum = fignum +1; %linear histogram
-%hist(pp,100);
-center = 115.5:1:160.5;
-lpp = length(pp);
-mpp = mean(pp);
-sdpp = std(pp);
-%[n, center] = hist(pp,100);
-[nhist] = hist(pp,center);
-h2 = bar(center, nhist, 'barwidth', 1, 'basevalue', 1);
-set(h2,'EdgeColor','k','FaceColor','w')
-xlim([min(center),max(center)])
-ylim([0,1.05*max(nhist)])
-ylabel(gca, 'Number of detections','FontSize',16)
-xlabel(gca,'Peak-Peak Amplitude (dB)','FontSize',16);
-ppstr=[spe,' ',site,' ','Mean= ',num2str(mpp),...
-    'dB  StDev= ',num2str(sdpp),' Number= ',num2str(length(pp))];
-title(ppstr)
+%% After parfor data may not be sorted. Sort all the variables
+[~,sorted] = sort(TTall);
+TTall = TTall(sorted);
+PPall = PPall(sorted);
+ICIall = ICIall(sorted);
 
-%plot diel pattern
-figure(fignum); fignum = fignum +1;
-sutc = 5;% shift to local midnight
-dm = mod(diel - sutc,24); 
-dcenter = 0.5:1:23.5;
-[dhist] = hist(dm,dcenter);
-hd = bar(dcenter, dhist, 'barwidth', 1, 'basevalue', 1);
-set(hd,'EdgeColor','k','FaceColor','w')
-xlim([0,24]);
-ylim([0,1.05*max(dhist)])
-ylabel(gca, 'Number of Bins','FontSize',16)
-xlabel(gca,['Time of Day (UTC-',num2str(sutc),')'],'FontSize',16);
-dstr=[spe,' ',site,' Number Bins= ',num2str(length(diel))];
-title(dstr);
-dfn = [site,'_',spe,'_diel.pdf'];
-fnd = fullfile(detpn,dfn);
-saveas(gcf,fnd,'pdf')
+%% Convert times to bin vector times
+vTT = datevec(TTall);
+tbin = datetime([vTT(:,1:4), floor(vTT(:,5)/p.binDur)*p.binDur, ...
+    zeros(length(vTT),1)]);
 
-figure(fignum); fignum = fignum +1; %percent log histogram PP click
-nper = nhist*100/lpp; % percentage
-h3 = bar(center,nper, 'barwidth', 1, 'basevalue', 1);
-set(h3,'EdgeColor','k','FaceColor','w')
-%plot(center,n*100/lpp);
-set(gca,'YScale','log')
-xlim([min(center),max(center)])
-ylim([.1,50])
-set(gca,'FontSize',12)
-title(ppstr)
-ylabel(gca, 'Percent of detections','FontSize',16)
-xlabel(gca,'Peak-Peak Amplitude (dB)','FontSize',16);
-pplog = [site,'_',spe,'_pplog.mat'];
-fnlog = fullfile(detpn,pplog);
-save(fnlog,'center','nper')
-ppfn = [site,'_',spe,'_pp.pdf'];
-fn3 = fullfile(detpn,ppfn);
-saveas(gcf,fn3,'pdf')
+%% create table and get click counts and max pp per bin
+data = timetable(tbin,TTall,PPall);
+binData = varfun(@max,data,'GroupingVariable','tbin','InputVariable','PPall');
+binData.Properties.VariableNames{'GroupCount'} = 'Count'; % #clicks per bin
+binData.Properties.VariableNames{'max_PPall'} = 'maxPP';
 
-%plot pp bin data
-figure(fignum); fignum = fignum +1; %linear histogram
-%hist(pp,100);
-lbin = length(bin);
-mbin = mean(bin);
-sdbin = std(bin);
-%[n, center] = hist(pp,100);
-[nbhist] = hist(bin,center);
-h2 = bar(center, nbhist, 'barwidth', 1, 'basevalue', 1);
-set(h2,'EdgeColor','k','FaceColor','w')
-xlim([min(center),max(center)])
-ylim([0,1.05*max(nbhist)])
-ylabel(gca, 'Number of bins','FontSize',16)
-xlabel(gca,'Peak-Peak Amplitude (dB)','FontSize',16);
-binstr=[spe,' ',site,' ','Mean= ',num2str(mbin),...
-    'dB  StDev= ',num2str(sdbin),' Number= ',num2str(length(bin))];
-title(binstr)
+positiveCounts = sum(binData.Count);
+positiveBins = length(binData.Count);
 
-figure(fignum); fignum = fignum +1; %percent log histogram PP click
-nbper = nbhist*100/lbin; % percentage
-h3 = bar(center,nbper, 'barwidth', 1, 'basevalue', 1);
-set(h3,'EdgeColor','k','FaceColor','w')
-%plot(center,n*100/lpp);
-set(gca,'YScale','log')
-xlim([min(center),max(center)])
-ylim([.1,50])
-set(gca,'FontSize',12)
-title(binstr)
-ylabel(gca, 'Percent of bins','FontSize',16)
-xlabel(gca,'Peak-Peak Amplitude (dB)','FontSize',16);
-binlog = [site,'_',spe,'_binlog.mat'];
-fnblog = fullfile(detpn,binlog);
-save(fnblog,'center','nbper')
-binfn = [site,'_',spe,'_bin.pdf'];
-fn5 = fullfile(detpn,ppfn);
-saveas(gcf,fn5,'pdf')
+%% group effort in bins
+effort.diffSec = seconds(effort.End-effort.Start) ;
+effort.bins = effort.diffSec/(60*p.binDur);
+effort.roundbin = round(effort.diffSec/(60*p.binDur));
+
+secMonitEffort = sum(effort.diffSec);
+binMonitEffort = sum(effort.roundbin);
+
+% convert intervals in bins 
+binEffort = intervalToBinTimetable(effort.Start,effort.End,p); 
+binEffort.sec = binEffort.bin*(p.binDur*60);
+
+%% get average of detection by effort
+NktTkt = positiveCounts/secMonitEffort;
+NktTktbin = positiveBins/binMonitEffort;
+disp(['Nkt/Tkt for click counting: ',num2str(NktTkt)]);
+disp(['Nkt/Tkt for group counting: ',num2str(NktTktbin)]);
+
+%% group data by days and weeks
+Click = retime(binData(:,1),'daily','sum'); % #click per day
+Bin = retime(binData(:,1),'daily','count'); % #bin per day
+
+dayData = synchronize(Click,Bin);
+dayEffort = retime(binEffort,'daily','sum');
+
+weekData = retime(dayData,'weekly','mean');
+weekEffort = retime(binEffort,'weekly','sum');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Create plots, binlog and pplog files
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Plot Inter-Click Interval
+iciIdx = find(ICIall > p.iciRange(1) & ICIall < p.iciRange(2));
+% statistics
+miciSel = mean(ICIall(iciIdx));
+sdiciSel = std(ICIall(iciIdx));
+moiciSel = mode(ICIall(iciIdx));
+meiciSel = median(ICIall(iciIdx));
+
+figure(1); set(1,'name','Inter-Click Interval')
+h1 = gca;
+centerIci = p.iciRange(1):1:p.iciRange(2);
+[nhist] = histc(ICIall(iciIdx),centerIci);
+bar(h1,centerIci,nhist, 'barwidth', 1, 'basevalue', 1)
+xlim(h1,p.iciRange);
+title(h1,sprintf('%s N=%d',filePrefix,length(ICIall)), 'Interpreter', 'none')
+xlabel(h1,'Inter-Click Interval (ms)')
+ylabel(h1,'Counts')
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', miciSel);
+stdlabel = sprintf('Std = %0.2f', sdiciSel);
+melabel = sprintf('Median = %0.2f', meiciSel);
+molabel = sprintf('Mode = %0.2f', moiciSel);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% save ici data and figure
+icifn = [filePrefix,'_',p.speName,'_ici'];
+saveas(h1,fullfile(sdir,icifn),'png')
+
+
+%% Plot Peak-to-peak per click
+% statistics
+mpp = mean(PPall);
+sdpp = std(PPall);
+mopp = mode(PPall);
+mepp = median(PPall);
+
+% Plot histogram
+figure(2); set(2,'name','Received Levels')
+h2 = gca;
+center = p.threshRL:1:p.p1Hi;
+[nhist] = histc(PPall,center);
+bar(h2,center, nhist, 'barwidth', 1, 'basevalue', 1)
+title(h2,sprintf('%s N=%d',filePrefix,length(PPall)), 'Interpreter', 'none')
+xlabel(h2,'Peak-Peak Amplitude (dB)')
+ylabel(h2,'Click Counts')
+xlim(h2,[p.threshRL, p.p1Hi])
+% create labels and textbox
+mnlabel = sprintf('Mean = %0.2f', mpp);
+stdlabel = sprintf('Std = %0.2f', sdpp);
+melabel = sprintf('Median = %0.2f', mepp);
+molabel = sprintf('Mode = %0.2f', mopp);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
+    melabel,molabel});
+
+% Save plot
+ppfn = [filePrefix,'_',p.speName,'_pp'];
+% saveas(h2,fullfile(sdir,ppfn),'png')
+saveas(h2,fullfile(sdir,ppfn),'png')
+
+%% Plot Peak-to-peak per bin
+% statistics
+mppBin = mean(binData.maxPP);
+sdppBin = std(binData.maxPP);
+moppBin = mode(binData.maxPP);
+meppBin = median(binData.maxPP);
+
+% Plot histogram
+figure(3); set(3,'name','Received Levels per Bin')
+h3 = gca;
+centerBin = p.threshRL:1:p.p1Hi;
+[nhistBin] = histc(binData.maxPP,centerBin);
+bar(h3,centerBin, nhistBin, 'barwidth', 1, 'basevalue', 1)
+title(h3,sprintf('%s N=%d',filePrefix,length(binData.maxPP)), 'Interpreter', 'none')
+xlabel(h3,'Peak-Peak Amplitude (dB)')
+ylabel(h3,[num2str(p.binDur),' min Bin Counts'])
+xlim(h3,[p.threshRL, p.p1Hi])
+% create labels and textbox
+mnlabelBin = sprintf('Mean = %0.2f', mppBin);
+stdlabelBin = sprintf('Std = %0.2f', sdppBin);
+melabelBin = sprintf('Median = %0.2f', meppBin);
+molabelBin = sprintf('Mode = %0.2f', moppBin);
+annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabelBin,stdlabelBin,...
+    melabelBin,molabelBin});
+
+% Save plot
+binfn = [filePrefix,'_',p.speName,'_bin'];
+saveas(h3,fullfile(sdir,binfn),'png')
+
+%% Plot weekly mean of detections 
+figure(5); set(5,'name','Weekly presence','DefaultAxesColor',[.8 .8 .8]) 
+set(gca,'defaultAxesColorOrder',[0 0 0; 0 0 0]);
+h5(1) = subplot(2,1,1);
+h5(2) = subplot(2,1,2);
+hold(h5(1), 'on')
+bar(h5(1),weekEffort.tbin,weekEffort.sec,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+bar(h5(1),weekData.tbin,weekData.Count_Click,'BarWidth', 1)
+hold(h5(1), 'off')
+hold(h5(2), 'on')
+bar(h5(2),weekEffort.tbin,weekEffort.bin,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+bar(h5(2),weekData.tbin,weekData.Count_Bin,'BarWidth', 1)
+hold(h5(2), 'off')
+%set(h5(1),'xticklabel', '');
+ylabel(h5(1),{'Weekly mean';'of clicks per day'})
+ylabel(h5(2),{'Weekly mean';['of ', num2str(p.binDur), ' min bins per day']})
+title(h5(1),'Click Counting')
+title(h5(2),'Group Counting');
+axis (h5(1),'tight')
+axis (h5(2),'tight')
+
+% define step according to number of weeks
+if length(weekData.tbin) > 53 && length(weekData.tbin) <= 104 % 2 years
+    step = calmonths(1);
+elseif length(weekData.tbin) > 104 && length(weekData.tbin) <= 209 % 4 years
+    step = calmonths(2);
+elseif length(weekData.tbin) > 209 && length(weekData.tbin) <= 313 % 6 years
+    step = calmonths(3);
+elseif length(weekData.tbin) > 313 && length(weekData.tbin) <= 417 % 8 years
+    step = calmonths(4);
+elseif length(weekData.tbin) >= 417 % more than 8 years
+    step = calyears(1);
+end
+% define tick steps only if more than 1 year of data
+if length(weekData.tbin) > 53
+    xtickformat('MMMyy')
+    xticks(weekData.tbin(1):step:weekData.tbin(end))
+    xtickangle(45)
+end
+
+
+%% Plot weekly mean of detections 
+% figure(5); set(5,'name','Weekly presence','DefaultAxesColor',[.8 .8 .8]) 
+% set(gca,'defaultAxesColorOrder',[0 0 0; 0 0 0]);
+% h5(1) = subplot(2,1,1);
+% h5(2) = subplot(2,1,2);
+% hold(h5(1), 'on')
+% bar(h5(1),dayEffort.tbin,dayEffort.sec,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+% bar(h5(1),dayData.tbin,dayData.Count_Click,'BarWidth', 1)
+% hold(h5(1), 'off')
+% hold(h5(2), 'on')
+% bar(h5(2),dayEffort.tbin,dayEffort.bin,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+% bar(h5(2),dayData.tbin,dayData.Count_Bin,'BarWidth', 1)
+% hold(h5(2), 'off')
+% set(h5(1),'xticklabel', '');
+% ylabel(h5(1),{'Weekly mean';'of clicks per day'})
+% ylabel(h5(2),{'Weekly mean';['of ', num2str(p.binDur), ' min bins per day']})
+% title(h5(1),'Click Counting')
+% title(h5(2),'Group Counting');
+
+
+end
+

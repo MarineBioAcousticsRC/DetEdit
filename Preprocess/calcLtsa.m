@@ -1,9 +1,10 @@
 function calcLtsa
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% calculate spectral averages and save to ltsa file
+%calcLtsa calculate spectral averages and save to ltsa file, called by
+%mkLtsa
 %
-% called by mk_ltsa
-%
+% Copyright(C) 2018 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
+%                      Kait E. Frasier, UCSD, krasier@ucsd.edu
+%                      Alba Solsona Berga, UCSD, asolsonaberga@ucsd.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global PARAMS
 tic
@@ -22,24 +23,6 @@ h = loadbar(' Creating LTSA ');
 total = PARAMS.ltsa.nxwav;
 m = 0;                              % total number of raw file counter
 count = 0;                          % total number of averages counter for output display
-% total = 0;
-% rfc = 0;
-% for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
-%     if PARAMS.ltsa.ftype ~= 1           % only for HARP and ARP & OBS data
-%         % open xwav file
-%         fid = fopen(fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)),'r');
-%         fseek(fid,80,'bof');
-%         nrf = fread(fid,1,'uint16');         % Number of RawFiles in XWAV file (80 bytes from bof)
-%     else                                % wav/Ishmael data
-%         nrf = 1;
-%     end
-%
-%     for r = 1:nrf                   % loop over each raw file in xwav
-%
-%         total = total + PARAMS.ltsa.nave(rfc + r);
-%     end
-%     rfc = rfc + nrf;
-% end
 
 for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
     if PARAMS.ltsa.ftype ~= 1           % only for HARP and ARP & OBS data
@@ -88,8 +71,6 @@ for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
                 end
             end
             
-            %              disp([num2str(k),'  ',num2str(r),'  ',num2str(n),'  ',num2str(nsamp)])      % for debugging
-            
             if PARAMS.ltsa.ftype ~= 1       % xwavs (count bytes)
                 % start Byte location in xwav file of spectral average
                 if n == 1
@@ -107,8 +88,6 @@ for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
                 end
             end
             
-            
-            
             % clear data vector
             data = [];
             % jump to correct location in xwav file
@@ -125,44 +104,33 @@ for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
                 if ~isempty(data)
                     data = data(PARAMS.ltsa.ch,:);
                 else
-                    disp_msg(['Error: No data read, # of samples = ',num2str(nsamp)])
-                    disp_msg(['xi = ',num2str(xi)])
-                    disp_msg(['k,r,n = ',num2str(k),' ',num2str(r),' ',num2str(n)])
+                    disp(['Error: No data read, # of samples = ',num2str(nsamp)])
+                    disp(['xi = ',num2str(xi)])
+                    disp(['k,r,n = ',num2str(k),' ',num2str(r),' ',num2str(n)])
                     data = zeros(1,nsamp);
                 end
             else
-                %                 dall = wavread(fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)),[yi yi-1+nsamp]);
-                %                 dall = double(wavread(fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)),[yi yi-1+nsamp],'Native'));
-                [dall,Fs] = audioread( fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)), [yi yi-1+nsamp], 'native' );
+                [dall,~] = audioread( fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)), [yi yi-1+nsamp], 'native' );
                 dall = double(dall);
                 data = dall(:,PARAMS.ltsa.ch);
             end
             
             % if not enough data samples, pad with zeroes
-            %             if nsamp < PARAMS.ltsa.nfft
             dsz = length(data);
             % for debugging
-            %             disp(['File# Raw# Ave# DataSize: ',num2str(k),'  ',num2str(r),'  ',num2str(n),'  ',num2str(dsz)])
             if dsz < PARAMS.ltsa.nfft
-                %                 dz = zeros(PARAMS.ltsa.nfft-nsamp,1);
                 dz = zeros(PARAMS.ltsa.nfft-dsz,1);
-                %                 data = [data;dz];
                 data = [data,dz'];
-                disp_msg(['File# Raw# Ave# DataSize: ',num2str(k),'  ',num2str(r),'  ',num2str(n),'  ',num2str(dsz)])
-                %                 disp_msg('Paused ... press any key to continue')
-                % pause
+                disp(['File# Raw# Ave# DataSize: ',num2str(k),'  ',num2str(r),'  ',num2str(n),'  ',num2str(dsz)])
             end
             
-            % disp_msg(['File# Raw# Ave# DataSize: ',num2str(k),'  ',num2str(r),'  ',num2str(n),'  ',num2str(dsz)])
-            
             % calculate spectra
-            [ltsa,freq] = pwelch(data,window,noverlap,PARAMS.ltsa.nfft,PARAMS.ltsa.fs);   % pwelch is supported psd'er
+            [ltsa,~] = pwelch(data,window,noverlap,PARAMS.ltsa.nfft,PARAMS.ltsa.fs);   % pwelch is supported psd'er
             ltsa = 10*log10(ltsa); % counts^2/Hz
             % write data
             fwrite(fod,ltsa,'int8');
             count = count + 1;
         end     % end for n - loop over the number of spectral averages
-%         pcntDone = m/PARAMS.ltsa.nrftot;
         pcntDone = ((k-1) + r/nrf)/total;
         loadbar(['Calculating, ',num2str(int8(pcntDone*100)),'% complete'],h, pcntDone)
     end     % end for r - loop over each raw file
@@ -170,14 +138,14 @@ for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
         % close input xwav file
         fclose(fid);
     end
-    disp_msg(['Completed Processing XWAV file ',num2str(k)])
+    disp(['Completed Processing audio file ',num2str(k)])
     
     
 end     % end for k - loop over each xwav file
 % close output ltsa file
 fclose(fod);
 t = toc;
-disp_msg(['Time to calculate ',num2str(count),' spectra is ', num2str(t)])
+disp(['Time to calculate ',num2str(count),' spectra is ', num2str(t)])
 
 close(h)    % turn off progress bar (loadbar)
 

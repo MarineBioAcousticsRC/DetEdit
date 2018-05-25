@@ -1,10 +1,12 @@
 function ioGetLtsaDir
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%get_ltsadir get directory of wave/xwav files 
 %
-% get_ltsadir.m
+% Prompt user to enter a directory path containg audio files, and specify  
+% audio format.
 %
-% get directory of wave/xwav files
-%
+% Copyright(C) 2018 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
+%                      Kait E. Frasier, UCSD, krasier@ucsd.edu
+%                      Alba Solsona Berga, UCSD, asolsonaberga@ucsd.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global PARAMS 
@@ -21,13 +23,13 @@ AddOpts.WindowStyle='normal';
 AddOpts.Interpreter='tex';
 % display input dialog box window
 in=inputdlg(prompt,dlgTitle,lineNo,def,AddOpts);
-if length(in) == 0	% if cancel button pushed
+if isempty(in)	% if cancel button pushed
     PARAMS.ltsa.gen = 0;
     return
 else
     PARAMS.ltsa.gen = 1;
 end
-PARAMS.ltsa.ftype = str2num(deal(in{1}));
+PARAMS.ltsa.ftype = str2double(deal(in{1}));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get the directory
 %
@@ -36,8 +38,8 @@ if PARAMS.ltsa.ftype == 1
 elseif PARAMS.ltsa.ftype == 2
     str1 = 'Select Directory with XWAV files';
 else
-    disp_msg('Wrong file type. Input 1 or 2 only')
-    disp_msg(['Not ',num2str(PARAMS.ltsa.ftype)])
+    disp('Wrong file type. Input 1 or 2 only')
+    disp(['Not ',num2str(PARAMS.ltsa.ftype)])
     get_ltsadir
 end
 ipnamesave = PARAMS.ltsa.indir;
@@ -63,19 +65,18 @@ end
 fn = char(d.name);      % file names in directory
 fnsz = size(fn);        % number of data files in directory
 nfiles = fnsz(1);
-disp_msg(' ')
-disp_msg([num2str(nfiles),'  data files for LTSA'])
+disp([num2str(nfiles),' data files for LTSA'])
 if fnsz(2)>80
-    disp_msg('Error: filename length too long')
-    disp_msg('Rename to 80 characters or less')
-    disp_msg('Abort LTSA generation')
+    disp('Error: filename length too long')
+    disp('Rename to 80 characters or less')
+    disp('Abort LTSA generation')
     return
 end
 
 if nfiles < 1
-    disp_msg(['No data files in this directory: ',PARAMS.ltsa.indir])
-    disp_msg('Pick another directory')
-    get_ltsadir
+    disp(['No data files in this directory: ',PARAMS.ltsa.indir])
+    disp('Pick another directory')
+    ioGetLtsaDir
 end
 
 if PARAMS.ltsa.ftype == 1
@@ -90,7 +91,7 @@ if PARAMS.ltsa.ftype == 1
     end    
    
     % sort times
-    [B,index] = sortrows(dnumStart');
+    [~,index] = sortrows(dnumStart');
     % put file name in PARAMS
     PARAMS.ltsa.fname = fn(index,:);
 elseif PARAMS.ltsa.ftype == 2

@@ -1,11 +1,11 @@
 function ioWriteLtsaHead
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%write_ltsahead write ltsa files
 %
-% write_ltsahead.m
+% Prompt user to enter a directory path to save ltsa files
 %
-% setup values for ltsa file and write header + directories for new ltsa
-% file
-%
+% Copyright(C) 2018 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
+%                      Kait E. Frasier, UCSD, krasier@ucsd.edu
+%                      Alba Solsona Berga, UCSD, asolsonaberga@ucsd.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global PARAMS
 
@@ -23,12 +23,12 @@ DefaultName = [PARAMS.ltsa.outdir,'\',PARAMS.ltsa.outfile];
 % so exit this script
 if strcmp(num2str(PARAMS.ltsa.outfile),'0')
     PARAMS.ltsa.gen = 0;
-    disp_msg('Canceled file creation')
+    disp('Canceled file creation')
     return
 else
     PARAMS.ltsa.gen = 1;
-    disp_msg('Opened File: ')
-    disp_msg([PARAMS.ltsa.outdir,PARAMS.ltsa.outfile])
+    disp('Opened File: ')
+    disp([PARAMS.ltsa.outdir,PARAMS.ltsa.outfile])
     %     disp(' ')
     cd(PARAMS.ltsa.outdir)
 end
@@ -59,7 +59,7 @@ if  PARAMS.ltsa.ver == 4
     fwrite(fid,PARAMS.ltsa.nrftot,'uint32');    % 4 bytes - total number of raw files from all xwavs
     nz = 25;
 else
-    disp_msg(['Error: incorrect version number ',num2str(PARAMS.ltsa.ver)])
+    disp(['Error: incorrect version number ',num2str(PARAMS.ltsa.ver)])
     return
 end
 
@@ -107,8 +107,6 @@ for k = 1 : PARAMS.ltsa.nrftot
     
     PARAMS.ltsa.byteloc(k) = ltsaByteLoc;
     
-    
-    %
     % write ltsa parameters:
     %
     fwrite(fid,PARAMS.ltsa.byteloc(k) ,'uint32');     % 4 byte - Byte location in ltsa file of the spectral averages for this rawfile

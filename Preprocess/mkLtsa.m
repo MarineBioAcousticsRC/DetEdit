@@ -5,9 +5,8 @@ function mkLtsa
 % Syntax:
 %   mkLtsa
 %
-% mkLtsa
-% open specified audio files by user and read headers for making an ltsa 
-% file. A LTSA (Long-Term Spectral Average) is compressed format to view
+% Make a LTSA file from selected audio files by reading audio headers. 
+% A LTSA (Long-Term Spectral Average) is a compressed format to view
 % large data sets. It is only compatible with WAV and XWAV files and 
 % supports 4 filename formats:
 %   1.  yymmdd-HHMMSS
@@ -44,7 +43,7 @@ initLtsaParams
 ioGetLtsaDir
 
 if PARAMS.ltsa.gen == 0
-    disp_msg('Canceled making ltsa')
+    disp('Canceled making ltsa')
     return
 end
 
@@ -65,7 +64,7 @@ ckLtsaParams
 ioWriteLtsaHead
 
 if PARAMS.ltsa.gen == 0
-    disp_msg('Canceled making ltsa')
+    disp('Canceled making ltsa')
     return
 end
 % calculated averaged spectra

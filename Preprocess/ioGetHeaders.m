@@ -1,10 +1,9 @@
 function ioGetHeaders
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%get_headers open data files and read headers for making an ltsa file
 %
-% get_headers.m
-%
-% open data files and read headers for making an ltsa file
-%
+% Copyright(C) 2018 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
+%                      Kait E. Frasier, UCSD, krasier@ucsd.edu
+%                      Alba Solsona Berga, UCSD, asolsonaberga@ucsd.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global PARAMS
@@ -17,29 +16,12 @@ for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
     
     if PARAMS.ltsa.ftype == 1       % do the following for wav files
         m = m + 1;
-        % check wav file goodness
-%         mm = [];
-%         [mm dd] = wavfinfo(fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)));
-%         if isempty(mm)
-%             disp_msg(dd)
-%             disp_msg(fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)))
-%             disp_msg('Run wavDirTestFix.m on this directory first, then try again')
-%             return
-%         end
-
-        % read wav header and fill up PARAMS
-%         [y, fs, PARAMS.ltsa.nBits, OPTS] = wavread( fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)),10);
-%         PARAMS.ltsahd.sample_rate(m) = fs;  % sample rate of this file
-%         siz = wavread( fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)), 'size' );
-%         PARAMS.ltsahd.nsamp(m) = siz(1);
-%         PARAMS.ltsa.nch(m) = siz(2);
         try
             info = audioinfo(fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)));
         catch ME
-            disp_msg(ME.message)
-            dmsg = sprintf('Is %s a real wave file?', ...
+            disp(ME.message)
+            fprintf('Is %s a real wave file?', ...
                 fullfile(PARAMS.ltsa.indir,PARAMS.ltsa.fname(k,:)));
-            disp_msg(dmsg);
             PARAMS.ltsa.gen = 0; % need to cancel
             return 
         end
@@ -47,8 +29,6 @@ for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
         PARAMS.ltsahd.sample_rate(m) = info.SampleRate;
         PARAMS.ltsahd.nsamp(m) = info.TotalSamples;
         PARAMS.ltsa.nch(m) = info.NumChannels;
-      
-        bytespersample = floor(PARAMS.ltsa.nBits/8);
         
         PARAMS.ltsahd.fname(m,1:fnsz(2)) = PARAMS.ltsa.fname(k,:);        % xwav file name for this raw file header
         PARAMS.ltsahd.rfileid(m) = 1;                           % raw file id / number in this xwav file
@@ -84,9 +64,9 @@ for k = 1:PARAMS.ltsa.nxwav            % loop over all xwavs
         elseif PARAMS.ltsa.nBits == 32
             PARAMS.ltsa.dbtype = 'int32';
         else
-            disp_msg('PARAMS.ltsa.nBits = ')
-            disp_msg(PARAMS.ltsa.nBits)
-            disp_msg('not supported')
+            disp('PARAMS.ltsa.nBits = ')
+            disp(PARAMS.ltsa.nBits)
+            disp('not supported')
             return
         end
         
@@ -125,5 +105,5 @@ end
 PARAMS.ltsa.nrftot = m;     % total number of raw files
 PARAMS.ltsa.ver = 4;    % 32 bits (~ 4billon nave and nrftot allowed)
 
-disp_msg(['Total number of raw files: ',num2str(PARAMS.ltsa.nrftot)])
-disp_msg(['LTSA version ',num2str(PARAMS.ltsa.ver)])
+disp(['Total number of raw files: ',num2str(PARAMS.ltsa.nrftot)])
+disp(['LTSA version ',num2str(PARAMS.ltsa.ver)])

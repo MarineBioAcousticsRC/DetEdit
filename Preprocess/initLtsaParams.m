@@ -1,10 +1,11 @@
 function initLtsaParams
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%init_ltsaparams initialize ltsa parameters
 %
-% init_ltsaparams.m
+% Defines default parameters used to create ltsa
 %
-% initialize ltsa parameters
-%
+% Copyright(C) 2018 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
+%                      Kait E. Frasier, UCSD, krasier@ucsd.edu
+%                      Alba Solsona Berga, UCSD, asolsonaberga@ucsd.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global PARAMS
 
@@ -49,8 +50,4 @@ PARAMS.ltsa.start.str = '0000';
 PARAMS.ltsa.aptime = 0;			%  pause time (typically CPU speed dependent?
 PARAMS.ltsa.cancel = 0;
 PARAMS.ltsa.delimit.value = 0;  %  delimit value is off at first
-
-
-% PARAMS.ltsa.infile = PARAMS.ltsa.outfile;
-% PARAMS.ltsa.inpath = PARAMS.ltsa.outdir;
 

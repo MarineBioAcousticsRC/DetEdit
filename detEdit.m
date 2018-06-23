@@ -1,6 +1,6 @@
 % detEdit.m
 % 2/21/2016 modified for version 1.1
-% For Kogia JAH 5/22/15
+% For Kogia JAH 5/22/15<>
 % Estimate the number of False Detections
 % JAH 10-19-2014
 % spec2 uses the LTSA for the click spectra
@@ -16,7 +16,7 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings
+detEdit_settings_kf
 
 % define subfolder that fit specified iteration
 if itnum > 1
@@ -38,7 +38,8 @@ else
     detfn = [filePrefix,'.*',p.speName,'.*TPWS',itnum,'.mat'];
 end
 % Get a list of all the files in the start directory
-fileList = cellstr(ls(sdir));
+cd(sdir); 
+fileList = cellstr(strsplit(ls));
 % Find the file name that matches the filePrefix
 fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
@@ -145,17 +146,17 @@ end
 %% Make FD file intersect with MTT
 load(fNameList.FD)  % false detection times zFD
 zFD = rmUnmatchedDetections(MTT, zFD);
-save(fNameList.FD,'zFD');
+%save(fNameList.FD,'zFD');  JAH BUG
 
 % Make ID file intersect with MTT
 load(fNameList.ID)  % identified detection times zID
 zID = rmUnmatchedDetections(MTT, zID);
-save(fNameList.ID,'zID');
+%save(fNameList.ID,'zID');  JAH BUG the removes species ID
 
 % Make MD file intersect with MTT
 load(fNameList.MD)  % identified detection times zMD
 zMD = rmUnmatchedDetections(MTT, zID);
-save(fNameList.MD,'zMD');
+%save(fNameList.MD,'zMD'); JAH BUG
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Calculate bout starts and ends
@@ -302,11 +303,11 @@ while (k <= nb)
     
     % If all time series are loaded:
     % Make PP versus RMS plot for all clicks, if all time series are loaded
-    figure(51); clf; set(51,'name',sprintf('RL pp vs. RL rms (left shift by %d)',p.threshRL))
+    figure(51); clf; set(51,'name',sprintf('RL pp vs. RL rms (shift at %d)',p.threshRMS))
     h51 = gca;
     
     % Make RMS versus frequency plot for all clicks
-    figure(53); clf; set(53,'name',sprintf('RL rms vs. Peak freq. (left shift by %d)',p.threshRL))
+    figure(53); clf; set(53,'name',sprintf('RL rms vs. Peak freq. (shift at %d)',p.threshRMS))
     h53 = gca;
     
     if p.threshHiFreq ~=0 %any(strcmp('threshHiFreq',fieldnames(p)))
@@ -334,7 +335,7 @@ while (k <= nb)
             pxmspAll = xmspAll - p.slope*(xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
         end
         plot(h51,pxmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
-        title(h51,['Based on ',num2str(length(xmppAll)),' clicks']);
+        title(h51,['Based on ',num2str(length(xmppAll)),' clicks']);  %Gray background for all clicks
         
         % apply RMS threshold to figure (51)
         if (p.threshRMS > 0)
@@ -363,7 +364,7 @@ while (k <= nb)
         % plot RMS vs frequency plot, keeping RMS vertical like in fig(51)
         freqAll = fmsp(im + fimint-1);
         plot(h53,pxmspAll,freqAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
-        title(h53,['Based on total of ',num2str(length(freqAll)),' clicks']);
+        title(h53,['Based on total of ',num2str(length(freqAll)),' clicks']);%Gray background for all clicks
         % apply High Frequency threshold to figure (53)
         if onerun == 1
             if (p.threshHiFreq > 0)
@@ -554,7 +555,7 @@ while (k <= nb)
     PT = pt{1,k};   % LTSA session time vector
     pwr1 = pwr{1,k};  % LTSA power vector
     nbinS = length(PT);
-    if (nbinS == 0)
+    if (nbinS == 0) 
         disp('No LTSA for this Session');
         PT(1) = sb(k) ; PT(2) = eb(k); % start end times for plots
         pwr1(1:length(f)) = ones; % make uniform LTSA
@@ -645,7 +646,7 @@ while (k <= nb)
         
         % Plot  PP versus RMS Plot for this session
         hold(h51, 'on')
-        plot(h51,pxmsp,xmpp,'.','UserData',t)% true ones in blue
+        plot(h51,pxmsp,xmpp,'b.','MarkerSize',10,'UserData',t)% true ones in blue
         
         if ~loadMSP % plot threshold line now because no background data
             if (p.threshRMS > 0)
@@ -684,28 +685,28 @@ while (k <= nb)
             else
                 xtline = [p.threshRMS,p.threshRMS]; ytline = [ min(xmpp),max(xmpp)];
             end
-            plot(h51,xtline,ytline,'r')
+            plot(h51,xtline,ytline,'r') %Marks threshold as red line
         end
         
-        if ff2 % false in red
-            plot(h51,pxmsp(K2),xmpp(K2),'r.','UserData',t(K2))
+        if ff2 % false detections in red
+            plot(h51,pxmsp(K2),xmpp(K2),'r.','MarkerSize',10,'UserData',t(K2))
         end
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
+                hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','MarkerSize',10,'UserData',t(K3(thisIDset)));
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
-            end
+            end 
         end
         if ff4 % MD in green
-            plot(h51,pxmsp(K4),xmpp(K4),'g.','UserData',t(K4))
+            plot(h51,pxmsp(K4),xmpp(K4),'g.','MarkerSize',10,'UserData',t(K4))
         end
         hold(h51, 'off')
         
-        % Plot RMS vs frequency plot for this session
+        % Plot RMS vs frequency plot for this s ession
         hold(h53, 'on')
         freq = fmsp(im + fimint -1);
-        plot(h53,pxmsp,freq,'.','UserData',t) % true ones in blue
+        plot(h53,pxmsp,freq,'b.','MarkerSize',10,'UserData',t) % true ones in blue
         if ~loadMSP
             if onerun == 1
                 if (p.threshHiFreq > 0)
@@ -739,17 +740,17 @@ while (k <= nb)
             plot(h53,xtline,ytline,'r')
         end
         if ff2 % false in red
-            plot(h53,pxmsp(K2),freq(K2),'r.','UserData',t(K2))
+            plot(h53,pxmsp(K2),freq(K2),'r.','MarkerSize',10,'UserData',t(K2))
         end
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
+                hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','MarkerSize',10,'UserData',t(K3(thisIDset)));
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
         end
         if ff4 % MD in green
-            plot(h53,pxmsp(K4),freq(K4),'g.','UserData',t(K4))
+            plot(h53,pxmsp(K4),freq(K4),'g.','MarkerSize',10,'UserData',t(K4))
         end
         hold(h53, 'off')
         if p.threshHiFreq > 0
@@ -789,12 +790,13 @@ while (k <= nb)
     figure(201);clf
     colormap(201, jet)
     
-    set(201,'name','LTSA and time series','KeyPressFcn',@myfigfcn)
+    %set(201,'name','LTSA and time series','KeyPressFcn',@myfigfcn)
+    set(201,'name','LTSA and time series') %JAH
     hA201 = subplot_layout; % Top panel, Figure 201: Received Level
-    plot(hA201(1),t,RL,'b.','UserData',t)
+    plot(hA201(1),t,RL,'b.','MarkerSize',10,'UserData',t)
     hold(hA201(1),'on')
     if ff2 % plot False detections in red
-        plot(hA201(1),tfd,rlFD,'r.','UserData',tfd)
+        plot(hA201(1),tfd,rlFD,'r.','MarkerSize',10,'UserData',tfd)
         % disp([' false det plotted:',num2str(length(tfd))])
     end
     if ff3 % plot ID'd detections in associated color
@@ -802,12 +804,12 @@ while (k <= nb)
         specIDs = unique(spCodeSet); % get unigue species codes
         for iC2 = 1:length(specIDs) % set colors
             thisIDset = spCodeSet ==specIDs(iC2);
-            hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.','UserData',tID(thisIDset));
+            hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.','MarkerSize',10,'UserData',tID(thisIDset));
             set(hRLID,'Color',colorTab(specIDs(iC2),:))
         end
     end
     if ff4 % plot MD detections in green
-        plot(hA201(1),tMD,rlMD,'g.','UserData',tfd)
+        plot(hA201(1),tMD,rlMD,'g.','MarkerSize',10,'UserData',tfd)
     end
     hold(hA201(1),'off')
     axis(hA201(1),[PT(1) PT(end) p.rlLow p.rlHi])
@@ -839,7 +841,7 @@ while (k <= nb)
         dt2 = reshape([dt,dt]',2*ldt,1);
         
         [AX,H1,H2] = plotyy(hA201(3),tdt2,dt2,binT,binC,'plot','semilogy');
-        set(H1,'Marker','.','MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
+        set(H1,'Marker','.','MarkerSize',10,'MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
         set(H2,'Marker','o','MarkerFaceColor','c','LineStyle','none',...
             'Markersize',4.5,'UserData',dt2)
         % Note: plotyy is buggy in 2012b, axis handles work only if called
@@ -931,7 +933,7 @@ while (k <= nb)
     if strcmp(cc,'u') || strcmp(cc,'g') || strcmp(cc,'y') || ...
             strcmp(cc,'r') || strcmp(cc,'i')  ;
         % detections were flagged by user
-        disp(' Update Display') % Stay on same bout
+        disp(' Update Display') % Stay on same boutba
         % get brushed data and figure out what to do based on color:
         [yell,zFD,zID,zMD,bFlag] = brush_color(gca,cc,zFD,zID,zMD,colorTab,t);
         

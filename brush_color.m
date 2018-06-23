@@ -2,20 +2,28 @@ function [yell,zFD,zID,zMD,bFlag] = brush_color(hFig,cc,zFD,zID,zMD,colorTab,t)
 % get brushed data and figure out what to do based on color
 
 yell = [];
+hBrush = get(hFig,'Children'); %JAH
+shBrush = size(hBrush);
+brushID = [];
+% for i = 1: shBrush
+yesbrush = hBrush(shBrush).BrushData; %JAH
+nbrushID = find(yesbrush > 0); %JAH
+brushID = [brushID,nbrushID];
+% end
+%  hBrush = findall(hFig,'tag','Brushing');
+% 
+% % get x and x info from brushed data
+% brushDataX = get(hBrush, {'Xdata'});
+% brushDataY = get(hBrush, {'Ydata'});
+% % don't understand why nan values appear, create index of valid points here
 
-hBrush = findall(hFig,'tag','Brushing');
-
-% get x and x info from brushed data
-brushDataX = get(hBrush, {'Xdata'});
-brushDataY = get(hBrush, {'Ydata'});
-% don't understand why nan values appear, create index of valid points here
-
-if ~isempty(brushDataX)
-    brushID = ~isnan(brushDataX{1,1});
+% if ~isempty(brushDataX)
+if ~isempty(brushID) %JAH
+%     brushID = ~isnan(brushDataX{1,1});
     
     bFlag = 1;
-    brushDataX = brushDataX{1,1}(brushID);
-    brushDataY = brushDataY{1,1}(brushID);
+%     brushDataX = brushDataX{1,1}(brushID);
+%     brushDataY = brushDataY{1,1}(brushID);
     
     % get color info
     brushColor = get(hBrush, {'Color'});
@@ -26,13 +34,15 @@ if ~isempty(brushDataX)
     brushDate = filledMarkers{end}(brushID);
     
     if ~isempty(brushDate)
-        if isequal(brushColor,[1,0,0]) || strcmp(cc,'r');
+%         if isequal(brushColor,[1,0,0]) || strcmp(cc,'r');
+        if strcmp(cc,'r') %JAH use only key not brush color
             % Red paintbrush = False Detections
-            disp(['Number of False Detections = ',num2str(length(brushDataX))])
+            disp(['Number of False Detections = ',num2str(length(brushID))]) %JAH
             % make sure you're not flagging something outside this session
             [newFD,~] = intersect(t, brushDate);
             zFD = [zFD; newFD];   % cummulative False Detection matrix
-        elseif isequal(brushColor,[1,1,0]) || strcmp(cc,'y');
+%         elseif isequal(brushColor,[1,1,0]) || strcmp(cc,'y');
+        elseif  strcmp(cc,'y') %JAH
             % yellow paintbrush = give time of detection
             disp(['       Year              Month          Day           Hour', ...
                 '          Min          Sec']);
@@ -62,9 +72,10 @@ if ~isempty(brushDataX)
                 disp(['Remaining Number of False Detections = ',num2str(length(iC))])
                 % save(fn2,'zFD')
             end
-        elseif isequal(brushColor,[0,1,0]) || strcmp(cc,'m');
+%         elseif isequal(brushColor,[0,1,0]) || strcmp(cc,'m');
+        elseif strcmp(cc,'m') %JAH
             % magenta paintbrush = misidentified Detections
-            disp(['Number of Mid-ID Detections = ',num2str(length(brushDataX))])
+            disp(['Number of Mid-ID Detections = ',num2str(length(brushID))]) %JAH
             % make sure you're not flagging something outside this session
             [newMD,~] = intersect(t, brushDate);
             % remove new MD from ID

@@ -1008,7 +1008,42 @@ while (k <= nb)
         end
         onerun = 1;
         
-    elseif (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
+    elseif strcmp(cc,'c') % re-code one species ID with another
+        oldID = input(' Enter the ID you want to overwrite:  '); % Set RL low
+        newID  = input(' Enter the ID you want to change it to (enter 0 for no ID):  '); % Set RL low
+        addFlag = 0; % flag gets turned to 1 if we have to append to zID rather than change existing IDs
+        if oldID == 0 %get everything that's unlabeled
+            addFlag = 1;
+            [dates2Append,~] = setdiff(t,[tfd;tID]);
+
+        elseif oldID ==99 % get everything that's false
+            addFlag = 1;
+            [dates2Append,iCFD] = intersect(zFD(:,1),t);
+            zFD(iCFD) = [];
+        else
+            [~,iCID] = intersect(zID(:,1),t);
+            oldIDLocs = find(zID(iCID,2)==oldID);
+        end
+        
+        if newID == 0  && ~addFlag % user wants previously ID'd thing changed to unlabeled
+            zID(iCID(oldIDLocs),:) = [];
+        elseif newID == 99 && ~addFlag % user wants previously ID'd thing changed to false
+            zFD = [zFD;zID(iCID(oldIDLocs),1)];
+            zID(iCID(oldIDLocs),:) = [];
+        elseif newID == 99 && oldID == 0 % user wants to change unlabeled to false
+            zFD = [zFD;dates2Append];
+        elseif newID ==0 && oldID == 99 % user wants to change false to unlabeled
+            % nothing needs to happen, because they've already been removed
+            % from zFD above.
+        else
+            if addFlag % user wants previously false or unlabeled thing changed to ID
+                zID = [zID; [dates2Append,ones(size(dates2Append))*newID]];
+            else  % user wants previously ID'dthing changed to different ID
+                zID(iCID(oldIDLocs),2) = newID;
+            end
+        end
+        
+        elseif (strcmp(cc,'x') || strcmp(cc,'z') ) % test click for random False Detect
         if ~isempty(XFD)
             zTD(k,2) = 0;
             for inxfd = 1 : zTD(k,1)

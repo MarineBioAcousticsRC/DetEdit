@@ -4,17 +4,17 @@ clearvars
 close all
 
 %% Parameters defined by user
-filePrefix = 'DT'; % File name to match. 
+filePrefix = 'SOCAL'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
 %                    -> filePrefix = 'GofMX_DT01'
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
-sp = 'Pm'; % your species code
+sp = 'Zc'; % your species code
 itnum = '2'; % which iteration you are looking for
 srate = 200; % sample rate
-tpwsPath = 'H:\newTPWS'; %directory of TPWS files
-%tfName = 'E:\transfer_functions'; % Directory ...
+tpwsPath = 'G:\SOCAL_BW\Detections\SOCAL_A2\TPWS'; %directory of TPWS files
+tfName = 'G:\Harp_TF'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 effortXls = 'H:\Pm_Effort.xls'; % specify excel file with effort times
 % !!! if not effort times: run groupID_noEffortTimes

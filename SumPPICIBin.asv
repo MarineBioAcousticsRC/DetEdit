@@ -101,7 +101,6 @@ dayTable.Properties.VariableNames{'sec'} = 'Effort_Sec';
 
 weekData = retime(dayData,'weekly','mean');
 weekEffort = retime(binEffort,'weekly','sum');
-weekTable = retime(dayTable,'weekly','sum');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Create plots, binlog and pplog files
@@ -220,8 +219,6 @@ title(h5(2),'Group Counting');
 
 ylim(h5(1),[0 round(max(weekData.Count_Click),2,'significant')*1.2])
 ylim(h5(2),[0 round(max(weekData.Count_Bin),2,'significant')*1.2])
-xlim(h5(1),[datetime(refTime),weekEffort.tbin(end)+2])
-xlim(h5(2),[datetime(refTime),weekEffort.tbin(end)+2])
 % define step according to number of weeks
 if length(weekData.tbin) > 53 && length(weekData.tbin) <= 104 % 2 years
     step = calmonths(1);
@@ -238,17 +235,34 @@ end
 if length(weekData.tbin) > 53
     xtickformat(h5(1),'MMMyy')
     xtickformat(h5(2),'MMMyy')
-    xticks(h5(1),[datetime(refTime),weekData.tbin(1):step:weekData.tbin(end)])
-    xticks(h5(2),[datetime(refTime),weekData.tbin(1):step:weekData.tbin(end)])
+    xticks(h5(1),weekData.tbin(1):step:weekData.tbin(end))
+    xticks(h5(2),weekData.tbin(1):step:weekData.tbin(end))
     xtickangle(h5(1),45)
     xtickangle(h5(2),45)
 end
 
 weekfn = [filePrefix,'_',p.speName,'_weekly_presence'];
 saveas(h5,fullfile(sdir,weekfn),'fig')
+% saveas(h5,fullfile(sdir,weekfn),'png')
+%% Plot weekly mean of detections 
+% figure(5); set(5,'name','Weekly presence','DefaultAxesColor',[.8 .8 .8]) 
+% set(gca,'defaultAxesColorOrder',[0 0 0; 0 0 0]);
+% h5(1) = subplot(2,1,1);
+% h5(2) = subplot(2,1,2);
+% hold(h5(1), 'on')
+% bar(h5(1),dayEffort.tbin,dayEffort.sec,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+% bar(h5(1),dayData.tbin,dayData.Count_Click,'BarWidth', 1)
+% hold(h5(1), 'off')
+% hold(h5(2), 'on')
+% bar(h5(2),dayEffort.tbin,dayEffort.bin,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+% bar(h5(2),dayData.tbin,dayData.Count_Bin,'BarWidth', 1)
+% hold(h5(2), 'off')
+% set(h5(1),'xticklabel', '');
+% ylabel(h5(1),{'Weekly mean';'of clicks per day'})
+% ylabel(h5(2),{'Weekly mean';['of ', num2str(p.binDur), ' min bins per day']})
+% title(h5(1),'Click Counting')
+% title(h5(2),'Group Counting');
 
-summaryfn = [filePrefix,'_',p.speName,'_summaryData_forDensity'];
-save(fullfile(sdir,summaryfn),'dayTable','weekTable','refTime','NktTkt','NktTktbin')
 
 end
 

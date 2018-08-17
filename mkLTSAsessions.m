@@ -222,6 +222,9 @@ while (k <= nb)
     % find which ltsa to use and get pwr and pt vectors
     K = [];
     K = find(sTime <= sb(k) & eTime >= eb(k));
+    if length(K) > 1
+        K = find(sTime(k) <= sb(k) & eTime(k) >= eb(k));
+    end
     % find which rawfiles to plot ltsa
     if ~isempty(K) && length(K) == 1
         L = [];
@@ -231,7 +234,9 @@ while (k <= nb)
             L = find(rfTime{K} >= sb(k) & rfTime{K} <= eb(k));
         end
         if ~isempty(L)
+            if L ~= 1
             L = [L(1)-1,L]; % get rawfile from before sb(k)
+            end
             % grab the ltsa pwr matrix to plot
             hdr = ioReadLTSAHeader(fullfile(lpn,fnames(K,:))); % get some stuff we'll need
             nbin = length(L) * hdr.ltsa.nave(L(1));    % number of time bins to get
@@ -276,7 +281,9 @@ while (k <= nb)
         Le = [];
         Le = find(rfTime{Ke} <= eb(k));
         if ~isempty(Ls)
+            if Ls ~= 1
             Ls = [Ls(1)-1,Ls]; % get rawfile from before sb(k)
+            end
             % grab the ltsa pwr matrix to plot
             hdr = ioReadLTSAHeader(fullfile(lpn,fnames(Ks,:))); % get some stuff we'll need
             nbin = length(Ls) * hdr.ltsa.nave(Ls(1));    % number of time bins to get
@@ -329,10 +336,12 @@ while (k <= nb)
     k = k+1;
 end
 % save(fn2,'pwr','pt')
+if nb>= 1
 save(fn2,'pwr','pt','-v7.3')
 disp(['Done with file ',fn])
 tc = toc;
 disp(['Elasped Time : ',num2str(tc),' s'])
+end
 
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

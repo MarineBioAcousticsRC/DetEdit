@@ -54,7 +54,7 @@ matchingFile = fileList{fileMatchIdx};
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
-    tf = tfSelect(filePrefix, tfName);
+    [tf,tffreq,tfuppc] = tfSelect(filePrefix, tfName,p);
 else
     tf = 0;
     disp('No TF Applied');

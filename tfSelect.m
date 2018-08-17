@@ -1,4 +1,4 @@
-function tf = tfSelect(filePrefix, tfName)
+function [tf,tffreq,tfuppc] = tfSelect(filePrefix, tfName,p)
 
 if exist('tfName','var')
     disp('Load Transfer Function File');

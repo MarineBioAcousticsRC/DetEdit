@@ -11,7 +11,7 @@ autoSel = true; % by default select file automatically based on case
 switch stationDeploy
     % site DT
     case {'DT01','DT02','DT03'} 
-        tfnum = 585;
+        tfnum = 589;
         serie = '500_series';
     case {'DT04','DT05','DT06','DT07','DT08'} 
         tfnum = 638;
@@ -56,6 +56,9 @@ switch stationDeploy
     case 'GC09'
         tfnum = 718; 
         serie = '700_series';
+    case 'GC10'
+        tfnum = 809; 
+        serie = '800_series';
     
     % 'Antarc01EIE'
     case {'Antarc01EIE'}

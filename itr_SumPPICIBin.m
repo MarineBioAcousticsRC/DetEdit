@@ -4,20 +4,21 @@ clearvars
 close all
 
 %% Parameters defined by user
-filePrefix = 'GOM_MC'; % File name to match. 
+filePrefix = 'DT'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
 %                    -> filePrefix = 'GofMX_DT01'
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
-itnum = '3'; % which iteration you are looking for
+itnum = '2'; % which iteration you are looking for
 srate = 200; % sample rate
-tpwsPath = 'G:\TPWS'; %directory of TPWS files
+tpwsPath = 'H:\newTPWS'; %directory of TPWS files
 %tfName = 'E:\transfer_functions'; % Directory ...
 % with .tf files (directory containing folders with different series ...
-effortXls = 'G:\Pm_Effort.xls'; % specify excel file with effort times
+effortXls = 'H:\Pm_Effort.xls'; % specify excel file with effort times
 % !!! if not effort times: run groupID_noEffortTimes
+refTime = '2010-04-01'; %reference time format 'yyyy-MM-dd'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 %% define subfolder that fit specified iteration
 if itnum > 1
@@ -45,8 +46,9 @@ end
 
 %% Get effort times matching prefix file
 allEfforts = readtable(effortXls);
-site = strsplit(filePrefix,'_');
-effTable = allEfforts(ismember(allEfforts.Sites,site(2)),:);
+% site = strsplit(filePrefix,'_');
+site = filePrefix;
+effTable = allEfforts(ismember(allEfforts.Sites,site),:);
 % effTable = allEfforts(ismember(allEfforts.Deployments,site(2)),:);
 
 % make Variable Names consistent
@@ -64,7 +66,7 @@ effort = timetable(Start,End);
 concatFiles = fileList(fileMatchIdx);
 
 SumPPICIBin('filePrefix',filePrefix,'concatFiles', concatFiles,'sp', sp,...
-    'sdir', tpwsPath,'effort',effort);
+    'sdir', tpwsPath,'effort',effort,'referenceTime',refTime);
 
 
 disp('Done processing')

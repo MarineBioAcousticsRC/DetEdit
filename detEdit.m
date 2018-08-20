@@ -16,7 +16,7 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings
+detEdit_settings_asb
 
 % define subfolder that fit specified iteration
 if itnum > 1
@@ -43,7 +43,7 @@ fileList = cellstr(ls(sdir));
 fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
     % if no matches, throw error
-    error(sprintf('No files matching file prefix ''%s'' found!',detfn))
+error(sprintf('No files matching file prefix ''%s'' found!',detfn))
 elseif length(fileMatchIdx)>1
     % if more than one match, throw error
     error(sprintf('Multiple TPWS files match the file prefix ''%s''.\n Make the prefix more specific.',detfn))

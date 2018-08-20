@@ -1,15 +1,17 @@
 % select directory where ship files are located
-shipDir = 'F:\metadata_reduced';
-shipTimesDir = 'G:\ShipTimes'; % directory where to save ship times .mat files
+shipDir = 'E:\metadata_reduced';
+shipTimesDir = 'H:\ShipTimes'; % directory where to save ship times .mat files
 
-IDDir = 'G:\TPWS\TPWS2\';
-IDTimesDir = 'G:\IDTimes'; % directory where to save ID times .mat files
-
-saveTable = 'G:\Pm_Effort.xls'; % directory where to save excel file with effort times
+IDDir = 'H:\TPWS';
+IDTimesDir = 'H:\IDTimes'; % directory where to save ID times .mat files
+maxDetEdit = 4; % number of TPWS folders (i.e. TPWS4 is 4)
+saveTable = 'H:\Pm_Effort.xls'; % directory where to save excel file with effort times
 
 %% write ship file times
-%writeSFilesTimes(shipDir,shipTimesDir);
-%writeIDTimes(IDDir,IDTimesDir);
+%run join_IDs to group noe effort times
+%join_IDs
+writeSFilesTimes(shipDir,shipTimesDir);
+writeIDTimes(IDDir,IDTimesDir,maxDetEdit);
 
 %% Get a list of all the files in the start directory
 shipList = cellstr(ls(shipTimesDir));

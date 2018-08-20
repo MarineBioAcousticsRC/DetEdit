@@ -63,8 +63,8 @@ switch stationDeploy
         tfnum = 718; 
         serie = '700_series';
     case 'GC10'
-        tfnum = 809;
-        serie = '800_series'; 
+        tfnum = 809; 
+        serie = '800_series';
         
     % 'Antarc01EIE'
     case {'Antarc01EIE'}

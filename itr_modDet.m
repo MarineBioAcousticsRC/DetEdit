@@ -4,23 +4,23 @@
 
 clearvars
 clear global
-filePrefix = 'GofMX_MC02'; % File name to match. 
+filePrefix = 'GOM_DT_09_disk07'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
 %                    -> filePrefix = 'GofMX_DT01'
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
 sp = 'Pm'; % your species code
-itnum = '1'; % which iteration you are looking for
+itnum = '2'; % which iteration you are looking for
 getParams = 'none'; % Calculate Parameterss: 
 %                   -> 'none' do NOT compute parameters
 %                   -> 'ici&pp' only to compute peak-to-peak, ici and
 %                   peakFr
 %                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur
-excludeID = 0; % yes - 1 | no - 0. Exclude ID times from MTT files 
+excludeID = 1; % yes - 1 | no - 0. Exclude ID times from MTT files 
 srate = 200; % sample rate
 gth = .5;  % gap time in hrs between sessions
-tpwsPath = 'E:\TPWS'; %directory of TPWS files
+tpwsPath = 'H:\newTPWS'; %directory of TPWS files
 %tfName = 'E:\transfer_functions'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 

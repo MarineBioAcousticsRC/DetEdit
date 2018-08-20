@@ -9,18 +9,18 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-filePrefix = 'GofMX_MC01_disk01'; % File name to match. 
+filePrefix = 'GOM_MC_11_disk12'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
 %                    -> filePrefix = 'GofMX_DT01_disk01-08'
-itnum = '3'; % iteration
+itnum = '2'; % iteration
 srate = 200; % sample rate
 sp = 'Pm'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 3000; % Interval to check for false detections
-sdir = 'G:\TPWS'; %Directory with TPWS files
+sdir = 'H:\newTPWS'; %Directory with TPWS files
 %tfName = 'E:\TF_files'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
@@ -53,9 +53,9 @@ spParamsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no a
 
 % spParamsUser.threshRL = 120; % minimum RL threshold in dB peak-to-peak
 spParamsUser.threshRMS = 0; % RMS threshold cutoff
-spParamsUser.threshHiFreq = 30; % high freq cutoff for clicks
+spParamsUser.threshHiFreq = 40; % high freq cutoff for clicks
 spParamsUser.threshPP = 0; % high freq cutoff for clicks
-%spParamsUser.slope = 0.8;
+spParamsUser.slope = 0.7;
 % % spParamsUser.ltsaContrast = 116; % ltsa contrast
 % spParamsUser.ltsaBright = 55; % ltsa brightness
 % % spParamsUser.ltsaLims = [0,100]; % max and min of LTSA plot
@@ -75,7 +75,7 @@ maxDetLoad = 4e5; % [] - read all or 4e5 - the number of detections above
 % timeseries into memory this is for large files (e.g. dolphin click detections)
 % if maxDetLoad exist, plotaxes can be defined to keep the format of plot
 % 51 and 53
-plotaxes.minRMS = 60;
-plotaxes.maxRMS = 130;
+plotaxes.minRMS = 90;
+plotaxes.maxRMS = 150;
 plotaxes.minPP = 120;
 plotaxes.maxPP = 180;

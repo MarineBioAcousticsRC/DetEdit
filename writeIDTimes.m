@@ -1,4 +1,4 @@
-function writeIDTimes(cDir,saveDir)
+function writeIDTimes(cDir,saveDir,maxItr)
 % Specify directory where to save reduced mat files
 sec2Day = 60*60*24;
 addms = 1/(1000*sec2Day); % convert 1ms to days
@@ -18,7 +18,7 @@ for s = 1: length(TPWSList)
 end
 
 siteDisk = unique(siteDiskList);
-
+expression = 'ID(\d+).';
 for i = 1:length(siteDisk)
     % loop over files from the same site (e.g., MC01)
     disp(['loading times from: ', siteDisk{i}]);
@@ -28,18 +28,36 @@ for i = 1:length(siteDisk)
     
     % return detection times from the same site
     timesStart = [];
-    allfolders = [];
     for j = 1:length(siteDiskIdx)
         f = siteDiskIdx(j);
-        fold = fullfile(cDir,TPWSList{f});
-        disp(['   ', TPWSList{f}]);
-        load(fold);
-        if ~isempty(zID)
-        timesStart = [timesStart;zID(:,1)];  
+        file = TPWSList{f};
+        fold = fullfile(cDir,file);
+        itr = 1;
+        cDirTemp = cDir;
+        while itr < maxItr+1
+            if itr ~= 1
+               subfolder = ['TPWS',num2str(itr)];
+               cDirTemp = fullfile(cDir,subfolder);
+               replace = ['ID',num2str(itr),'.'];
+               file = regexprep(file,expression,replace);
+               fold = fullfile(cDirTemp,file);
+            end
+            disp(['   ', file]);
+            if exist(fold,'file')
+                load(fold);
+                if ~isempty(zID)
+                    timesStart = [timesStart;zID(:,1)];
+                end
+                itr = itr+1;
+            else
+                disp(['   ',file,' does not exist '])
+                itr = maxItr+1;
+            end
         end
     end
     
     if ~isempty(timesStart)
+    timesStart = sort(timesStart);
     diffStarts = diff(timesStart);
     breaks = find(diffStarts>(encDur/sec2Day)); 
     starts = [timesStart(1); timesStart(breaks+1)]; % start 1ms after

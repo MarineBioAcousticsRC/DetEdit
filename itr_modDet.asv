@@ -4,13 +4,13 @@
 
 clearvars
 clear global
-filePrefix = 'SOCAL32A2'; % File name to match. 
+filePrefix = 'SOCAL24A2'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
 %                    -> filePrefix = 'GofMX_DT01'
 % or                 -> filePrefix ='GOM_DT_09' (for files names with GOM)
-sp = 'Cuviers'; % your species code
+sp = 'Zc'; % your species code
 itnum = '1'; % which iteration you are looking for
 getParams = 'none'; % Calculate Parameterss: 
 %                   -> 'none' do NOT compute parameters
@@ -20,8 +20,8 @@ getParams = 'none'; % Calculate Parameterss:
 excludeID = 1; % yes - 1 | no - 0. Exclude ID times from MTT files 
 srate = 200; % sample rate
 gth = .5;  % gap time in hrs between sessions
-tpwsPath = 'G:\SOCAL_BW\Detections\SOCAL_A2\SOCAL_32_A2\TPWS'; %directory of TPWS files
-tfName = 'G:\Harp_TF'; % Directory ...
+tpwsPath = 'G:\SOCAL_BW\Detections\SOCAL_A2\SOCAL_24_A2\TPWS'; %directory of TPWS files
+%tfName = 'E:\transfer_functions'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 

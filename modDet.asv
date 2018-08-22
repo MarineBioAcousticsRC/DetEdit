@@ -169,8 +169,7 @@ if ~ isempty(MTT)
     dt = diff(MTT)*secInDay;
     I = find(dt>p.gth*60*60);
     if isrow(MTT)
-        MTT = MTT';  MPP = MPP';
-    end
+        MTT = MTT'
     sb = [MTT(1); MTT(I+1)];
     eb = [MTT(I); MTT(end)];
     bd = (eb - sb);
@@ -181,7 +180,7 @@ if ~ isempty(MTT)
         if exist('f','var')
             save(fullfile(outDir,outFileTPWS),'f','MTT','MPP','MSN','MSP','tfraw','-v7.3')
         else
-            disp('no frequency vector available');
+            warning('no frequency vector available')
             save(fullfile(outDir,outFileTPWS),'MTT','MPP','MSN','MSP','tfraw','-v7.3')
         end
         

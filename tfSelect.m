@@ -9,9 +9,9 @@ else
 end
 
 fid = fopen(tffn);
-[A,count] = fscanf(fid,'%f %f',[2,inf]);
-tffreq = A(1,:);
-tfuppc = A(2,:);
+[tfraw,count] = fscanf(fid,'%f %f',[2,inf]);
+tffreq = tfraw(1,:);
+tfuppc = tfraw(2,:);
 fclose(fid);
 
 tf = interp1(tffreq,tfuppc,p.tfSelect,'linear','extrap');

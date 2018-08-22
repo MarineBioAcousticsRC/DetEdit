@@ -9,19 +9,19 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-filePrefix = 'SOCAL35S'; % File name to match. 
+filePrefix = 'SOCAL24A2'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
 %                    -> filePrefix = 'GofMX_DT01_disk01-08'
-itnum = '2'; % iteration
+itnum = '1'; % iteration
 srate = 200; % sample rate
 sp = 'Zc'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 c4fd = 100; % Interval to check for false detections
-sdir = 'E:\JAH\BW\Detections\SOCAL_Cuviers\SOCAL_S\SOCAL_35_S\TPWS'; %Directory with TPWS files
-tfName = 'E:\Harp_TF'; % Directory ...
+sdir = 'G:\SOCAL_BW\Detections\SOCAL_A2\SOCAL_24_A2\TPWS'; %Directory with TPWS files
+tfName = 'G:\Harp_TF'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
 

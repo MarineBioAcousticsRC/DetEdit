@@ -37,6 +37,10 @@ parfor idsk = 1 : length(concatFiles)
     goodIdx = find(within ~= 0);
     MTT = D.MTT(goodIdx); % only keep the good detections
     MPP = D.MPP(goodIdx);
+    if isrow(MTT)
+        MTT = MTT'; 
+        MPP = MPP';
+    end
     
     % concatenate
     TTall = [TTall; MTT];   % group start times

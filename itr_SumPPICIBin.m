@@ -29,30 +29,33 @@ fk = 1; % folder counter
 d = dir(tpwsPath);     % get directory list into structure d
 ndl = length(d);    % number of files and folders
 name = char(d.name);      % get name field of d structure
+fileList = [];
 for m = 3:ndl       % loop over file and folder names
     fldn = fullfile(tpwsPath,name(m,:),'\TPWS');
     if itnum > 1 %% define subfolder that fit specified iteration
         for id = 2: str2num(itnum) % iternate id times according to itnum
-            subfolder = ['\TPWS',num2str(id)];
+            subfolder = ['\TPWS',num2str(id),'\'];
             fldn = (fullfile(fldn,subfolder));
         end
     end
-    fldrName{fk} = fldn;        % save folder names
-    flName{fk} = [name(m,:),'.*',sp,'.*TPWS',itnum,'.mat']; %file name
+    flName = [name(m,:),'.*',sp,'.*TPWS',itnum,'.mat']; %file name
+    allFile = (fullfile(fldn,flName));
+    fileList{fk} = cellstr(allFile);
     fk = fk + 1;
 end
 nf = fk - 1;
+
 %% Find all TPWS files that fit your specifications
 % Get a list of all the files in the directories
-for k = 1:nf
-    fileList = cellstr(ls(fldrName{k}));
-    % Find the file name that matches the filePrefix
-    fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,flName{k}))>0);
-    if isempty(fileMatchIdx)
-        % if no matches, throw error
-        disp('No files matching filePrefix found!')
-    end
-
+% for k = 1:nf
+%     fileList = cellstr(ls(fldrName{k}));
+%     % Find the file name that matches the filePrefix
+%     fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,flName{k}))>0);
+%     if isempty(fileMatchIdx)
+%         % if no matches, throw error
+%         disp('No files matching filePrefix found!')
+%     end
+% end
 %% Get effort times matching prefix file
 allEfforts = readtable(effortXls);
 % site = strsplit(filePrefix,'_');
@@ -73,10 +76,10 @@ End = datetime(x2mdate(effTable.End),'ConvertFrom','datenum');
 effort = timetable(Start,End);
 
 %% Concatenate all detections from the same site and create the plots
-concatFiles = fileList(fileMatchIdx);
+concatFiles = fileList;
 
 SumPPICIBin('filePrefix',filePrefix,'concatFiles', concatFiles,'sp', sp,...
     'sdir', tpwsPath,'effort',effort,'referenceTime',refTime);
 
-end
+
 disp('Done processing')

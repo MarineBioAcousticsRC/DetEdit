@@ -26,7 +26,7 @@ p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
 
 %% Concatenate variables
 PPall = []; TTall = []; ICIall = []; % initialize matrices
-parfor idsk = 1 : length(concatFiles)
+for idsk = 1 : length(concatFiles)
     % Load file
     fprintf('Loading %d/%d file %s\n',idsk,length(concatFiles),fullfile(sdir,concatFiles{idsk}))
     D = load(fullfile(sdir,concatFiles{idsk}));

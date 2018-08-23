@@ -108,7 +108,9 @@ SP0 = []; SP1 = [];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % apply tf if defined
-MPP = MPP + tf;
+if(p.tfSelect > 0)
+    MPP = MPP + tf;
+end
 
 % remove low amplitude (if threshold is changed)
 ib = find(MPP >= p.threshRL);

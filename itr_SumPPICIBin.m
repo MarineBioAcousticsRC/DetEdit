@@ -1,6 +1,5 @@
 %% itr_SumPPICIBin
-
-clearvars
+clear all
 close all
 
 %% Parameters defined by user
@@ -31,6 +30,7 @@ ndl = length(d);    % number of files and folders
 name = char(d.name);      % get name field of d structure
 fileList = [];
 for m = 3:ndl       % loop over file and folder names
+    if regexp(name(m,:),project)
     fldn = fullfile(tpwsPath,name(m,:),'\TPWS');
     if itnum > 1 %% define subfolder that fit specified iteration
         for id = 2: str2num(itnum) % iternate id times according to itnum
@@ -38,10 +38,11 @@ for m = 3:ndl       % loop over file and folder names
             fldn = (fullfile(fldn,subfolder));
         end
     end
-    flName = [name(m,:),'.*',sp,'.*TPWS',itnum,'.mat']; %file name
+    flName = [name(m,:),'_',sp,'_TPWS',itnum,'.mat']; %file name
     allFile = (fullfile(fldn,flName));
     fileList{fk} = cellstr(allFile);
     fk = fk + 1;
+    end
 end
 nf = fk - 1;
 
@@ -76,10 +77,13 @@ End = datetime(x2mdate(effTable.End),'ConvertFrom','datenum');
 effort = timetable(Start,End);
 
 %% Concatenate all detections from the same site and create the plots
-concatFiles = fileList;
+% concatFiles = fileList;
 
-SumPPICIBin('filePrefix',filePrefix,'concatFiles', concatFiles,'sp', sp,...
-    'sdir', tpwsPath,'effort',effort,'referenceTime',refTime);
+% SumPPICIBin('filePrefix',filePrefix,'concatFiles', concatFiles,'sp', sp,...
+%     'sdir', tpwsPath,'effort',effort,'referenceTime',refTime);
+SumPPICIBin('filePrefix',filePrefix,'concatFiles',fileList,...
+    'sp',sp,'sdir', tpwsPath,'effort',effort,'referenceTime',refTime);
+
 
 
 disp('Done processing')

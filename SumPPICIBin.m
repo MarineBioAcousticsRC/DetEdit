@@ -20,7 +20,9 @@ while n <= length(varargin)
             error('Bad optional argument: "%s"', varargin{n});
     end
 end
-
+sdir = [sdir,'\SumPPICI'];
+mkdir(sdir)  % create place to save files
+% cd([tpwsPath,'\SumPPICI'])
 %% get default parameters
 p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
 
@@ -28,8 +30,8 @@ p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
 PPall = []; TTall = []; ICIall = []; % initialize matrices
 for idsk = 1 : length(concatFiles)
     % Load file
-    fprintf('Loading %d/%d file %s\n',idsk,length(concatFiles),fullfile(sdir,concatFiles{idsk}))
-    D = load(fullfile(sdir,concatFiles{idsk}));
+    fprintf('Loading %d/%d file %s\n',idsk,length(concatFiles),char(concatFiles{idsk}))
+    D = load(char(concatFiles{idsk}));
     
     % find times outside effort (sometimes there are detections
     % which are from the audio test at the beggining of the wav file)
@@ -224,8 +226,8 @@ title(h5(2),'Group Counting');
 
 ylim(h5(1),[0 round(max(weekData.Count_Click),2,'significant')*1.2])
 ylim(h5(2),[0 round(max(weekData.Count_Bin),2,'significant')*1.2])
-xlim(h5(1),[datetime(refTime),weekEffort.tbin(end)+2])
-xlim(h5(2),[datetime(refTime),weekEffort.tbin(end)+2])
+xlim(h5(1),[datetime(refTime),weekEffort.tbin(end)+31])
+xlim(h5(2),[datetime(refTime),weekEffort.tbin(end)+31])
 % define step according to number of weeks
 if length(weekData.tbin) > 53 && length(weekData.tbin) <= 104 % 2 years
     step = calmonths(1);
@@ -242,8 +244,8 @@ end
 if length(weekData.tbin) > 53
     xtickformat(h5(1),'MMMyy')
     xtickformat(h5(2),'MMMyy')
-    xticks(h5(1),[datetime(refTime),weekData.tbin(1):step:weekData.tbin(end)])
-    xticks(h5(2),[datetime(refTime),weekData.tbin(1):step:weekData.tbin(end)])
+    xticks(h5(1),datetime(refTime):step:weekEffort.tbin(end)+31)
+    xticks(h5(2),datetime(refTime):step:weekEffort.tbin(end)+31)
     xtickangle(h5(1),45)
     xtickangle(h5(2),45)
 end

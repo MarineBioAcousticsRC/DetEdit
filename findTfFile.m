@@ -72,21 +72,21 @@ switch stationDeploy
         serie = '700_series';
         
     % site SOCAL
-    case{'SOCAL34M'}
-        tfnum = 452;
-        serie = '400_series';
-    case{'SOCAL35S'}
-        tfnum = 492;
-        serie = '400_series';
-    case{'SOCAL61E'}
-        tfnum = 830;
-        serie = '800_series';
-    case{'SOCAL61N'}
-        tfnum = 857;
-        serie = '800_series';
-    case{'SOCAL61H'}
-        tfnum = 844;
-        serie = '800_series';
+%     case{'SOCAL34M'}
+%         tfnum = 452;
+%         serie = '400_series';
+%     case{'SOCAL35S'}
+%         tfnum = 492;
+%         serie = '400_series';
+%     case{'SOCAL61E'}
+%         tfnum = 830;
+%         serie = '800_series';
+%     case{'SOCAL61N'}
+%         tfnum = 857;
+%         serie = '800_series';
+%     case{'SOCAL61H'}
+%         tfnum = 844;
+%         serie = '800_series';
         
     otherwise
         % select manually

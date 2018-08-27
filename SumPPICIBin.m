@@ -28,7 +28,7 @@ p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
 
 %% Concatenate variables
 PPall = []; TTall = []; ICIall = []; % initialize matrices
-for idsk = 1 : length(concatFiles)
+parfor idsk = 1 : length(concatFiles)
     % Load file
     fprintf('Loading %d/%d file %s\n',idsk,length(concatFiles),char(concatFiles{idsk}))
     D = load(char(concatFiles{idsk}));
@@ -40,10 +40,11 @@ for idsk = 1 : length(concatFiles)
     MTT = D.MTT(goodIdx); % only keep the good detections
     MPP = D.MPP(goodIdx);
     if isrow(MTT)
-        MTT = MTT'; 
+        MTT = MTT';
+    end
+    if isrow(MPP)
         MPP = MPP';
     end
-    
     % concatenate
     TTall = [TTall; MTT];   % group start times
     PPall = [PPall; MPP];   % group peak-to-peak

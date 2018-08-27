@@ -4,7 +4,7 @@ close all
 
 %% Parameters defined by user
 project = 'SOCAL';
-site = 'G2';
+site = 'H';
 filePrefix = [project,site]; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
@@ -15,7 +15,7 @@ filePrefix = [project,site]; % File name to match.
 sp = 'Cuviers'; % your species code
 itnum = '2'; % which iteration you are looking for
 srate = 200; % sample rate
-tpwsPath = 'G:\SOCAL_BW\Detections\SOCALG2\'; %directory of TPWS files
+tpwsPath = 'G:\SOCAL_BW\Detections\SOCALH\SOCAL58H'; %directory of TPWS files
 tfName = 'G:\Harp_TF'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % Specify excel file with effort times

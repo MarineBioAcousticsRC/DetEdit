@@ -66,8 +66,9 @@ p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','modDet');
 if (p.tfSelect > 0) || ~isempty(strfind(getParams,'all'))
     if exist('tfName','var')
         disp('Load Transfer Function File');
-        stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
-        tffn = findTfFile(tfName,stndeploy); % get corresponding tf file
+%         stndeploy = strsplit(filePrefix,'_'); % get only station and deployment
+        tffn = findTfFile(tfName,filePrefix); % get corresponding tf file
+%                 tffn = tfName;
     else
         error('No path specified for transfer function files. Add tfName')
     end
@@ -138,7 +139,15 @@ SP1 = SP0(IA,:);
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % ID Detections
 zIDfn = strrep(detfn,inTPWS,['ID',itnum]);
-load(fullfile(sdir,zIDfn)) % ID detections vector : zID
+fNameID = fullfile(sdir,zIDfn);
+% Create ID file if it does not exist JAH
+AID = exist(fNameID,'file');
+if (AID ~= 2)% if it doesn't exist, make it
+    zID = [];
+    save(fNameID,'zID');
+    disp('Made new ID file');
+end
+load(fNameID) % ID detections vector : zID
 
 % remove ID detections if specified
 if excludeID

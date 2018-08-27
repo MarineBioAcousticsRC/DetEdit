@@ -35,7 +35,7 @@ p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','detEdit','spParamsUser
 if isempty(p.speName)
     detfn = [filePrefix,'.*','TPWS',itnum,'.mat'];
 else
-    detfn = [filePrefix,'.*',p.speName,'.*TPWS',itnum,'.mat'];
+    detfn = [filePrefix,'.*',p.speName,'*.TPWS',itnum,'.mat'];
 end
 % Get a list of all the files in the start directory
 fileList = cellstr(ls(sdir));

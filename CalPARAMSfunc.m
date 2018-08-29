@@ -1,4 +1,5 @@
-function [ ] = CalPARAMSfunc(ct,cpp,csn,filePrefix,sp,sdir,detfn,p,tf,srate)
+function [ ] = CalPARAMSfunc(ct,cpp,csn,sdir,detfn,p,tf,srate)
+% function [ ] = CalPARAMSfunc(ct,cpp,csn,filePrefix,sp,sdir,detfn,p,tf,srate)
 % Calculate inter-click interval, peak-to-peak, peak frequency, center 
 % frequency, 3dB and 10 dB bandwidth, duration and rms amplitude.
 % Create a figure of all the parameters.

@@ -22,8 +22,8 @@ end
 
 % Set default parameters
 spParams = [];
-specChar = 'Unk';  %Simone abbreviation for species
-speName = 'Unknown';  % Species code used in file names 
+% specChar = 'Unk';  %Simone abbreviation for species
+% speName = 'Unknown';  % Species code used in file names 
 if ~exist('srate','var')
     srate = 200;
 end
@@ -74,7 +74,7 @@ if (strcmp(sp,'Ko') || strcmp(sp,'k'))
     durstep = 3;
 elseif (strcmp(sp,'Zc') || strcmp(sp,'z') || strcmp(sp,'Cuviers'))
     speName = 'Cuviers'; specChar = 'Z'; 
-  %   tfSelect = 40200;
+    tfSelect = 40200;
     dtHi = 1.0; 
     fLow = 10;  
     threshRL = 121; 
@@ -230,7 +230,7 @@ switch analysis
                 spParams.(fn{1}) = spParamsUser.(fn{1});
             end
         end
-    case {'modDet'} 
+    case {'modDet','modTF'} 
         spParams.tfSelect = tfSelect;
         spParams.threshRL = threshRL;
         spParams.dbRange = dbRange;

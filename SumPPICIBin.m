@@ -156,7 +156,7 @@ ylabel(h2,'Click Counts')
 xlim(h2,[p.threshRL, p.p1Hi])
 % create labels and textbox
 [~,modeIdx] = max(nhist);
-mopp = centerIci(modeIdx);
+mopp = center(modeIdx);
 mnlabel = sprintf('Mean = %0.2f', mpp);
 stdlabel = sprintf('Std = %0.2f', sdpp);
 melabel = sprintf('Median = %0.2f', mepp);
@@ -187,7 +187,7 @@ ylabel(h3,[num2str(p.binDur),' min Bin Counts'])
 xlim(h3,[p.threshRL, p.p1Hi])
 % create labels and textbox
 [~,modeIdx] = max(nhist);
-moppBin = centerIci(modeIdx);
+moppBin = centerBin(modeIdx);
 mnlabelBin = sprintf('Mean = %0.2f', mppBin);
 stdlabelBin = sprintf('Std = %0.2f', sdppBin);
 melabelBin = sprintf('Median = %0.2f', meppBin);

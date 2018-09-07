@@ -112,7 +112,6 @@ iciIdx = find(ICIall > p.iciRange(1) & ICIall < p.iciRange(2));
 % statistics
 miciSel = mean(ICIall(iciIdx));
 sdiciSel = std(ICIall(iciIdx));
-moiciSel = mode(ICIall(iciIdx));
 meiciSel = median(ICIall(iciIdx));
 
 figure(1); set(1,'name','Inter-Click Interval')
@@ -125,6 +124,8 @@ title(h1,sprintf('%s N=%d',filePrefix,length(ICIall)), 'Interpreter', 'none')
 xlabel(h1,'Inter-Click Interval (ms)')
 ylabel(h1,'Counts')
 % create labels and textbox
+[~,modeIdx] = max(nhist);
+moiciSel = centerIci(modeIdx);
 mnlabel = sprintf('Mean = %0.2f', miciSel);
 stdlabel = sprintf('Std = %0.2f', sdiciSel);
 melabel = sprintf('Median = %0.2f', meiciSel);
@@ -141,7 +142,6 @@ saveas(h1,fullfile(sdir,icifn),'fig')
 % statistics
 mpp = mean(PPall);
 sdpp = std(PPall);
-mopp = mode(PPall);
 mepp = median(PPall);
 
 % Plot histogram
@@ -155,6 +155,8 @@ xlabel(h2,'Peak-Peak Amplitude (dB)')
 ylabel(h2,'Click Counts')
 xlim(h2,[p.threshRL, p.p1Hi])
 % create labels and textbox
+[~,modeIdx] = max(nhist);
+mopp = centerIci(modeIdx);
 mnlabel = sprintf('Mean = %0.2f', mpp);
 stdlabel = sprintf('Std = %0.2f', sdpp);
 melabel = sprintf('Median = %0.2f', mepp);
@@ -171,7 +173,6 @@ saveas(h2,fullfile(sdir,ppfn),'fig')
 % statistics
 mppBin = mean(binData.maxPP);
 sdppBin = std(binData.maxPP);
-moppBin = mode(binData.maxPP);
 meppBin = median(binData.maxPP);
 
 % Plot histogram
@@ -185,6 +186,8 @@ xlabel(h3,'Peak-Peak Amplitude (dB)')
 ylabel(h3,[num2str(p.binDur),' min Bin Counts'])
 xlim(h3,[p.threshRL, p.p1Hi])
 % create labels and textbox
+[~,modeIdx] = max(nhist);
+moppBin = centerIci(modeIdx);
 mnlabelBin = sprintf('Mean = %0.2f', mppBin);
 stdlabelBin = sprintf('Std = %0.2f', sdppBin);
 melabelBin = sprintf('Median = %0.2f', meppBin);

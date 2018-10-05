@@ -37,6 +37,7 @@ parfor idsk = 1 : length(concatFiles)
     goodIdx = find(within ~= 0);
     MTT = D.MTT(goodIdx); % only keep the good detections
     MPP = D.MPP(goodIdx);
+    MSP = D.MSP(goodIdx,:);
     
     % concatenate
     TTall = [TTall; MTT];   % group start times
@@ -90,7 +91,7 @@ disp(['Nkt/Tkt for click counting: ',num2str(NktTkt)]);
 disp(['Nkt/Tkt for group counting: ',num2str(NktTktbin)]);
 
 %% group data by days and weeks
-Click = retime(binData(:,1),'daily','sum'); % #click per day
+Click = retime(binData(:,1),'daily','sum'); % # mean click per day
 Bin = retime(binData(:,1),'daily','count'); % #bin per day
 
 dayData = synchronize(Click,Bin);
@@ -99,7 +100,7 @@ dayTable = synchronize(dayData,dayEffort);
 dayTable.Properties.VariableNames{'bin'} = 'Effort_Bin';
 dayTable.Properties.VariableNames{'sec'} = 'Effort_Sec';
 
-weekData = retime(dayData,'weekly','mean');
+weekData = retime(dayData,'weekly','sum');
 weekEffort = retime(binEffort,'weekly','sum');
 weekTable = retime(dayTable,'weekly','sum');
 
@@ -169,6 +170,10 @@ ppfn = [filePrefix,'_',p.speName,'_pp'];
 save(fullfile(sdir,ppfn),'clickData','PPall','center')
 saveas(h2,fullfile(sdir,ppfn),'fig')
 
+% to store
+centerHist = center;
+histBins = nhist;
+percHist = nhist*100/length(PPall);
 %% Plot Peak-to-peak per bin
 % statistics
 mppBin = mean(binData.maxPP);
@@ -200,49 +205,47 @@ binfn = [filePrefix,'_',p.speName,'_bin'];
 save(fullfile(sdir,binfn),'binData','centerBin')
 saveas(h3,fullfile(sdir,binfn),'fig')
 
-%% Plot weekly mean of detections 
+% to store
+percHistBin = nhistBin*100/length(binData.maxPP);
 figure(5); set(5,'name','Weekly presence','DefaultAxesColor',[.8 .8 .8],'Position',[100 100 1400 600]) 
 set(gca,'defaultAxesColorOrder',[0 0 0; 0 0 0]);
 h5(1) = subplot(2,1,1);
 h5(2) = subplot(2,1,2);
 hold(h5(1), 'on')
-bar(h5(1),weekEffort.tbin,weekEffort.sec,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
-bar(h5(1),weekData.tbin,weekData.Count_Click,'BarWidth', 1)
+bar(h5(1),weekTable.tbin,weekTable.Effort_Sec./604800*100,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+bar(h5(1),weekTable.tbin,weekTable.Count_Click./weekTable.Effort_Sec*100,'BarWidth', 1)
 hold(h5(1), 'off')
 hold(h5(2), 'on')
-bar(h5(2),weekEffort.tbin,weekEffort.bin,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
-bar(h5(2),weekData.tbin,weekData.Count_Bin,'BarWidth', 1)
+bar(h5(2),weekTable.tbin,weekTable.Effort_Bin./2016*100,'FaceColor',[1 1 1],'EdgeColor','none','BarWidth', 1)
+bar(h5(2),weekTable.tbin,weekTable.Count_Bin./weekTable.Effort_Bin*100,'BarWidth', 1)
 hold(h5(2), 'off')
-%set(h5(1),'xticklabel', '');
-ylabel(h5(1),{'Weekly mean';'of clicks per day'})
-ylabel(h5(2),{'Weekly mean';['of ', num2str(p.binDur), ' min bins per day']})
+ylabel(h5(1),{'Weekly Presence';'(% of clicks per week)'})
+ylabel(h5(2),{'Weekly Presence';['(of 5 min bins per week)']})
 title(h5(1),'Click Counting')
 title(h5(2),'Group Counting');
-% axis (h5(1),'tight')
-% axis (h5(2),'tight')
 
-ylim(h5(1),[0 round(max(weekData.Count_Click),2,'significant')*1.2])
-ylim(h5(2),[0 round(max(weekData.Count_Bin),2,'significant')*1.2])
-xlim(h5(1),[datetime(refTime),weekEffort.tbin(end)+2])
-xlim(h5(2),[datetime(refTime),weekEffort.tbin(end)+2])
+ylim(h5(1),[0 round(max(weekTable.Count_Click./weekTable.Effort_Sec*100),2,'significant')*1.2])
+ylim(h5(2),[0 round(max(weekTable.Count_Bin./weekTable.Effort_Bin*100),2,'significant')*1.2])
+xlim(h5(1),[datetime(refTime),weekTable.tbin(end)+3])
+xlim(h5(2),[datetime(refTime),weekTable.tbin(end)+3])
 % define step according to number of weeks
-if length(weekData.tbin) > 53 && length(weekData.tbin) <= 104 % 2 years
+if length(weekTable.tbin) > 53 && length(weekTable.tbin) <= 104 % 2 years
     step = calmonths(1);
-elseif length(weekData.tbin) > 104 && length(weekData.tbin) <= 209 % 4 years
+elseif length(weekTable.tbin) > 104 && length(weekTable.tbin) <= 209 % 4 years
     step = calmonths(2);
-elseif length(weekData.tbin) > 209 && length(weekData.tbin) <= 313 % 6 years
+elseif length(weekTable.tbin) > 209 && length(weekTable.tbin) <= 313 % 6 years
     step = calmonths(3);
-elseif length(weekData.tbin) > 313 && length(weekData.tbin) <= 417 % 8 years
+elseif length(weekTable.tbin) > 313 && length(weekTable.tbin) <= 417 % 8 years
     step = calmonths(4);
-elseif length(weekData.tbin) >= 417 % more than 8 years
+elseif length(weekTable.tbin) >= 417 % more than 8 years
     step = calyears(1);
 end
 % define tick steps only if more than 1 year of data
-if length(weekData.tbin) > 53
+if length(weekTable.tbin) > 53
     xtickformat(h5(1),'MMMyy')
     xtickformat(h5(2),'MMMyy')
-    xticks(h5(1),[datetime(refTime),weekData.tbin(1):step:weekData.tbin(end)])
-    xticks(h5(2),[datetime(refTime),weekData.tbin(1):step:weekData.tbin(end)])
+    xticks(h5(1),[datetime(refTime),weekTable.tbin(1):step:weekTable.tbin(end)])
+    xticks(h5(2),[datetime(refTime),weekTable.tbin(1):step:weekTable.tbin(end)])
     xtickangle(h5(1),45)
     xtickangle(h5(2),45)
 end
@@ -251,7 +254,8 @@ weekfn = [filePrefix,'_',p.speName,'_weekly_presence'];
 saveas(h5,fullfile(sdir,weekfn),'fig')
 
 summaryfn = [filePrefix,'_',p.speName,'_summaryData_forDensity'];
-save(fullfile(sdir,summaryfn),'dayTable','weekTable','refTime','NktTkt','NktTktbin')
+save(fullfile(sdir,summaryfn),'dayTable','weekTable','binData','refTime','NktTkt',...
+    'NktTktbin','centerHist','percHist','percHistBin','histBins')
 
 end
 

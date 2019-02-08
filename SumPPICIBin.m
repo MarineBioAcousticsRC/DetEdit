@@ -65,6 +65,7 @@ tbin = datetime([vTT(:,1:4), floor(vTT(:,5)/p.binDur)*p.binDur, ...
 
 %% create table and get click counts and max pp per bin
 data = timetable(tbin,TTall,PPall);
+
 binData = varfun(@max,data,'GroupingVariable','tbin','InputVariable','PPall');
 binData.Properties.VariableNames{'GroupCount'} = 'Count'; % #clicks per bin
 binData.Properties.VariableNames{'max_PPall'} = 'maxPP';
@@ -77,12 +78,13 @@ effort.diffSec = seconds(effort.End-effort.Start) ;
 effort.bins = effort.diffSec/(60*p.binDur);
 effort.roundbin = round(effort.diffSec/(60*p.binDur));
 
-secMonitEffort = sum(effort.diffSec);
-binMonitEffort = sum(effort.roundbin);
-
 % convert intervals in bins 
 binEffort = intervalToBinTimetable(effort.Start,effort.End,p); 
-binEffort.sec = binEffort.bin*(p.binDur*60);
+binEffort.Properties.VariableNames{1} = 'bin';
+binEffort.Properties.VariableNames{2} = 'sec';
+
+secMonitEffort = sum(binEffort.sec);
+binMonitEffort = sum(binEffort.bin);
 
 %% get average of detection by effort
 NktTkt = positiveCounts/secMonitEffort;

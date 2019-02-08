@@ -858,11 +858,12 @@ while (k <= nb)
         axis(AX(2),[PT(1), PT(end), 1, 100])
         datetick(AX(2),'x',15,'keeplimits')
         Ytick2 = [.1 1 10 100 1000 10000];
-        set(AX(2),'YTick',Ytick2)
-        ylabel(AX(2),'Det/bin')
+        set(AX(2),'YTick',[]) %set(AX(2),'YTick',Ytick2)
+%         ylabel(AX(2),'Det/bin')
         xlabel(AX(2),'Time [GMT]')
-        title(AX(2),'Inter-Detection Interval (IDI)')
+        title(AX(1),'Inter-Detection Interval (IDI)')
         %grid(AX(2),'on')
+        set(AX,{'ycolor'},{'k';'k'})
         
         %%% plot FD, ID, MD
         hold(AX(1),'on')

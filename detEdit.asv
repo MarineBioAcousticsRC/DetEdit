@@ -12,11 +12,15 @@
 % modified for BW 140308 jah 140320 jah for small ici
 % 140311 smw detection editor based on evalSessions.m
 clearvars
+
+sizePoints = 8; % the current points
+sizeBack = 4; % the background points
+colorPoints = [0 .4470 .7410];
 % utSetDesktopTitle('detEdit');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings
+detEdit_settings_asb
 
 % define subfolder that fit specified iteration
 if itnum > 1
@@ -362,7 +366,7 @@ while (k <= nb)
         
         % plot RMS vs frequency plot, keeping RMS vertical like in fig(51)
         freqAll = fmsp(im + fimint-1);
-        plot(h53,pxmspAll,freqAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
+        plot(h53,pxmspAll,freqAll,'o','MarkerSize',sizeBack,'MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
         title(h53,['Based on total of ',num2str(length(freqAll)),' clicks']);
         % apply High Frequency threshold to figure (53)
         if onerun == 1
@@ -403,7 +407,7 @@ while (k <= nb)
     % Test for XFD and strcmp('x or z or w') - if no test points skip
     % x = true, z = false, w = window
     if (isempty(XFD) && (strcmp(cc,'x') || ...
-            strcmp(cc,'z') || strcmp(cc,'w')));
+            strcmp(cc,'z') || strcmp(cc,'w')))
         disp(' NO Test Detections, so skip')
         k = k + 1;
         continue
@@ -645,7 +649,7 @@ while (k <= nb)
         
         % Plot  PP versus RMS Plot for this session
         hold(h51, 'on')
-        plot(h51,pxmsp,xmpp,'.','UserData',t)% true ones in blue
+        plot(h51,pxmsp,xmpp,'b.','MarkerSize',sizePoints,'MarkerFaceColor',colorPoints,'UserData',t)% true ones in blue
         
         if ~loadMSP % plot threshold line now because no background data
             if (p.threshRMS > 0)
@@ -688,24 +692,24 @@ while (k <= nb)
         end
         
         if ff2 % false in red
-            plot(h51,pxmsp(K2),xmpp(K2),'r.','UserData',t(K2))
+            plot(h51,pxmsp(K2),xmpp(K2),'r.','MarkerSize',sizePoints,'UserData',t(K2))
         end
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
+                hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
         end
         if ff4 % MD in green
-            plot(h51,pxmsp(K4),xmpp(K4),'g.','UserData',t(K4))
+            plot(h51,pxmsp(K4),xmpp(K4),'g.','MarkerSize',sizePoints,'UserData',t(K4))
         end
         hold(h51, 'off')
         
         % Plot RMS vs frequency plot for this session
         hold(h53, 'on')
         freq = fmsp(im + fimint -1);
-        plot(h53,pxmsp,freq,'.','UserData',t) % true ones in blue
+        plot(h53,pxmsp,freq,'b.','MarkerSize',sizePoints,'UserData',t) % true ones in blue
         if ~loadMSP
             if onerun == 1
                 if (p.threshHiFreq > 0)
@@ -744,12 +748,12 @@ while (k <= nb)
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','UserData',t(K3(thisIDset)));
+                hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
                 set(hPP,'Color',colorTab(specIDs(iC2),:))
             end
         end
         if ff4 % MD in green
-            plot(h53,pxmsp(K4),freq(K4),'g.','UserData',t(K4))
+            plot(h53,pxmsp(K4),freq(K4),'g.','MarkerSize',sizePoints,'UserData',t(K4))
         end
         hold(h53, 'off')
         if p.threshHiFreq > 0
@@ -791,7 +795,7 @@ while (k <= nb)
     
     set(201,'name','LTSA and time series','KeyPressFcn',@myfigfcn)
     hA201 = subplot_layout; % Top panel, Figure 201: Received Level
-    plot(hA201(1),t,RL,'b.','UserData',t)
+    plot(hA201(1),t,RL,'b.','MarkerSize',sizePoints,'UserData',t)
     hold(hA201(1),'on')
     if ff2 % plot False detections in red
         plot(hA201(1),tfd,rlFD,'r.','UserData',tfd)
@@ -802,12 +806,12 @@ while (k <= nb)
         specIDs = unique(spCodeSet); % get unigue species codes
         for iC2 = 1:length(specIDs) % set colors
             thisIDset = spCodeSet ==specIDs(iC2);
-            hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.','UserData',tID(thisIDset));
+            hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.','MarkerSize',sizePoints,'UserData',tID(thisIDset));
             set(hRLID,'Color',colorTab(specIDs(iC2),:))
         end
     end
     if ff4 % plot MD detections in green
-        plot(hA201(1),tMD,rlMD,'g.','UserData',tfd)
+        plot(hA201(1),tMD,rlMD,'g.','MarkerSize',sizePoints,'UserData',tfd)
     end
     hold(hA201(1),'off')
     axis(hA201(1),[PT(1) PT(end) p.rlLow p.rlHi])
@@ -1096,7 +1100,7 @@ while (k <= nb)
     save(fNameList.FD,'zFD')
     save(fNameList.ID,'zID')
     save(fNameList.MD,'zMD')
-    save(fNameList.TD,'zTD');
+    save(fNameList.TD,'zTD')
     
     % don't end if you used paintbrush on last record
     if (k > nb) && bFlag

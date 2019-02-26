@@ -115,6 +115,8 @@ Date: 1/26/2016
     	'x' or 'z' Test a random subset of detections to estimate false positive cue rate  
     	'w' Test a random subset of time bins to estimate false positive bin rate  
 
+	'p' Activate brush (need it for brushing in MATLAB2014b or higher). It requires to click the figure that you want to brush before pressing the key.
+
    - **Output:**  
      `*ID.mat` - This file contains a 2xn matrix in which the first column contains the detection time, and the second column contains an ID number associated with that detection. The ID number is given by the brush color used by the analyste to identify that detection type.  
 

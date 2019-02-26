@@ -1096,7 +1096,7 @@ while (k <= nb)
     save(fNameList.FD,'zFD')
     save(fNameList.ID,'zID')
     save(fNameList.MD,'zMD')
-    save(fNameList.TD,'zTD')
+    save(fNameList.TD,'zTD');
     
     % don't end if you used paintbrush on last record
     if (k > nb) && bFlag

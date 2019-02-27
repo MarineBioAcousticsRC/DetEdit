@@ -13,8 +13,8 @@
 % 140311 smw detection editor based on evalSessions.m
 clearvars
 
-sizePoints = 8; % the current points
-sizeBack = 4; % the background points
+sizePoints = 9; % the current points
+sizeBack = 5; % the background points
 colorPoints = [0 .4470 .7410];
 % utSetDesktopTitle('detEdit');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -337,7 +337,7 @@ while (k <= nb)
         else
             pxmspAll = xmspAll - p.slope*(xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
         end
-        plot(h51,pxmspAll,xmppAll,'o','MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
+        plot(h51,pxmspAll,xmppAll,'o','MarkerSize',sizeBack,'MarkerEdgeColor',[.7,.7,.7],'UserData',clickTimes)
         title(h51,['Based on ',num2str(length(xmppAll)),' clicks']);
         
         % apply RMS threshold to figure (51)
@@ -649,8 +649,8 @@ while (k <= nb)
         
         % Plot  PP versus RMS Plot for this session
         hold(h51, 'on')
-        plot(h51,pxmsp,xmpp,'b.','MarkerSize',sizePoints,'MarkerFaceColor',colorPoints,'UserData',t)% true ones in blue
-        
+        h51.ColorOrderIndex = 1;
+        plot(h51,pxmsp,xmpp,'.','MarkerSize',sizePoints,'UserData',t)% true ones in blue
         if ~loadMSP % plot threshold line now because no background data
             if (p.threshRMS > 0)
                 if onerun == 1
@@ -708,8 +708,9 @@ while (k <= nb)
         
         % Plot RMS vs frequency plot for this session
         hold(h53, 'on')
+        h53.ColorOrderIndex = 1;
         freq = fmsp(im + fimint -1);
-        plot(h53,pxmsp,freq,'b.','MarkerSize',sizePoints,'UserData',t) % true ones in blue
+        plot(h53,pxmsp,freq,'.','MarkerSize',sizePoints,'UserData',t) % true ones in blue
         if ~loadMSP
             if onerun == 1
                 if (p.threshHiFreq > 0)
@@ -743,7 +744,7 @@ while (k <= nb)
             plot(h53,xtline,ytline,'r')
         end
         if ff2 % false in red
-            plot(h53,pxmsp(K2),freq(K2),'r.','UserData',t(K2))
+            plot(h53,pxmsp(K2),freq(K2),'r.','MarkerSize',sizePoints,'UserData',t(K2))
         end
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
@@ -793,12 +794,12 @@ while (k <= nb)
     figure(201);clf
     colormap(201, jet)
     
-    set(201,'name','LTSA and time series','KeyPressFcn',@myfigfcn)
+    set(201,'name','LTSA and time series')
     hA201 = subplot_layout; % Top panel, Figure 201: Received Level
-    plot(hA201(1),t,RL,'b.','MarkerSize',sizePoints,'UserData',t)
+    plot(hA201(1),t,RL,'.','MarkerSize',sizePoints,'UserData',t)
     hold(hA201(1),'on')
     if ff2 % plot False detections in red
-        plot(hA201(1),tfd,rlFD,'r.','UserData',tfd)
+        plot(hA201(1),tfd,rlFD,'r.','MarkerSize',sizePoints,'UserData',tfd)
         % disp([' false det plotted:',num2str(length(tfd))])
     end
     if ff3 % plot ID'd detections in associated color
@@ -843,7 +844,7 @@ while (k <= nb)
         dt2 = reshape([dt,dt]',2*ldt,1);
         
         [AX,H1,H2] = plotyy(hA201(3),tdt2,dt2,binT,binC,'plot','semilogy');
-        set(H1,'Marker','.','MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
+        set(H1,'Marker','.','MarkerSize',sizePoints,'MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
         set(H2,'Marker','o','MarkerFaceColor','c','LineStyle','none',...
             'Markersize',4.5,'UserData',dt2)
         % Note: plotyy is buggy in 2012b, axis handles work only if called
@@ -852,7 +853,7 @@ while (k <= nb)
         % Do setup for 1st axes
         axis(AX(1),[PT(1) PT(end) 0 p.dtHi])
         datetick(AX(1),'x',15,'keeplimits')
-        Ytick = 0:p.dtHi/10:p.dtHi; % make 0.05 Kogia, 0.2 BW
+        Ytick = 0:p.dtHi/10:p.dtHi;
         set(AX(1),'YTick',Ytick)
         datetick(AX(1),'x',15,'keeplimits')
         grid(AX(1),'on')
@@ -894,14 +895,14 @@ while (k <= nb)
     % if you have items brushed in yellow, highlight those on each plot
     if specploton && ~isempty(yell) && ~isempty(csnJ)
         hold(hA201(1),'on')
-        plot(hA201(1),t(yell),RL(yell),'ko','MarkerSize',6,'UserData',t(yell));
+        plot(hA201(1),t(yell),RL(yell),'ko','MarkerSize',sizeBack,'UserData',t(yell));
         hold(hA201(1),'off');
         
         % for diffs, yell can't exceed length dt, which could happen if you
         % grabbed the last point in the vector, so:
         yellDT = yell(yell<length(dt));
         hold(AX(1),'on')
-        plot(AX(1),t(yellDT),dt(yellDT),'ko','MarkerSize',6,'UserData',t(yell));
+        plot(AX(1),t(yellDT),dt(yellDT),'ko','MarkerSize',sizeBack,'UserData',t(yell));
         hold(AX(1),'off')
         
         hold(h50,'on') % add click to spec plot in BLACK
@@ -911,7 +912,7 @@ while (k <= nb)
         hold(h50,'off')
         
         hold(h51,'on')
-        plot(h51,pxmsp(yell),xmpp(yell),'ko','MarkerSize',10,...
+        plot(h51,pxmsp(yell),xmpp(yell),'ko','MarkerSize',sizeBack,...
             'LineWidth',2,'UserData',clickTimes(K2))
         hold(h51,'off')
         
@@ -920,7 +921,7 @@ while (k <= nb)
         hold(h52,'off')
         
         hold(h53,'on')
-        plot(h53,pxmsp(yell),freq(yell),'ko','MarkerSize',10,...
+        plot(h53,pxmsp(yell),freq(yell),'ko','MarkerSize',sizeBack,...
             'LineWidth',2,'UserData',clickTimes(K2))
         hold(h53,'off')
     end
@@ -936,7 +937,9 @@ while (k <= nb)
     
     % if brush selected get key
     if strcmp(cc,'p')
-       brush on
+       br = brush;
+       set
+       brush yellow
        waitfor(gcf,'CurrentCharacter')
        brush off
        cc = get(gcf,'CurrentCharacter');

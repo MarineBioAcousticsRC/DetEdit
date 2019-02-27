@@ -937,9 +937,10 @@ while (k <= nb)
     
     % if brush selected get key
     if strcmp(cc,'p')
-       brush on
+       h = brush;
+       set(h,'Color',[.9290 .6940 .1250],'Enable','on');
        waitfor(gcf,'CurrentCharacter')
-       brush off
+       set(h,'Enable','off')
        cc = get(gcf,'CurrentCharacter');
     end
     

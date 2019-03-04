@@ -16,11 +16,10 @@ clearvars
 sizePoints = 9; % the current points
 sizeBack = 5; % the background points
 colorPoints = [0 .4470 .7410];
-% utSetDesktopTitle('detEdit');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load user input. Has to happen first so you know species.
-detEdit_settings_asb
+detEdit_settings
 
 % define subfolder that fit specified iteration
 if itnum > 1

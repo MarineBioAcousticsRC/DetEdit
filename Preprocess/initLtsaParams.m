@@ -1,5 +1,5 @@
 function initLtsaParams
-%init_ltsaparams initialize ltsa parameters
+%initLtsaParams initialize ltsa parameters
 %
 % Defines default parameters used to create ltsa
 %

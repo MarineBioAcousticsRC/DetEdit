@@ -1,5 +1,5 @@
 function ioGetLtsaDir
-%get_ltsadir get directory of wave/xwav files 
+%ioGetLtsaDir get directory of wave/xwav files 
 %
 % Prompt user to enter a directory path containg audio files, and specify  
 % audio format.

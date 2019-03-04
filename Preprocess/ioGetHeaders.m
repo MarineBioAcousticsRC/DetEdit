@@ -1,5 +1,5 @@
 function ioGetHeaders
-%get_headers open data files and read headers for making an ltsa file
+%ioGetHeaders open data files and read headers for making an ltsa file
 %
 % Copyright(C) 2018 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
 %                      Kait E. Frasier, UCSD, krasier@ucsd.edu

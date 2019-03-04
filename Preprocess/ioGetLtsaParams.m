@@ -1,5 +1,5 @@
 function ioGetLtsaParams
-%get_ltsaparams get parameters needed for generating LTSA's from user
+%ioGetLtsaParams get parameters needed for generating LTSA's from user
 %
 % Prompt user to specify time average length (seconds) and frequency bin
 % size (Herz). The parameters are typicaly data sample rate dependent. The

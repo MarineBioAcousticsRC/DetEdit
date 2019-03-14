@@ -1,3 +1,4 @@
+function detEdit(userFunc)
 % detEdit.m
 % 2/21/2016 modified for version 1.1
 % For Kogia JAH 5/22/15
@@ -11,38 +12,46 @@
 % Brushing only works in MATLAB ver 2013b, not 2013a or 2012b
 % modified for BW 140308 jah 140320 jah for small ici
 % 140311 smw detection editor based on evalSessions.m
-clearvars
+% clearvars
 
 sizePoints = 9; % the current points
 sizeBack = 5; % the background points
 colorPoints = [0 .4470 .7410];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Load user input. Has to happen first so you know species.
-detEdit_settings
-
-% define subfolder that fit specified iteration
-if itnum > 1
-    for id = 2: str2num(itnum) % iterate id times according to itnum
-        subfolder = ['TPWS',num2str(id)];
-        sdir = (fullfile(sdir,subfolder));
-    end
-end
-
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
-p = sp_setting_defaults('sp',sp,'srate',srate,'analysis','detEdit','spParamsUser',spParamsUser);
+
+% get user input and set up function name
+typeInput = exist('userFunc','var');
+if typeInput ~= 1
+    [userfile,userpath] = uigetfile('*.m',...
+        'Select Script with your Data Parameter Settings');
+    addpath(userpath) % it adds user folder path to the beggining of the set path
+    userFunc = str2func(['@',userfile(1:end-2)]);
+end
+
+p = getParams(userFunc,'analysis','detEdit');
+
+%% Define subfolder that fit specified iteration
+if p.itnum > 1
+    for id = 2: str2num(p.itnum) % iterate id times according to p.itnum
+        subfolder = ['TPWS',num2str(id)];
+        p.sdir = (fullfile(p.sdir,subfolder));
+    end
+end
+
 %% Check if TPWS file exists
 % Concatenate parts of file name
 if isempty(p.speName)
-    detfn = [filePrefix,'.*','TPWS',itnum,'.mat'];
+    detfn = [p.filePrefix,'.*','TPWS',p.itnum,'.mat'];
 else
-    detfn = [filePrefix,'.*',p.speName,'.*TPWS',itnum,'.mat'];
+    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.itnum,'.mat'];
 end
 % Get a list of all the files in the start directory
-fileList = cellstr(ls(sdir));
-% Find the file name that matches the filePrefix
+fileList = cellstr(ls(p.sdir));
+% Find the file name that matches the p.filePrefix
 fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
     % if no matches, throw error
@@ -57,18 +66,18 @@ matchingFile = fileList{fileMatchIdx};
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
-    [tf,tffreq,tfuppc] = tfSelect(filePrefix, tfName,p);
+    [tf,tffreq,tfuppc] = getTransfunc(p.filePrefix, p.tfName,p);
 else
     tf = 0;
     disp('No TF Applied');
 end
 %% Generate FD, TD, and ID files if needed
-[zFD,zID,zMD,fNameList] = buildLabelFiles(matchingFile, sdir);
+[zFD,zID,zMD,fNameList] = buildLabelFiles(matchingFile, p.sdir);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
-fNameList.TPWS = fullfile(sdir,matchingFile);
+fNameList.TPWS = fullfile(p.sdir,matchingFile);
 load(fNameList.TPWS,'MTT','MPP')
 
 % if you have more than "maxDetLoad" detections, don't load all spectra and
@@ -107,8 +116,8 @@ else
     clickLevels = MPP(ia1)';
 end
 
-if specploton && loadMSP
-    % if specploton and there aren't too many detections, load spectra
+if p.specploton && loadMSP
+    % if p.specploton and there aren't too many detections, load spectra
     csn = MSN(ia1,:);
     csp = MSP(ia1,:);
 else
@@ -133,7 +142,7 @@ if (size(ib1,1) == 0)
 end
 % prune by RL only if spectra & waveforms have been loaded
 
-if specploton && loadMSP
+if p.specploton && loadMSP
     disp([' Removed too low:',num2str(length(ia1)-length(ib1))]);
     clickTimes = clickTimes(ib1);
     clickLevels = clickLevels(ib1);
@@ -165,12 +174,12 @@ save(fNameList.MD,'zMD');
 % TODO: this is calculated in mkLTSA, we should save it there instead of
 % recalculating here but would create backward compatibility issues
 
-[nb,eb,sb,bd] = calculate_bouts(clickTimes,gth,p);
+[nb,eb,sb,bd] = calculate_bouts(clickTimes,p.gth,p);
 bFlag = 0;
 
 %% Make LTSA session file
 lsfn = strrep(matchingFile,'TPWS','LTSA');
-fNameList.LTSA = fullfile(sdir,lsfn);
+fNameList.LTSA = fullfile(p.sdir,lsfn);
 Altsa = exist(fNameList.LTSA,'file');
 if Altsa ~= 2
     disp(['Error: LTSA Sessions File Does Not Exist: ',fNameList.LTSA])
@@ -199,7 +208,7 @@ if ~isempty(zFD)
 end
 
 [~,trueClickIDx] = setdiff(clickTimes, zFD);
-ixfd = (1: c4fd : length(trueClickIDx));  % selected to test for False Det
+ixfd = (1: p.c4fd : length(trueClickIDx));  % selected to test for False Det
 testClickIdx = trueClickIDx(ixfd);
 
 A6 = exist(fNameList.TD,'file');
@@ -219,7 +228,7 @@ end
 %% Compute Spectra Plot Parameters
 % max and min for LTSA frequency
 fiminLTSA = 0;% TODO: make this configurable
-fimaxLTSA = srate/2 ; % in kHz 100 or 160 kHz
+fimaxLTSA = p.srate/2 ; % in kHz 100 or 160 kHz
 
 % set ltsa step size
 iPwr = 1;
@@ -245,7 +254,7 @@ else
     tfLTSA = zeros(size(f))';
 end
 
-if specploton %Does anyone ever turn specploton off??
+if p.specploton %Does anyone ever turn p.specploton off??
     % check length of MSP
     inFileMat = matfile(fNameList.TPWS);
     if ~loadMSP
@@ -260,7 +269,7 @@ if specploton %Does anyone ever turn specploton off??
         fmsp = [];
     end
     if isempty(fmsp)
-        fmsp = ((srate/2)/(smsp2-1))*ift - (srate/2)/(smsp2-1);
+        fmsp = ((p.srate/2)/(smsp2-1))*ift - (p.srate/2)/(smsp2-1);
         fprintf('No freq vector in TPWS file. Using approximation based on sample rate.\n')
     end
     % find the indices that are in the range of interest
@@ -318,7 +327,7 @@ while (k <= nb)
         ymax = fmsp(end);  % yaxis max of plot 53 (Default)
     end
     
-    if specploton && loadMSP
+    if p.specploton && loadMSP
         xmsp0All = csp + repmat(Ptfpp,size(csp,1),1);
         [xmspAll,im] = max(xmsp0All(:,fimint:fimaxt),[],2); % maximum between flow-100kHz
         
@@ -388,12 +397,12 @@ while (k <= nb)
     % find detections and false detections within this bout (session)
     J = []; JFD =[]; Jtrue = []; XFD = []; JID = [];
     J = find(clickTimes >= sb(k) & clickTimes <= eb(k));
-    if specploton && loadMSP
+    if p.specploton && loadMSP
         % have to load consecutive detections if reading from disk
         J = J(1):J(end);
         csnJ = csn(J,:);
         cspJ = csp(J,:);
-    elseif specploton % only load the ones you need for this session
+    elseif p.specploton % only load the ones you need for this session
         csnJ = inFileMat.MSN(keepers(J),:);
         cspJ = inFileMat.MSP(keepers(J),:);
     end
@@ -435,7 +444,7 @@ while (k <= nb)
         end
         if ~isempty(K2) % if this session contains false detections
             ff2 = 1; % set false flag to true
-            if specploton
+            if p.specploton
                 wavFD = norm_wav(mean(csnJ(K2,:),1)); % calculate mean false time series
                 specFD = cspJ(K2,:); % get set of false spectra
             end
@@ -458,7 +467,7 @@ while (k <= nb)
             ff3 = 1;
             spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
             specIDs = unique(spCodeSet); % get unique ID codes
-            if specploton % get mean spectra for each ID'd type
+            if p.specploton % get mean spectra for each ID'd type
                 wavID = [];
                 specID = [];
                 for iSpID = 1:length(specIDs)
@@ -484,7 +493,7 @@ while (k <= nb)
         end
         if ~isempty(K4) % if this session contains mis-ID detections
             ff4 = 1; % set false flag to true
-            if specploton
+            if p.specploton
                 wavMD = norm_wav(mean(csnJ(K4,:),1)); % calculate mean MD series
                 specMD = cspJ(K4,:); % get set of MD spectra
             end
@@ -505,7 +514,7 @@ while (k <= nb)
         %[JtrueWithID,~,~]= setxor(J,JFM); % find all true detections no ID
         trueTimes = clickTimes(Jtrue);% vector of true times in this session
         
-        if specploton
+        if p.specploton
             cspJtrue = cspJ(iJ,:); % true spectra in this session
             csnJtrue = csnJ(iJ,:); % true time series in this session
             wtrue = norm_wav(nanmean(csnJtrue,1)); % mean of true spectra in this session
@@ -532,10 +541,10 @@ while (k <= nb)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % calculate number of detections per bin
-    [KB,binCX,binT,binC] = ndets_per_bin(t,xt,RL,dt,minNdet,nd,p.binDur);
+    [KB,binCX,binT,binC] = ndets_per_bin(t,xt,RL,dt,p.minNdet,nd,p.binDur);
     % filter empty and low number bins
     if isempty(KB) % not sure what this case does?
-        disp(['No bins with at least ',num2str(minNdet),' detections'])
+        disp(['No bins with at least ',num2str(p.minNdet),' detections'])
         binT = 0;
         binRL = 0;
         binC = 0;
@@ -566,7 +575,7 @@ while (k <= nb)
     end
     durS = PT(end) - PT(1);
     
-    if specploton
+    if p.specploton
         % allSPEC = norm_spec(cspJ,fimint,fimint,fimaxt);
         figure(50);clf;set(50,'name','Frequency Spectra')
         h50 = gca;
@@ -580,7 +589,7 @@ while (k <= nb)
             % average true click waveform
             plot(h52, wtrue);
         else
-            disp(['No true with at least ',num2str(minNdet),' detections'])
+            disp(['No true with at least ',num2str(p.minNdet),' detections'])
         end
         if ff2   % average false click spec
             SPEC2 = norm_spec_simple(specFD,fimint,fimaxt);
@@ -668,7 +677,7 @@ while (k <= nb)
                     end
                     if ~isempty(K2) % if this session contains false detections
                         ff2 = 1; % set false flag to true
-                        if specploton
+                        if p.specploton
                             wavFD = norm_wav(mean(csnJ(K2,:),1)); % calculate mean false time series
                             specFD = cspJ(K2,:); % get set of false spectra
                         end
@@ -723,7 +732,7 @@ while (k <= nb)
                     end
                     if ~isempty(K2) % if this session contains false detections
                         ff2 = 1; % set false flag to true
-                        if specploton
+                        if p.specploton
                             wavFD = norm_wav(mean(csnJ(K2,:),1)); % calculate mean false time series
                             specFD = cspJ(K2,:); % get set of false spectra
                         end
@@ -892,7 +901,7 @@ while (k <= nb)
     end
     
     % if you have items brushed in yellow, highlight those on each plot
-    if specploton && ~isempty(yell) && ~isempty(csnJ)
+    if p.specploton && ~isempty(yell) && ~isempty(csnJ)
         hold(hA201(1),'on')
         plot(hA201(1),t(yell),RL(yell),'ko','MarkerSize',sizeBack,'UserData',t(yell));
         hold(hA201(1),'off');
@@ -1036,7 +1045,7 @@ while (k <= nb)
                 plot(AX(1),testTimes,dt(inxfdDT),'ro','MarkerSize',10);
                 hold(AX(1),'off')
                 disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
-                if (specploton == 1)
+                if (p.p.specploton == 1)
                     hold(h50,'on')  % add click to spec plot in BLACK
                     plot(h50,ft,trueSpec,'Linewidth',2);
                     clickInBoutIdx = find(t==testTimes);

@@ -35,7 +35,7 @@ function mkLtsa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global PARAMS
 
-% initialize ltsa parameters to seet the defaults first
+% initialize ltsa parameters to see the defaults first
 initLtsaParams
 
 % get directory of wave/xwav files

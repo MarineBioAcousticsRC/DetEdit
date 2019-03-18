@@ -62,18 +62,4 @@ tfName = ''; %'E:\TF_files'; % Directory ...
 % paramsUser.threshPP = 0; % default for : command, PP threshold cutoff
 paramsUser.threshHiFreq = 40; % default for ^ command, high freq cutoff for clicks
 
-%% Colors to use for classification - ID signal types
-%{
-colorTab = [191, 191, 0; ... % type 1 green
-            191, 0, 191; ... % type 2 purple
-            0, 127, 0; ... % type 3 dark-green
-            0, 191, 191; ... % type 4 light-blue
-            20, 43, 140; ... % type 5 dark-blue
-            218, 179, 255; ... % type 6 pale-purple
-            255,   214, 0; ... % type 7 yellow
-            222,  125, 0; ... % type 8 orange
-            255,  153, 199; ... % type 9 pink
-            153, 51,   0]./255; % type 10  brown
-%}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

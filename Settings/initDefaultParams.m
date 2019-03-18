@@ -69,6 +69,8 @@ colorTab = [191, 191, 0; ... % type 1 green
             255,  153, 199; ... % type 9 pink
             153, 51,   0]./255; % type 10  brown
 
+colorTab = round(colorTab.*100)/100;      
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % parameters for modDet plots (if specified to compute)
 

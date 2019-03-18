@@ -617,8 +617,8 @@ while (k <= nb)
             hID2 = plot(h52,(wavID + repmat(-1*rand(size(hID)),1,length(wavID)))');
             
             for iC = 1:length(hID) % set colors
-                set(hID(iC),'Color',colorTab(specIDs(iC),:))
-                set(hID2(iC),'Color',colorTab(specIDs(iC),:))
+                set(hID(iC),'Color',p.colorTab(specIDs(iC),:))
+                set(hID2(iC),'Color',p.colorTab(specIDs(iC),:))
             end
             hold(h52, 'off')
             
@@ -706,7 +706,7 @@ while (k <= nb)
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
                 hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
-                set(hPP,'Color',colorTab(specIDs(iC2),:))
+                set(hPP,'Color',p.colorTab(specIDs(iC2),:))
             end
         end
         if ff4 % MD in green
@@ -758,7 +758,7 @@ while (k <= nb)
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
                 hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
-                set(hPP,'Color',colorTab(specIDs(iC2),:))
+                set(hPP,'Color',p.colorTab(specIDs(iC2),:))
             end
         end
         if ff4 % MD in green
@@ -816,7 +816,7 @@ while (k <= nb)
         for iC2 = 1:length(specIDs) % set colors
             thisIDset = spCodeSet ==specIDs(iC2);
             hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.','MarkerSize',sizePoints,'UserData',tID(thisIDset));
-            set(hRLID,'Color',colorTab(specIDs(iC2),:))
+            set(hRLID,'Color',p.colorTab(specIDs(iC2),:))
         end
     end
     if ff4 % plot MD detections in green
@@ -851,51 +851,39 @@ while (k <= nb)
         tdt2 = reshape([t(1:ldt),t((1:ldt)+1)]',2*ldt,1);
         dt2 = reshape([dt,dt]',2*ldt,1);
         
-        [AX,H1,H2] = plotyy(hA201(3),tdt2,dt2,binT,binC,'plot','semilogy');
-        set(H1,'Marker','.','MarkerSize',sizePoints,'MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
-        set(H2,'Marker','o','MarkerFaceColor','c','LineStyle','none',...
-            'Markersize',4.5,'UserData',dt2)
+        hICI = plot(hA201(3),tdt2,dt2,'.');
+        set(hICI,'MarkerSize',sizePoints,'MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
         % Note: plotyy is buggy in 2012b, axis handles work only if called
         % using "axes" and avoid calls to "subplot"
         
         % Do setup for 1st axes
-        axis(AX(1),[PT(1) PT(end) 0 p.dtHi])
-        datetick(AX(1),'x',15,'keeplimits')
+        axis(hA201(3),[PT(1) PT(end) 0 p.dtHi])
+        datetick(hA201(3),'x',15,'keeplimits')
         Ytick = 0:p.dtHi/10:p.dtHi;
-        set(AX(1),'YTick',Ytick)
-        datetick(AX(1),'x',15,'keeplimits')
-        grid(AX(1),'on')
-        ylabel(AX(1),'Time between detections [s]')
-        
-        % Do setup for 2nd axes
-        axis(AX(2),[PT(1), PT(end), 1, 100])
-        datetick(AX(2),'x',15,'keeplimits')
-        Ytick2 = [.1 1 10 100 1000 10000];
-        set(AX(2),'YTick',[]) %set(AX(2),'YTick',Ytick2)
-        %         ylabel(AX(2),'Det/bin')
-        xlabel(AX(2),'Time [GMT]')
-        title(AX(1),'Inter-Detection Interval (IDI)')
-        %grid(AX(2),'on')
-        set(AX,{'ycolor'},{'k';'k'})
+        set(hA201(3),'YTick',Ytick)
+        datetick(hA201(3),'x',15,'keeplimits')
+        grid(hA201(3),'on')
+        ylabel(hA201(3),'Time between detections [s]')
+%         title(AX(1),'Inter-Detection Interval (IDI)')
         
         %%% plot FD, ID, MD
-        hold(AX(1),'on')
+        hold(hA201(3),'on')
         if ff2
-            plot(AX(1),tfd(2:end),dtFD,'.r','UserData',tfd(2:end))
+            plot(hA201(3),tfd(2:end),dtFD,'.r','MarkerSize',sizePoints,'UserData',tfd(2:end))
             % no need to double FD since only the blue points are brush captured
         end
         if ff3 % plot ID'd in associated color
             for iC3 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC3);
-                hdtID = plot(AX(1),tID(thisIDset(2:end)),...
-                    dtID(thisIDset(2:end)),'.','UserData',tID(thisIDset));
-                set(hdtID,'Color',colorTab(specIDs(iC3),:))
+                plot(hA201(3),tID(thisIDset(2:end)),...
+                    dtID(thisIDset(2:end)),'.','MarkerSize',sizePoints,'UserData',tID(thisIDset));
+                set(hA201(3),'Color',p.colorTab(specIDs(iC3),:))
             end
         end
         if ff4 % plot MDs in bright green
-            plot(AX(1),tMD(2:end),dtMD,'.g','UserData',tMD(2:end));
+            plot(hA201(3),tMD(2:end),dtMD,'.g','MarkerSize',sizePoints,'UserData',tMD(2:end));
         end
-        hold(AX(1),'off')
+        hold(hA201(3),'off')
     else
         plot(0,0);
     end
@@ -957,7 +945,7 @@ while (k <= nb)
         % detections were flagged by user
         disp(' Update Display') % Stay on same bout
         % get brushed data and figure out what to do based on color:
-        [yell,zFD,zID,zMD,bFlag] = brush_color(gca,cc,zFD,zID,zMD,colorTab,t);
+        [yell,zFD,zID,zMD,bFlag] = brush_color(gca,cc,zFD,zID,zMD,p.colorTab,t);
         
     elseif strcmp(cc,'s') % change time diff scale on bottom plot of 201
         p.dtHi = input(' Update IPI scale (sec):  '); % Set IPI scale
@@ -1041,9 +1029,9 @@ while (k <= nb)
                 plot(hA201(1),testTimes,xPP(inxfd),'ro','MarkerSize',10);
                 hold(hA201(1),'off')
                 inxfdDT = inxfd(inxfd<length(dt));
-                hold(AX(1),'on')
-                plot(AX(1),testTimes,dt(inxfdDT),'ro','MarkerSize',10);
-                hold(AX(1),'off')
+                hold(hA201(3),'on')
+                plot(hA201(3),testTimes,dt(inxfdDT),'ro','MarkerSize',10);
+                hold(hA201(3),'off')
                 disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
                 if (p.p.specploton == 1)
                     hold(h50,'on')  % add click to spec plot in BLACK

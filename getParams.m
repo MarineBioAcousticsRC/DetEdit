@@ -65,6 +65,7 @@ switch analysis
         params.minNdet = minNdet; 
         params.maxDetLoad = maxDetLoad;
         params.gth = gth;
+        params.colorTab = colorTab;
         
         % apply species default parameters
         if exist('spParams','var')

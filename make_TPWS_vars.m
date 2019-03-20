@@ -19,27 +19,26 @@ function [MPP,MTT,MSP,MSN,f] = make_TPWS_vars(varargin)
 %       provided. 
 %       An [N x nF] matrix where N is the number of detections and nF is
 %       the number of frequency bins in the spectra.
-%       If not provided, 'fftLength', 'windowFun' and 'sampleRate'
-%       are required.
+%       If not provided, 'fftLength' and 'sampleRate' are required.
 % 
-%   'f' - Required if 'spectra' is provided.
+%   'f' - Required if 'signalSpectra' is provided.
 %       If not provided, will be calculated from 'fftLength' and 'sampleRate'.
 %       A [1 x nF] vector of frequencies associated with 'spectra'. 
 %       Units = kHz.
 %
-%   'fftLength' - Required if 'spectra' is NOT provided. 
+%   'fftLength' - Required if 'signalSpectra' is NOT provided. 
 %       Number of points to use when calculating the FFT. 
 % 
-%   'sampleRate' - Required if 'spectra' is NOT provided. 
+%   'sampleRate' - Required if 'signalSpectra' is NOT provided. 
 %       Used to calculate frequency vector associated with spectra.
 %       Units = Hz
 % 
 %   'peak2peakAmp' - Optional, will be calculated from time series if not
 %       provided.
-%       If not provided, a transfer function is required. 
+%       If NOT provided, a transfer function is required. 
 %       Units: dB peak-to-peak, re: 1 \muPa.
 %
-%   'tfFunFrequency' - Required if 'spectra' is not provided.
+%   'tfFunFrequency' - Required if 'signalSpectra' is NOT provided.
 %                      Required if 'peak2peakAmp' is NOT provided, unless
 %                      size('tfFunVals) = [1,1] (see 'tfFunValues' for details).
 %       Units = kHz
@@ -60,7 +59,8 @@ function [MPP,MTT,MSP,MSN,f] = make_TPWS_vars(varargin)
 % 
 %   'bandPassEdges' - Optional. Only used if signalSpectra is not provided
 %       A [1x2] vector of upper and lower frequencies used to truncate the 
-%       spectra if the input timeseries have been band passed.
+%       spectra if the input timeseries have been band passed. Values in
+%       kHz.
 %       
 %       
 %
@@ -86,6 +86,8 @@ peak2peakAmp = [];
 tfFunFrequency = [];
 tfFunValues = [];
 bandPassEdges = [];
+
+tfFunResampled = [];
 
 vIdx = 1;
 while vIdx <= length(varargin)
@@ -119,7 +121,10 @@ while vIdx <= length(varargin)
             vIdx = vIdx+2;  
         case 'bandPassEdges'
             bandPassEdges = varargin{vIdx+1};
-            vIdx = vIdx+2;  
+            vIdx = vIdx+2; 
+        otherwise
+            sprintf('undefined input value %s',varargin{vIdx})
+            vIdx = vIdx+2; 
     end
 end
         
@@ -134,9 +139,9 @@ elseif isempty(fftLength) && isempty(signalSpectra)
 elseif isempty(sampleRate) && isempty(signalSpectra)
     error('sampleRate input is required to calculate spectra')
 elseif isempty(tfFunValues) && (isempty(peak2peakAmp) || isempty(signalSpectra))
-    error('tfFunValues input required to compute spectra & peak to peak amplitudes')
-elseif isempty(tfFunFrequency) && length(tfFunVals) >1
-    error('tfFunFrequency input required to go with tfFunVals vector')
+    error('tfFunValues input required to compute spectra & peak-to-peak amplitudes')
+elseif isempty(tfFunFrequency) && length(tfFunValues) >1
+    error('tfFunFrequency input required to go with tfFunValues vector')
 end
 % Make MSN
 MSN = timeSeries;
@@ -148,31 +153,33 @@ MTT = detectionTimes;
 if ~isempty(signalSpectra)
     MSP = signalSpectra;
 else
+    
+    % Calculate window
     fftWindow = hann(fftLength)';
     
-    % preallocate
-    specLen = (1:(sampleRate/fftLength):(sampleRate/2))./1000;
-    MSP = zeros(size(MSN,1), specLen);
+    % Pad waveforms with zeros to reach desired fft length
+    padZeros = [MSN,zeros(size(MSN,1),fftLength-size(MSN,2))];
+    
+    % Compute power spectral density
+    [MSP,fHz] = pwelch(padZeros',fftWindow,0,fftLength,sampleRate);
 
-    for iDet = 1:size(MSN,1)
-        [MSP(iDet,:),fHz] = pwelch(MSN(iDet,:),fftWindow,fftLength,sampleRate);
-    end
     % convert to dBs
-    MSP = 10.*log10(MSP);
+    MSP = 10.*log10(abs(MSP'));
+
+    f = fHz./1000; % Convert to kHz
     
-    f = fHz./1000;
-    % resample transfer fun so it matches your frequency vector
-    tfFunResampled = interp1(tfFunFrequency, tfFunVals, f, 'linear', 'extrap');
+    % Resample transfer function so it matches your frequency vector
+    tfFunResampled = interp1(tfFunFrequency, tfFunValues, f, 'linear', 'extrap')';
     
-    % add transfer fun to spectra
-    MSP = MSP + repmat(tfFunResampled,1,size(MSP,1)); 
+    % Add transfer function to spectra
+    MSP = MSP + repmat(tfFunResampled,size(MSP,1),1); 
     
-    % Truncate if filter edges provided:
+    % Truncate spectra if filter edges are provided
     if ~isempty(bandPassEdges)
-        lowIdx = find(min(abs(f-bandPassEdges(1))));
-        hiIdx = find(min(abs(f-bandPassEdges(2))));
+        [~,lowIdx] = min(abs(f-bandPassEdges(1)));
+        [~,hiIdx] = min(abs(f-bandPassEdges(2)));
         MSP = MSP(:,lowIdx:hiIdx);
-        f = f(:,lowIdx:hiIdx);
+        f = f(lowIdx:hiIdx);
     end
 end
     
@@ -183,9 +190,13 @@ else
     % Figure out the peak frequency of the spectra
     [~, peakFrIdx] = max(MSP,[],2);
     % Identify transfer fun value to add
-    peakFrTfVal = tfFunValues(peakFrIdx);
+    if ~isempty(tfFunResampled)
+        % if we haven't done this above, do it here
+    	tfFunResampled = interp1(tfFunFrequency, tfFunValues, f, 'linear', 'extrap')';
+    end
+    peakFrTfVal = tfFunResampled(peakFrIdx);
     % Compute amplitude from waveform and add tf.
-    MPP = 20*log10(max(MSN,[],2)) + peakFrTfVal;
+    MPP = 20*log10(max(MSN,[],2)+abs(min(MSN,[],2))) + peakFrTfVal';
     
 end
 

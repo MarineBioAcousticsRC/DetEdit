@@ -34,6 +34,7 @@ params.itnum = itnum;
 params.srate = srate;
 params.sdir = sdir;
 params.tfName = tfName;
+params.ltsadir = ltsadir;
 
 %% create struct to return parameters
 switch analysis
@@ -66,6 +67,7 @@ switch analysis
         params.maxDetLoad = maxDetLoad;
         params.gth = gth;
         params.colorTab = colorTab;
+        params.ltsadir = ltsadir;
         
         % apply species default parameters
         if exist('spParams','var')

@@ -19,7 +19,8 @@ srate = 200; % sample rate
 sp = 'Pm'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
-sdir = 'C:\TPWS'; %Directory with TPWS files
+sdir = 'C:\TPWS'; %'C:\TPWS'; Directory with TPWS files
+ltsadir = ''; % 'C:\LTSA'; Directory with LTSA files
 tfName = ''; %'E:\TF_files'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)

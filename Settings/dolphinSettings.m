@@ -9,7 +9,7 @@
 % Then change line 22 of detEdit to match the settings file you want to
 % use.
 
-filePrefix = 'MC02_disk15'; % File name to match. 
+filePrefix = 'GofMX_MC02_disk15'; % File name to match. 
 % File prefix should include deployment, site, (disk is optional). 
 % Example: 
 % File name 'GofMX_DT01_disk01-08_TPWS2.mat' 
@@ -20,7 +20,8 @@ sp = 'De'; % species code (can be: 'Ko' or 'k' (kogia);
 % 'Zc' or 'z' (Cuvier's),'Me' or 'm' (Gervais'), 'Md' (Blainville's), BWG,...
 % 'De' (Dolphin), 'Po' (porpoise), 'MFA', 'whs' (whistles), 'Dl' (beluga)
 sdir = 'C:\Users\Alba\Downloads\detEditexamples\Dolphin_Test_Set'; %Directory with TPWS files
-tfName = ''; %'E:\TF_files'; % Directory ...
+ltsadir = 'H:\LTSA\MC\';
+% tfName = ''; %'E:\TF_files'; % Directory ...
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
 

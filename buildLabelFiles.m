@@ -1,8 +1,7 @@
-function [zFD, zID,zMD,fNameList]= buildLabelFiles(matchingFile, sdir)
+function [zFD, zID,fNameList]= buildLabelFiles(matchingFile, sdir)
 % initialize variables
 zFD = [];
 zID = [];
-zMD = [];
 
 % Name and build false detection file
 ffn = strrep(matchingFile,'TPWS','FD');
@@ -28,14 +27,4 @@ if (AID ~= 2)% if it doesn't exist, make it
     zID = [];
     save(fNameList.ID,'zID');
     disp('Made new ID file');
-end
-
-% Name and build ID file
-mdfn = strrep(matchingFile,'TPWS','MD');
-fNameList.MD = fullfile(sdir,mdfn);
-AMD = exist(fNameList.MD,'file');
-if (AMD ~= 2)% if it doesn't exist, make it
-    zMD = [];
-    save(fNameList.MD,'zMD');
-    disp('Made new MD file');
 end

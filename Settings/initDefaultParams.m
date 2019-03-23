@@ -17,6 +17,11 @@ if ~exist('srate','var')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Initilize empty directories (these may not be specified)
+ltsadir = '';
+tfName = '';
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % General bout parameters
 
 threshRL = 0; % minimum RL threshold in dB peak-to-peak

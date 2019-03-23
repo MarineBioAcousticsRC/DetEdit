@@ -8,7 +8,7 @@ function detEdit(userFunc)
 % spec3 uses the TPWS file for the click spectra  JAH 9-26-14
 % spcc4 used the TPWS2 file JAH 10-12-14
 % 7-7-14 use Simone bouts and Sean Detector JAH
-% includes brushing FD, MD in and out of files
+% includes brushing FD in and out of files
 % Brushing only works in MATLAB ver 2013b, not 2013a or 2012b
 % modified for BW 140308 jah 140320 jah for small ici
 % 140311 smw detection editor based on evalSessions.m
@@ -72,7 +72,7 @@ else
     disp('No TF Applied');
 end
 %% Generate FD, TD, and ID files if needed
-[zFD,zID,zMD,fNameList] = buildLabelFiles(matchingFile, p.sdir);
+[zFD,zID,fNameList] = buildLabelFiles(matchingFile, p.sdir);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
@@ -124,7 +124,7 @@ else
     disp('Number of detections exceeds max for loading');
 end
 
-%% apply tf and remove low amplitude detections
+%% Apply tf and remove low amplitude detections
 clickLevels = clickLevels + tf;
 ib1 = find(clickLevels >= p.threshRL);
 
@@ -163,11 +163,6 @@ save(fNameList.FD,'zFD');
 load(fNameList.ID)  % identified detection times zID
 zID = rmUnmatchedDetections(MTT, zID);
 save(fNameList.ID,'zID');
-
-% Make MD file intersect with MTT
-load(fNameList.MD)  % identified detection times zMD
-zMD = rmUnmatchedDetections(MTT, zID);
-save(fNameList.MD,'zMD');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Calculate bout starts and ends
@@ -306,10 +301,9 @@ onerun = 1; % What does this do?
 
 while (k <= nb)
     disp([' BEGIN SESSION: ',num2str(k)]);
-    % load in FD, MD and TD each session in case these have been modified
+    % load in FD, ID and TD each session in case these have been modified
     load(fNameList.FD); % brings in zFD
     load(fNameList.ID); % brings in zID
-    load(fNameList.MD); % brings in zMD
     load(fNameList.TD); % brings in zTD
     
     % If all time series are loaded:
@@ -482,36 +476,12 @@ while (k <= nb)
             disp(' No identified detections (ID)')
         end
         
-        % get MisID detection times that intersect with detection times
-        K4 = []; % holds MD'd indices
-        ff4 = 0; % becomes positive if you have MD's detections in this session
-        tMD = []; % times of MD'd detections
-        MDidx = [];
-        if ~isempty(zMD)
-            [tMD,K4,MDidx] = intersect(t,zMD(:,1));
-            rlMD = RL(K4);
-        end
-        if ~isempty(K4) % if this session contains mis-ID detections
-            ff4 = 1; % set false flag to true
-            if p.specploton
-                wavMD = norm_wav(mean(csnJ(K4,:),1)); % calculate mean MD series
-                specMD = cspJ(K4,:); % get set of MD spectra
-            end
-            disp([' MD detections:',num2str(length(K4))])
-        else
-            ff4 = 0;
-            disp(' No misidentified Detections (MD)')
-        end
         
         % Calculate indices of detections which are neither false, ID'd,
-        % or MD
         JFD = J(K2);
         JID = J(K3);
-        JMD = J(K4);
-        JFIM = union(union(JFD,JID),JMD);
-        JFM = union(JFD,JMD);
+        JFIM = union(JFD,JID);
         [Jtrue,iJ,~]= setxor(J,JFIM); % find all true detections
-        %[JtrueWithID,~,~]= setxor(J,JFM); % find all true detections no ID
         trueTimes = clickTimes(Jtrue);% vector of true times in this session
         
         if p.specploton
@@ -532,9 +502,6 @@ while (k <= nb)
     end
     if ff3
         dtID = dt(K3(1:end-1));
-    end
-    if ff4
-        dtMD = dt(K4(1:end-1));
     end
     disp(['END SESSION: ',num2str(k),' Start: ',datestr(sb(k)),...
         ' End:',datestr(eb(k))])
@@ -623,17 +590,6 @@ while (k <= nb)
             hold(h52, 'off')
             
         end
-        if ff4   % average false click spec
-            SPEC4 = norm_spec_simple(specMD,fimint,fimaxt);
-            % plot average false click spectrum
-            hold(h50, 'on')
-            plot(h50,ft,SPEC4,'g','Linewidth',4)
-            hold(h50, 'off')
-            % plot average false click waveform
-            hold(h52, 'on')
-            plot(h52,wavMD + 1,'g');
-            hold(h52, 'off')
-        end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Add detections of this session in figure 51 and 53
         % for all detections in this session, calculate xmpp and xmsp
@@ -709,9 +665,7 @@ while (k <= nb)
                 set(hPP,'Color',p.colorTab(specIDs(iC2),:))
             end
         end
-        if ff4 % MD in green
-            plot(h51,pxmsp(K4),xmpp(K4),'g.','MarkerSize',sizePoints,'UserData',t(K4))
-        end
+        
         hold(h51, 'off')
         
         % Plot RMS vs frequency plot for this session
@@ -761,9 +715,7 @@ while (k <= nb)
                 set(hPP,'Color',p.colorTab(specIDs(iC2),:))
             end
         end
-        if ff4 % MD in green
-            plot(h53,pxmsp(K4),freq(K4),'g.','MarkerSize',sizePoints,'UserData',t(K4))
-        end
+
         hold(h53, 'off')
         if p.threshHiFreq > 0
             ylim(h53,[p.fLow ymax+10])
@@ -815,12 +767,10 @@ while (k <= nb)
         specIDs = unique(spCodeSet); % get unigue species codes
         for iC2 = 1:length(specIDs) % set colors
             thisIDset = spCodeSet ==specIDs(iC2);
-            hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.','MarkerSize',sizePoints,'UserData',tID(thisIDset));
+            hRLID = plot(hA201(1),tID(thisIDset),rlID(thisIDset),'.',...
+                'MarkerSize',sizePoints,'UserData',tID(thisIDset));
             set(hRLID,'Color',p.colorTab(specIDs(iC2),:))
         end
-    end
-    if ff4 % plot MD detections in green
-        plot(hA201(1),tMD,rlMD,'g.','MarkerSize',sizePoints,'UserData',tfd)
     end
     hold(hA201(1),'off')
     axis(hA201(1),[PT(1) PT(end) p.rlLow p.rlHi])
@@ -866,7 +816,7 @@ while (k <= nb)
         ylabel(hA201(3),'Time between detections [s]')
 %         title(AX(1),'Inter-Detection Interval (IDI)')
         
-        %%% plot FD, ID, MD
+        %%% plot FD, ID
         hold(hA201(3),'on')
         if ff2
             plot(hA201(3),tfd(2:end),dtFD,'.r','MarkerSize',sizePoints,'UserData',tfd(2:end))
@@ -875,13 +825,11 @@ while (k <= nb)
         if ff3 % plot ID'd in associated color
             for iC3 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC3);
-                plot(hA201(3),tID(thisIDset(2:end)),...
-                    dtID(thisIDset(2:end)),'.','MarkerSize',sizePoints,'UserData',tID(thisIDset));
-                set(hA201(3),'Color',p.colorTab(specIDs(iC3),:))
+                hICI = plot(hA201(3),tID(thisIDset(2:end)),...
+                    dtID(thisIDset(2:end)),'.','MarkerSize',sizePoints,...
+                    'UserData',tID(thisIDset));
+                set(hICI,'Color',p.colorTab(specIDs(iC2),:))
             end
-        end
-        if ff4 % plot MDs in bright green
-            plot(hA201(3),tMD(2:end),dtMD,'.g','MarkerSize',sizePoints,'UserData',tMD(2:end));
         end
         hold(hA201(3),'off')
     else
@@ -897,9 +845,9 @@ while (k <= nb)
         % for diffs, yell can't exceed length dt, which could happen if you
         % grabbed the last point in the vector, so:
         yellDT = yell(yell<length(dt));
-        hold(AX(1),'on')
-        plot(AX(1),t(yellDT),dt(yellDT),'ko','MarkerSize',sizeBack,'UserData',t(yell));
-        hold(AX(1),'off')
+        hold(hA201(3),'on')
+        plot(hA201(3),t(yellDT),dt(yellDT),'ko','MarkerSize',sizeBack,'UserData',t(yell));
+        hold(hA201(3),'off')
         
         hold(h50,'on') % add click to spec plot in BLACK
         cspJy = mean(cspJ(yell,:),1);
@@ -945,7 +893,7 @@ while (k <= nb)
         % detections were flagged by user
         disp(' Update Display') % Stay on same bout
         % get brushed data and figure out what to do based on color:
-        [yell,zFD,zID,zMD,bFlag] = brush_color(gca,cc,zFD,zID,zMD,p.colorTab,t);
+        [yell,zFD,zID,bFlag] = brush_color(gca,cc,zFD,zID,p.colorTab,t);
         
     elseif strcmp(cc,'s') % change time diff scale on bottom plot of 201
         p.dtHi = input(' Update IPI scale (sec):  '); % Set IPI scale
@@ -981,10 +929,6 @@ while (k <= nb)
             %[newFD,~] = setdiff(t,zID(:,1)); % remove from zID
             [~,iCID] = setdiff(zID(:,1),t); % remove from zID
             zID = zID(iCID,:);
-            if ~isempty(zMD)
-                [~,iCMD] = setdiff(zMD(:,1),t); % remove from zMD
-                zMD = zMD(iCMD,:);
-            end
         end
         newFD = t;
         zFD = [zFD; newFD; trueTimes]; % Add everything to zFD
@@ -996,22 +940,6 @@ while (k <= nb)
             [~,iCID] = setdiff(zID(:,1),t);
             zID = zID(iCID,:);
         end
-        if ~isempty(zMD)
-            [~,iCMD] = setdiff(zMD(:,1),t); % remove from zMD
-            zMD = zMD(iCMD,:);
-        end
-    elseif strcmp(cc,'m')% assign ALL as mis-ID
-        disp(['Number of mis-ID Detections Added = ',num2str(length(t))])
-        if ~isempty(zID) % remove these times from FD and ID
-            [~,iCID] = setdiff(zID(:,1),t); % remove from zID
-            zID = zID(iCID,:);
-        end
-        if ~isempty(zFD)
-            [~,iCFD] = setdiff(zFD,t); % remove from zFD
-            zFD = zFD(iCFD,:);
-        end
-        zMD = [zMD; t];
-        
     elseif strcmp(cc,'j')% jump to non-consecutive session
         prompt = 'Jump to Session: ';
         kjump = input(prompt);
@@ -1020,17 +948,17 @@ while (k <= nb)
         end
         onerun = 1;
         
-    elseif (strcmp(cc,'x') || strcmp(cc,'z') ); % test click for random False Detect
+    elseif (strcmp(cc,'x') || strcmp(cc,'z') ) % test click for random False Detect
         if ~isempty(XFD)
             zTD(k,2) = 0;
             for inxfd = 1 : zTD(k,1)
                 hold(hA201(1),'on')
                 testTimes = xt(inxfd);
-                plot(hA201(1),testTimes,xPP(inxfd),'ro','MarkerSize',10);
+                plot(hA201(1),testTimes,xPP(inxfd),'ro','MarkerSize',sizePoints);
                 hold(hA201(1),'off')
                 inxfdDT = inxfd(inxfd<length(dt));
                 hold(hA201(3),'on')
-                plot(hA201(3),testTimes,dt(inxfdDT),'ro','MarkerSize',10);
+                plot(hA201(3),testTimes,dt(inxfdDT),'ro','MarkerSize',sizePoints);
                 hold(hA201(3),'off')
                 disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
                 if (p.p.specploton == 1)
@@ -1052,12 +980,12 @@ while (k <= nb)
                     
                     hold(h51,'on')
                     % get click index relative to bout
-                    xH1 = plot(h51,pxmsp(clickInBoutIdx),xmpp(clickInBoutIdx),'ro','MarkerSize',10,...
+                    xH1 = plot(h51,pxmsp(clickInBoutIdx),xmpp(clickInBoutIdx),'ro','MarkerSize',sizePoints,...
                         'LineWidth',2);
                     hold(h51,'off')
                     
                     hold(h53,'on')
-                    xH3 = plot(h53,pxmsp(clickInBoutIdx),freq(clickInBoutIdx),'ro','MarkerSize',10,...
+                    xH3 = plot(h53,pxmsp(clickInBoutIdx),freq(clickInBoutIdx),'ro','MarkerSize',sizePoints,...
                         'LineWidth',2);
                     hold(h53,'off')
                 end
@@ -1092,12 +1020,8 @@ while (k <= nb)
         [~,uniqueID] = unique(zID(:,1));
         zID = zID(uniqueID,:);
     end
-    if ~isempty(zMD)
-        zMD = unique(zMD);
-    end
     save(fNameList.FD,'zFD')
     save(fNameList.ID,'zID')
-    save(fNameList.MD,'zMD')
     save(fNameList.TD,'zTD')
     
     % don't end if you used paintbrush on last record
@@ -1129,8 +1053,6 @@ disp(['Number of True Detections = ',num2str(length(clickTimes)-length(zFD)+2)])
 disp(' ')
 disp(['Number of False Detections = ',num2str(length(zFD)-1)])
 disp(' ')
-% disp(['Number of Mis-ID Detections = ',num2str(length(zMD(:,1))-1)])
-% disp(' ')
 disp(['Number of Test Detections & False Detect = ',num2str(sum(zTD(tfinal,:)))])
 disp(' ')
 disp(['Done with file ',fNameList.TPWS])

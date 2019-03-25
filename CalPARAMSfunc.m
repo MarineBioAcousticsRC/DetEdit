@@ -1,4 +1,4 @@
-function [ ] = CalPARAMSfunc(ct,cpp,csn,filePrefix,sp,sdir,detfn,p,tf,srate)
+function [ ] = CalPARAMSfunc(ct,cpp,csn,sdir,detfn,p,tf)
 % Calculate inter-click interval, peak-to-peak, peak frequency, center 
 % frequency, 3dB and 10 dB bandwidth, duration and rms amplitude.
 % Create a figure of all the parameters.
@@ -17,7 +17,7 @@ for Cidx = 1:size(csn,1)
 
     % Since we are operating on the high pass data, we'll
     % set the delay to zero.
-    [SClicks, CClicks, noise, SNR] = dtHighResClick(srate*1000, energy, 0, hpdata, ...
+    [SClicks, CClicks, noise, SNR] = dtHighResClick(p.srate*1000, energy, 0, hpdata, ...
                                                  teagerH, 0.001); % why 0.001? in triton is 0.015
     if isempty(CClicks)
         CClicks = [NaN NaN];
@@ -41,7 +41,7 @@ end
 
 %% Calculate parameters: rms, pf, cf, 3db, 10db, dur
 [rms,peakFr,bw10db,bw3db,F0,dur] = ...
-    paramDetEdit(csn,posClick,rmsClick,srate,tf,p.N);
+    paramDetEdit(csn,posClick,rmsClick,p.srate,tf,p.N);
 
 %*****************************************************************
 %% Peak-to-peak

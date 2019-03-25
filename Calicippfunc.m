@@ -1,4 +1,4 @@
-function [ ] = Calicippfunc(MTT,MPP,MSP,sdir,detfn,p,srate)
+function [ ] = Calicippfunc(MTT,MPP,MSP,sdir,detfn,p)
 % Calculate the ICI and the PP 
 close all
 
@@ -79,7 +79,7 @@ saveas(h2,fullfile(sdir,ppfn),'png')
 %% Peak Frequency
 smsp2 = size(MSP,2);% 2nd element is num fft points
 ift = 1:smsp2;
-fmsp = ((srate/2)/(smsp2-1))*ift - (srate/2)/(smsp2-1);
+fmsp = ((p.srate/2)/(smsp2-1))*ift - (p.srate/2)/(smsp2-1);
 
 [~,im] = max(MSP(:,p.frRange(1):p.frRange(2)),[],2); % maximum between flow-100kHz       
 peakFr = fmsp(im + p.frRange(1)-1);
@@ -96,7 +96,7 @@ h3 = gca;
 nbinsfr = (p.frRange(1):p.frRange(2));
 [y,centers] = hist(peakFr,nbinsfr);
 bar(h3,centers,y);
-xlim(h3,[0,srate/2])
+xlim(h3,[0,p.srate/2])
 title(h3,sprintf('N=%d',length(peakFr)));
 xlabel(h3,'Peak Frequency (kHz)')
 

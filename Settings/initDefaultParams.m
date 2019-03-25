@@ -79,6 +79,7 @@ colorTab = round(colorTab.*100)/100;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % parameters for modDet plots (if specified to compute)
 
+excludeID = 0; % exclude ID times from MTT files
 iciRange = []; % min/max ici in ms
 dbRange = [];  % min/max db for plots of pp and rms
 durRange = []; % min/max duration in us
@@ -87,3 +88,8 @@ frdbwRange = [fLow, fHi]; % min/max frequency for plots of 3/10 db bw
 durstep = 1; % step range for number bins in histogram 
 N = srate; % FFT size for parameter clicks
 rawFileDur = []; % raw file length, default 75s
+calcParams = 'none';% Calculate Parameters: 
+%                   -> 'none' do NOT compute parameters
+%                   -> 'ici&pp' only to compute peak-to-peak, ici and
+%                   peakFr
+%                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur

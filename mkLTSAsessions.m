@@ -50,6 +50,16 @@ if isempty(fileMatchIdx)
     error('No files matching filePrefix found!')
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Handle Transfer Function
+% add in transfer function if desired
+if (p.tfSelect > 0)
+    [tf,~,~] = getTransfunc(p.filePrefix, p.tfName,p);
+else
+    tf = 0;
+    disp('No TF Applied ');
+end
+    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make LTSA.mat file for each TPWS file found
 for iD = 1:length(fileMatchIdx)
@@ -95,17 +105,7 @@ for iD = 1:length(fileMatchIdx)
         clickLevels = MPP(ia)';
     end
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% Handle Transfer Function
-    % add in transfer function if desired
-    if (p.tfSelect > 0)
-        [tf,~,~] = getTransfunc(p.filePrefix, p.tfName,p);
-    else
-        tf = 0;
-        disp('No TF Applied ');
-    end
-    
-    % Apply tf and remove low amplitude detections
+    % Apply tf (if defined) and remove low amplitude detections
     clickLevels = clickLevels + tf;
     ib = find(clickLevels >= p.threshRL);
     disp([' Removed too low:',num2str(length(ia)-length(ib))]);
@@ -146,7 +146,7 @@ for iD = 1:length(fileMatchIdx)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Calculate bout starts and ends
     
-    [nb,eb,sb,bd] = calculate_bouts(clickTimes,p.gth,p);
+    [nb,eb,sb,bd] = calculate_bouts(clickTimes,p);
     
     % Define bouts if minimum bout duration is given
     if ~isempty(p.minDur)

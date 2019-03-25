@@ -169,7 +169,7 @@ save(fNameList.ID,'zID');
 % TODO: this is calculated in mkLTSA, we should save it there instead of
 % recalculating here but would create backward compatibility issues
 
-[nb,eb,sb,bd] = calculate_bouts(clickTimes,p.gth,p);
+[nb,eb,sb,bd] = calculate_bouts(clickTimes,p);
 bFlag = 0;
 
 %% Make LTSA session file

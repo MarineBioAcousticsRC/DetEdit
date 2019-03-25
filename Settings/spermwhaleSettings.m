@@ -25,6 +25,13 @@ ltsadir = 'H:\LTSA\DT';
 % with .tf files (directory containing folders with different series ...
 % (e.g. 300_series,400_series)
 
+excludeID = 0; % yes - 1 | no - 0. Exclude ID times from MTT files 
+calcParams = 'none';% Calculate Parameters: 
+%                   -> 'none' do NOT compute parameters
+%                   -> 'ici&pp' only to compute peak-to-peak, ici and
+%                   peakFr
+%                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Settings preferences to override defaults parameters for the interface

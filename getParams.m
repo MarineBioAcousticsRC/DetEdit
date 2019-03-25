@@ -90,6 +90,7 @@ switch analysis
         end
         
     case {'modDet'} 
+        params.speName = speName;
         params.tfSelect = tfSelect;
         params.threshRL = threshRL;
         params.dbRange = dbRange;
@@ -101,7 +102,9 @@ switch analysis
         params.N = N;
         params.gth = gth;
         params.minBout = minBout;
-        params.p1Hi = p1Hi;
+        params.excludeID = excludeID;
+        params.calcParams = calcParams;
+        params.ltsaMax = ltsaMax;
         
         % apply species default parameters
         if exist('spParams','var')

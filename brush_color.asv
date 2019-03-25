@@ -101,17 +101,14 @@ if ~isempty(brushID)
             % Green paintbrush or 'g' = True Detections
             disp(['Number of Detections Selected = ',num2str(length(brushDate))])
             if exist('zFD','var')
-                
                 % Make sure you're not flagging something outside this session
                 [newTD,~] = intersect(t, brushDate);
                 [zFD,iC] = setdiff(zFD,newTD);
-                
                 % Clear brushed set from ID set
                 if ~isempty(zID) 
                     [~,zIDkeep] = setdiff(zID(:,1),newTD);
                     zID = zID(zIDkeep,:);
                 end
-                
                 % Clear brushed set from FD set
                 if ~isempty(zFD) 
                     [~,zFDkeep] = setdiff(zFD(:,1),newTD);
@@ -121,12 +118,11 @@ if ~isempty(brushID)
             end
             
         else
-            % Find color code to assign ID signal type
+            % Find the brush color
             tfCompare = find(sum(bsxfun(@eq,colorTab,brushColor),2)==3);
             if ~isempty(tfCompare)
                 specID = tfCompare;
-                
-                % Write to ID file
+                % write to ID file
                 disp(['Number of ID Detections = ',num2str(length(brushDate))])
                 [newIDtimes,~] = intersect(t, brushDate);
                 spLabels = ones(size(newIDtimes)).*specID;
@@ -137,9 +133,7 @@ if ~isempty(brushID)
             end
         end
     end
-    
-    % Remove any ID from FD
-    if ~isempty(zID) 
+    if ~isempty(zID) % remove any ID from FD
         [~,zIDkeep2] = setdiff(zID(:,1),zFD);
         zID = zID(zIDkeep2,:);
     end

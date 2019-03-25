@@ -35,22 +35,22 @@ end
 p = getParams(userFunc,'analysis','detEdit');
 
 %% Define subfolder that fit specified iteration
-if p.itnum > 1
-    for id = 2: str2num(p.itnum) % iterate id times according to p.itnum
+if p.iterationNum > 1
+    for id = 2: str2num(p.iterationNum) % iterate id times according to p.iterationNum
         subfolder = ['TPWS',num2str(id)];
-        p.sdir = (fullfile(p.sdir,subfolder));
+        p.tpwsDir = (fullfile(p.tpwsDir,subfolder));
     end
 end
 
 %% Check if TPWS file exists
 % Concatenate parts of file name
 if isempty(p.speName)
-    detfn = [p.filePrefix,'.*','TPWS',p.itnum,'.mat'];
+    detfn = [p.filePrefix,'.*','TPWS',p.iterationNum,'.mat'];
 else
-    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.itnum,'.mat'];
+    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.iterationNum,'.mat'];
 end
 % Get a list of all the files in the start directory
-fileList = cellstr(ls(p.sdir));
+fileList = cellstr(ls(p.tpwsDir));
 % Find the file name that matches the p.filePrefix
 fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
@@ -72,12 +72,12 @@ else
     disp('No TF Applied');
 end
 %% Generate FD, TD, and ID files if needed
-[zFD,zID,fNameList] = buildLabelFiles(matchingFile, p.sdir);
+[zFD,zID,fNameList] = buildLabelFiles(matchingFile, p.tpwsDir);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
-fNameList.TPWS = fullfile(p.sdir,matchingFile);
+fNameList.TPWS = fullfile(p.tpwsDir,matchingFile);
 load(fNameList.TPWS,'MTT','MPP')
 
 % if you have more than "maxDetLoad" detections, don't load all spectra and
@@ -174,7 +174,7 @@ bFlag = 0;
 
 %% Make LTSA session file
 lsfn = strrep(matchingFile,'TPWS','LTSA');
-fNameList.LTSA = fullfile(p.sdir,lsfn);
+fNameList.LTSA = fullfile(p.tpwsDir,lsfn);
 Altsa = exist(fNameList.LTSA,'file');
 if Altsa ~= 2
     disp(['Error: LTSA Sessions File Does Not Exist: ',fNameList.LTSA])
@@ -223,7 +223,7 @@ end
 %% Compute Spectra Plot Parameters
 % max and min for LTSA frequency
 fiminLTSA = 0;% TODO: make this configurable
-fimaxLTSA = p.srate/2 ; % in kHz 100 or 160 kHz
+fimaxLTSA = p.sampleRate/2 ; % in kHz 100 or 160 kHz
 
 % set ltsa step size
 iPwr = 1;
@@ -264,7 +264,7 @@ if p.specploton %Does anyone ever turn p.specploton off??
         fmsp = [];
     end
     if isempty(fmsp)
-        fmsp = ((p.srate/2)/(smsp2-1))*ift - (p.srate/2)/(smsp2-1);
+        fmsp = ((p.sampleRate/2)/(smsp2-1))*ift - (p.sampleRate/2)/(smsp2-1);
         fprintf('No freq vector in TPWS file. Using approximation based on sample rate.\n')
     end
     % find the indices that are in the range of interest
@@ -882,7 +882,7 @@ while (k <= nb)
     % if brush selected get key
     if strcmp(cc,'p')
        h = brush;
-       set(h,'Color',[.9290 .6940 .1250],'Enable','on');
+       set(h,'Color',[1,1,0],'Enable','on'); % light yellow [.9290 .6940 .1250]
        waitfor(gcf,'CurrentCharacter')
        set(h,'Enable','off')
        cc = get(gcf,'CurrentCharacter');

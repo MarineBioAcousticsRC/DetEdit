@@ -26,15 +26,15 @@ initDefaultParams
 userParams()
 
 % Initialize defined species parameters
-spParams = initSpParams('sp',sp,'srate',srate);
+spParams = initSpParams('sp',sp,'sampleRate',sampleRate);
 
 % General parameters (directories, iterations)
 params.filePrefix = filePrefix;
-params.itnum = itnum;
-params.srate = srate;
-params.sdir = sdir;
+params.iterationNum = iterationNum;
+params.sampleRate = sampleRate;
+params.tpwsDir = tpwsDir;
 params.tfName = tfName;
-params.ltsadir = ltsadir;
+params.ltsaDir = ltsaDir;
 
 %% create struct to return parameters
 switch analysis
@@ -67,7 +67,7 @@ switch analysis
         params.maxDetLoad = maxDetLoad;
         params.gth = gth;
         params.colorTab = colorTab;
-        params.ltsadir = ltsadir;
+        params.ltsaDir = ltsaDir;
         
         % apply species default parameters
         if exist('spParams','var')

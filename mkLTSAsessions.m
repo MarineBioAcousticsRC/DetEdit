@@ -27,22 +27,22 @@ end
 p = getParams(userFunc,'analysis','mkLTSA');
 
 %% Define subfolder that fit specified iteration
-if p.itnum > 1
-    for id = 2: str2num(p.itnum) % iternate id times according to p.itnum
+if p.iterationNum > 1
+    for id = 2: str2num(p.iterationNum) % iternate id times according to p.iterationNum
         subfolder = ['TPWS',num2str(id)];
-        p.sdir = (fullfile(p.sdir,subfolder));
+        p.tpwsDir = (fullfile(p.tpwsDir,subfolder));
     end
 end
 
 %% Check if TPWS file exists (does not look in subdirectories)
 % Concatenate parts of file name
 if isempty(p.speName)
-    detfn = [p.filePrefix,'.*','TPWS',p.itnum,'.mat'];
+    detfn = [p.filePrefix,'.*','TPWS',p.iterationNum,'.mat'];
 else
-    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.itnum,'.mat'];
+    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.iterationNum,'.mat'];
 end
 % Get a list of all the files in the start directory
-fileList = cellstr(ls(p.sdir));
+fileList = cellstr(ls(p.tpwsDir));
 % Find the file name that matches the p.filePrefix
 fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
@@ -67,9 +67,9 @@ for iD = 1:length(fileMatchIdx)
     %% Find files and load data
     % Find if TPWS file exist
     matchingFile = fileList{fileMatchIdx(iD)};
-    detfn = dir(fullfile(p.sdir,matchingFile));
+    detfn = dir(fullfile(p.tpwsDir,matchingFile));
     
-    fNameList.TPWS = fullfile(p.sdir,detfn.name);
+    fNameList.TPWS = fullfile(p.tpwsDir,detfn.name);
     A1 = exist(fNameList.TPWS,'file');
     if A1 ~= 2
         disp(['Error: File Does Not Exist: ',fNameList.TPWS])
@@ -114,7 +114,7 @@ for iD = 1:length(fileMatchIdx)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Get ltsa file names for a specific site name and deployment number
-    d = dir(fullfile(p.ltsadir,[p.filePrefix,'*.ltsa']));
+    d = dir(fullfile(p.ltsaDir,[p.filePrefix,'*.ltsa']));
     fnames = char(d.name);
     nltsas = length(d);
     
@@ -127,21 +127,21 @@ for iD = 1:length(fileMatchIdx)
             sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
             disp('reading ltsa headers, please be patient ...')
             for k = 1:nltsas
-                hdr = ioReadLTSAHeader(fullfile(p.ltsadir,fnames(k,:)));
+                hdr = ioReadLTSAHeader(fullfile(p.ltsaDir,fnames(k,:)));
                 sTime(k) = hdr.ltsa.start.dnum + doff;  % start time of ltsa files
                 eTime(k) = hdr.ltsa.end.dnum + doff;    % end time of ltsa files
                 rfTime{k} = hdr.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
             end
             disp('done reading ltsa headers')
         else
-            disp(['No LTSAs found to match wildcard: ', [p.ltsadir,p.filePrefix,'*']])
+            disp(['No LTSAs found to match wildcard: ', [p.ltsaDir,p.filePrefix,'*']])
             return
         end
     end
     
     % Define LTSA session output file
     lsfn = strrep(detfn.name,'TPWS','LTSA');
-    fn2 = fullfile(p.sdir,lsfn);
+    fn2 = fullfile(p.tpwsDir,lsfn);
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Calculate bout starts and ends

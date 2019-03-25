@@ -34,22 +34,22 @@ end
 p = getParams(userFunc,'analysis','modDet');
 
 %% Define subfolder that fit specified iteration
-if p.itnum > 1
-    for id = 2: str2num(p.itnum) % iternate id times according to p.itnum
+if p.iterationNum > 1
+    for id = 2: str2num(p.iterationNum) % iternate id times according to p.iterationNum
         subfolder = ['TPWS',num2str(id)];
-        p.sdir = (fullfile(p.sdir,subfolder));
+        p.tpwsDir = (fullfile(p.tpwsDir,subfolder));
     end
 end
 
 %% Check if TPWS file exists (does not look in subdirectories)
 % Concatenate parts of file name
 if isempty(p.speName)
-    detfn = [p.filePrefix,'.*','TPWS',p.itnum,'.mat'];
+    detfn = [p.filePrefix,'.*','TPWS',p.iterationNum,'.mat'];
 else
-    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.itnum,'.mat'];
+    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.iterationNum,'.mat'];
 end
 % Get a list of all the files in the start directory
-fileList = cellstr(ls(p.sdir));
+fileList = cellstr(ls(p.tpwsDir));
 % Find the file name that matches the p.filePrefix
 fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
 if isempty(fileMatchIdx)
@@ -58,11 +58,11 @@ if isempty(fileMatchIdx)
 end
 
 %% Define output directory
-newitnum = num2str(str2double(p.itnum)+1);
-inTPWS = ['TPWS',p.itnum];
-outTPWS = ['TPWS',newitnum];
+newiterationNum = num2str(str2double(p.iterationNum)+1);
+inTPWS = ['TPWS',p.iterationNum];
+outTPWS = ['TPWS',newiterationNum];
 
-outDir = fullfile(p.sdir,outTPWS);
+outDir = fullfile(p.tpwsDir,outTPWS);
 if ~isdir(outDir)
     disp(['Make new folder: ',outDir])
     mkdir(outDir)
@@ -72,11 +72,6 @@ end
 %% Handle Transfer Function
 if (p.tfSelect > 0) || ~isempty(strfind(p.calcParams,'all'))
     [tf,~,~] = getTransfunc(p.filePrefix, p.tfName,p);
-    if ~isempty(strfind(p.calcParams,'all')) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% solve this
-        BinkHz = 0:1:srate/2;
-        tf = interp1(tffreq,tfuppc,BinkHz,'linear','extrap');
-        disp('TF Applied to get parameters');
-    end
 else
     tf = 0;
     disp('No TF Applied')
@@ -89,9 +84,9 @@ for iD = 1:length(fileMatchIdx)
     %% Find files and load data
     % Find if TPWS file exist
     matchingFile = fileList{fileMatchIdx(iD)};
-    detfn = dir(fullfile(p.sdir,matchingFile));
+    detfn = dir(fullfile(p.tpwsDir,matchingFile));
     
-    fNameList.TPWS = fullfile(p.sdir,detfn.name);
+    fNameList.TPWS = fullfile(p.tpwsDir,detfn.name);
     A1 = exist(fNameList.TPWS,'file');
     if A1 ~= 2
         disp(['Error: File Does Not Exist: ',fNameList.TPWS])
@@ -114,8 +109,8 @@ for iD = 1:length(fileMatchIdx)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Remove false detections and ID detections if specified
     % Load False Detections file
-    zFDfn = strrep(detfn.name,inTPWS,['FD',p.itnum]);
-    load(fullfile(p.sdir,zFDfn))
+    zFDfn = strrep(detfn.name,inTPWS,['FD',p.iterationNum]);
+    load(fullfile(p.tpwsDir,zFDfn))
     
     % Remove False Detections
     [MTT,IA] = setdiff(MTT,zFD'); % setdiff already sorts the data
@@ -124,8 +119,8 @@ for iD = 1:length(fileMatchIdx)
     MSP = MSP(IA,:);
     
     % Load ID Detections file
-    zIDfn = strrep(detfn.name,inTPWS,['ID',p.itnum]);
-    load(fullfile(p.sdir,zIDfn))
+    zIDfn = strrep(detfn.name,inTPWS,['ID',p.iterationNum]);
+    load(fullfile(p.tpwsDir,zIDfn))
     
     % Remove ID Detections (if specified)
     if p.excludeID
@@ -163,16 +158,10 @@ for iD = 1:length(fileMatchIdx)
             end
             
             % Calculate parameters and make figure if specified by user in itr_modDet
-            switch p.calcParams
-                case 'ici&pp'
-                    Calicippfunc(MTT,MPP,MSP,outDir,outFileTPWS,p)
-                case 'all'
-                    CalPARAMSfunc(MTT,MPP',MSN,outDir,outFileTPWS,p,tf)
-                case 'none'
-                    disp('No parameters calculated')
-                otherwise
-                    fprintf(['Wrong name to call parameters, see itr_modDet:\n -all- for all parameters',...
-                        '\n -ici&pp- for computing only ici and pp \n -none- No parameters'])
+            if p.calcParams
+                Calicippfunc(MTT,MPP,MSP,outDir,outFileTPWS,p)
+            else
+                disp('No parameters calculated')
             end
         else
             disp(['No encounter longer than minimum bout (',num2str(p.minBout),') in file: ',outFileTPWS])

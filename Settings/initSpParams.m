@@ -1,22 +1,36 @@
 function spParams = initSpParams(varargin)
-% Establish basic parameter settings, then update for species
-% specific defaults, and user preferences.
-% Pulled into subroutine kf 10/4/2016
 
-% get user input and set up file names
-n = 1;
-while n <= length(varargin)
-    switch varargin{n}
+% initSpParams
+
+% Takes species code and outputs corresponding species default parameters
+
+% Inputs:
+%   'sp' - REQUIRED.
+%       A string defining the species abbreviation code. 
+%   'sampleRate' - Optional, if required for species settings.
+%       Units = kHz
+%
+%
+% Output:
+%   spParams - A structure with variable fields of specific
+%   parameters
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+vIdx = 1;
+while vIdx <= length(varargin)
+    switch varargin{vIdx}
         case 'sp'
-            sp = varargin{n+1}; n=n+2;
-        case 'srate'
-            srate = varargin{n+1}; n=n+2;
+            sp = varargin{vIdx+1}; vIdx=vIdx+2;
+        case 'sampleRate'
+            sampleRate = varargin{vIdx+1}; vIdx=vIdx+2;
         otherwise
-            error('Bad optional argument: "%s"', varargin{n});
+            error('Bad optional argument: "%s"', varargin{vIdx});
     end
 end
 
-% Set parameters according to sp
+% Set parameters according to sp code
+
 %%% Delphinids
 if  strcmpi(sp,'De')
     spParams.speName = 'Delphin';  
@@ -31,10 +45,9 @@ if  strcmpi(sp,'De')
     % Panel Frequency spectra
     spParams.fLow = 10;
     
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Sperm whales
 
-elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
+%%% Sperm whales
+elseif strcmp(sp,'Pm')
     spParams.speName = 'Pm'; 
     
     % Bout parameters 
@@ -57,10 +70,9 @@ elseif (strcmp(sp,'PM') || strcmp(sp,'pm') || strcmp(sp,'Pm'))
     % parameters for modDet plots (if specified to compute)
     spParams.iciRange = [300, 2000];
     spParams.N = 512;
-  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Beaked whales
 
+    
+%%% Beaked whales
 elseif (strcmp(sp,'Zc') || strcmp(sp,'z') || strcmp(sp,'Cuviers'))
     spParams.speName = 'Cuviers'; 
     
@@ -139,9 +151,8 @@ elseif (strcmp(sp,'Md') || strcmp(sp,'d'))
     spParams.frdbwRange = [0, 80];
     spParams.durstep = 2;    
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Kogia
 
+%%% Kogia
 elseif (strcmp(sp,'Ko') || strcmp(sp,'k'))
     spParams.speName = 'Kogia';
     
@@ -159,9 +170,8 @@ elseif (strcmp(sp,'Ko') || strcmp(sp,'k'))
     spParams.frdbwRange = [0, 80];
     spParams.durstep = 3;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Porpoise
 
+%%% Porpoise
 elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
     spParams.speName = 'Porpoise'; 
 
@@ -176,9 +186,8 @@ elseif (strcmp(sp,'Po') || strcmp(sp,'p'))
     % Panel Frequency spectra
     spParams.fLow = 25;
     
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Beluga
 
+%%% Beluga
 elseif strcmpi(sp,'Dl') 
     spParams.speName = 'Beluga'; 
     
@@ -217,9 +226,8 @@ elseif (strcmp(sp,'Mm') || strcmp(sp,'Narwhal'))
     spParams.durRange = [10, 300];
     spParams.rawFileDur = 300; 
     
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Others
 
+%%% Others
 elseif strcmpi(sp,'MFA')
     spParams.speName = 'MFA';  
 
@@ -251,7 +259,6 @@ elseif strcmpi(sp,'whs')
     % Panel Frequency spectra
     spParams.fLow = 5;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 else
     warning('Unknown Species Type!!!')

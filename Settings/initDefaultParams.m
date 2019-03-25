@@ -1,27 +1,15 @@
 %initDefaultParams
-%initDefaultParams initialize default parameters
-%
-% Defines default parameters of the interface
-%
-% Copyright(C) 2019 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
-%                      Kait E. Frasier, UCSD, krasier@ucsd.edu
-%                      Alba Solsona Berga, UCSD, asolsonaberga@ucsd.edu
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Set default parameters
-spParams = [];
-specChar = 'Unk';
-speName = 'Unknown';  % Species code used in file names 
-if ~exist('srate','var')
-    srate = 200;
+% Initialize default parameters for the interface, mkLTSAsessions and modDet
+
+if ~exist('sampleRate','var')
+    sampleRate = 200;
+    disp('Default Sample Rate: 200 kHz. Modify in your settings script')
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Initilize empty directories (these may not be specified)
-ltsadir = '';
+speName = '';
+ltsaDir = '';
 tfName = '';
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % General bout parameters
 
 threshRL = 0; % minimum RL threshold in dB peak-to-peak
@@ -38,23 +26,24 @@ maxDetLoad = 4e5; % [] - read all or 4e5 - the number of detections above
 % if maxDetLoad exist, plotaxes can be defined to keep the format of the
 % panels        
 c4fd = 1; % Detections step size to estimate false detection rate
+rawFileDur = []; % Raw file length, default 75s
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% parameters for the interface
+
+% Parameters for the interface
 
 % Panel LTSA and time series
 rlLow = 110; % PP plot window low limit
 rlHi = 170; % PP plot window high limit
 ltsaContrast = 250; % ltsa contrast
 ltsaBright = 100; % ltsa brightness
-ltsaLims = [0,srate/2]; % max and min of LTSA plot
+ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
 ltsaMax = 6; % ltsa maximum duration per session
 dtHi = .5; % max yaxis value for ICI display in sec
 minDur = []; % minimum window duration (if specified in minutes)
 
 % Panel Frequency spectra
 fLow = 0; % Minimum frequency of interest
-fHi = srate/2; % Maximum frequency of interest
+fHi = sampleRate/2; % Maximum frequency of interest
 
 % Panel RL rms vs. RL pp | Peak freq.
 slope = 1; % slope for shifting data vertically
@@ -73,23 +62,22 @@ colorTab = [191, 191, 0; ... % type 1 green
             222,  125, 0; ... % type 8 orange
             255,  153, 199; ... % type 9 pink
             153, 51,   0]./255; % type 10  brown
-
 colorTab = round(colorTab.*100)/100;      
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% parameters for modDet plots (if specified to compute)
+
+% Parameters for modDet (if specified to compute)
 
 excludeID = 0; % exclude ID times from MTT files
+calcParams = 0; % yes - 1 | no - 0. Calculate Parameters peak-to-peak, 
+% inter-detection-interval and peak frequency
+
+% Plot settings
 iciRange = []; % min/max ici in ms
 dbRange = [];  % min/max db for plots of pp and rms
 durRange = []; % min/max duration in us
 frRange = [fLow, fHi];   % min/max frequency for plots of peak and center freq
 frdbwRange = [fLow, fHi]; % min/max frequency for plots of 3/10 db bw
 durstep = 1; % step range for number bins in histogram 
-N = srate; % FFT size for parameter clicks
-rawFileDur = []; % raw file length, default 75s
-calcParams = 'none';% Calculate Parameters: 
-%                   -> 'none' do NOT compute parameters
-%                   -> 'ici&pp' only to compute peak-to-peak, ici and
-%                   peakFr
-%                   -> 'all' compute pp, ici, 3/10dbBw, peakFr, F0, rms, dur
+
+
+

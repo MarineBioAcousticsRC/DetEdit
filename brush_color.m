@@ -1,107 +1,147 @@
-function [yell,zFD,zID,zMD,bFlag] = brush_color(hFig,cc,zFD,zID,zMD,colorTab,t)
-% get brushed data and figure out what to do based on color
+function [yell,zFD,zID,bFlag] = brush_color(hFig,cc,zFD,zID,colorTab,t)
+
+% brush_color.m
+
+% Get brushed data from figure and based on specified color code modify data
+
+% Inputs
+%   hFig - Figure handle
+%
+%   cc - Keyboard shortcut label
+%       A string with a keyboard shortcut to label data as:
+%       'r' - False detection
+%       'y' - Highlight selected data to show features (shown in black)
+%       'g' - True detection
+%       'u' - Update data according to current color brush selection. The
+%       other keyboard shortcuts do not work if brush color is:
+%           red - False detection
+%           yellow - Highlight selected data to show features (shown in black)
+%           green - True detection
+%
+%   zFD - An [N x 1] vector of detection times labeled as false detections,
+%         where N is the number of detections.
+%
+%   zID - An [N x 2] matrix of detection labeled as ID detections, where
+%         1st column contains the detection times and 2nd column an ID  
+%         number associated with the colorTab
+%
+%   colorTab - Color code for classification - ID signal types
+%              [191, 191,   0] type 1 green
+%              [191,   0, 191] type 2 purple
+%              [  0, 127,   0] type 3 dark-green
+%              [  0, 191, 191] type 4 light-blue
+%              [ 20,  43, 140] type 5 dark-blue
+%              [218, 179, 255] type 6 pale-purple
+%              [255, 214,   0] type 7 yellow
+%              [222, 125,   0] type 8 orange
+%              [255, 153, 199] type 9 pink
+%              [153,  51,   0] type 10  brown
+%
+%   t - An [N x 1] vector of detection times from current window session.
+%
+%
+%
+% Output:
+%
+%   yell - An [N x 1] vector of indices of highlighted detection times,
+%          where N is the number of detections.
+%
+%   zFD - An [N x 1] vector of detection times labeled as false detections,
+%         where N is the number of detections.
+%
+%   zID - An [N x 2] matrix of detection labeled as ID detections, where
+%         1st column contains the detection times and 2nd column an ID  
+%         number associated with the colorTab
+%
+%   bFlag - Logical,track if brush is on record 
 
 yell = [];
 
-hBrush = findall(hFig,'tag','Brushing');
+% Find brushed axes
+hBrushAll = get(hFig,'Children');
+selLine = arrayfun(@(x) hBrushAll(x).Marker == '.', 1:length(hBrushAll), 'UniformOutput', false);
+if iscell(selLine)
+    lenAx = cell2mat(cellfun(@length,selLine,'UniformOutput',false));
+    selLine(lenAx > 1) = {false};
+    selLine = cell2mat(selLine);
+end
+brushedLine = find(selLine,1,'last');
+hBrush = hBrushAll(brushedLine);
 
-% get x and x info from brushed data
-brushDataX = get(hBrush, {'Xdata'});
-brushDataY = get(hBrush, {'Ydata'});
-% don't understand why nan values appear, create index of valid points here
+% Get indices of brushed data
+brushID = find(get(hBrush, 'BrushData'));
 
-if ~isempty(brushDataX)
-    brushID = ~isnan(brushDataX{1,1});
+if ~isempty(brushID)
     
     bFlag = 1;
-    brushDataX = brushDataX{1,1}(brushID);
-    brushDataY = brushDataY{1,1}(brushID);
     
-    % get color info
-    brushColor = get(hBrush, {'Color'});
-    brushColor = round(brushColor{1,1}.*100)./100;
-    % get vector of dates associated with these points
-    markerDates = get(findall(hFig),'UserData');
-    filledMarkers = markerDates(~cellfun('isempty',markerDates));
-    brushDate = filledMarkers{end}(brushID);
+    % Get color info from brush
+    h = get(brush);
+    brushColor = round(h.Color*100)./100;
+    
+    % Get vector of dates associated with these points
+    markerDates = hBrush.UserData;
+    brushDate = markerDates(brushID);
     
     if ~isempty(brushDate)
-        if isequal(brushColor,[1,0,0]) || strcmp(cc,'r');
-            % Red paintbrush = False Detections
-            disp(['Number of False Detections = ',num2str(length(brushDataX))])
-            % make sure you're not flagging something outside this session
+        
+        if isequal(brushColor,[1,0,0]) || strcmp(cc,'r')
+            % Red paintbrush or 'r' = False Detections
+            disp(['Number of False Detections = ',num2str(length(brushDate))])
+            % Add false detections to FD matrix
             [newFD,~] = intersect(t, brushDate);
-            zFD = [zFD; newFD];   % cummulative False Detection matrix
-        elseif isequal(brushColor,[1,1,0]) || strcmp(cc,'y');
-            % yellow paintbrush = give time of detection
-            disp(['       Year              Month          Day           Hour', ...
-                '          Min          Sec']);
-            disp(['Datevec ',num2str(datevec(brushDate(1)))]);
+            zFD = [zFD; newFD]; 
+            
+        elseif isequal(brushColor,[1,1,0]) || strcmp(cc,'y')
+            % Yellow paintbrush or 'y' = Highlight Detections
+            disp(['Start time selected data: ',datestr(brushDate(1),'dd-mm-yyyy HH:MM:SS.FFF')]);
             [~,yell] = intersect(t, brushDate);
             
-        elseif isequal(brushColor,[0,5,0]) || strcmp(cc,'g')||...
-            isequal(brushColor,[0,0,0]) || strcmp(cc,'i');
-        
-            disp(['Number of Detections Selected = ',num2str(length(brushDate(1)))])
+        elseif isequal(brushColor,[0,1,0]) || strcmp(cc,'g')
+            % Green paintbrush or 'g' = True Detections
+            disp(['Number of Detections Selected = ',num2str(length(brushDate))])
             if exist('zFD','var')
-                % make sure you're not flagging something outside this session
+                
+                % Make sure you're not flagging something outside this session
                 [newTD,~] = intersect(t, brushDate);
                 [zFD,iC] = setdiff(zFD,newTD);
-                if ~isempty(zID) % clear brushed set from ID set
+                
+                % Clear brushed set from ID set
+                if ~isempty(zID) 
                     [~,zIDkeep] = setdiff(zID(:,1),newTD);
                     zID = zID(zIDkeep,:);
                 end
-                if ~isempty(zMD) % clear brushed set from ID set
-                    [~,zMDkeep] = setdiff(zMD(:,1),newTD);
-                    zMD = zMD(zMDkeep,:);
-                end
-                if ~isempty(zFD) % clear brushed set from FD set
+                
+                % Clear brushed set from FD set
+                if ~isempty(zFD) 
                     [~,zFDkeep] = setdiff(zFD(:,1),newTD);
                     zFD = zFD(zFDkeep,:);
                 end
                 disp(['Remaining Number of False Detections = ',num2str(length(iC))])
-                % save(fn2,'zFD')
             end
-        elseif isequal(brushColor,[0,1,0]) || strcmp(cc,'m');
-            % magenta paintbrush = misidentified Detections
-            disp(['Number of Mid-ID Detections = ',num2str(length(brushDataX))])
-            % make sure you're not flagging something outside this session
-            [newMD,~] = intersect(t, brushDate);
-            % remove new MD from ID
-            if ~isempty(zID) % clear brushed set from ID set
-            	[~,zIDkeep] = setdiff(zID(:,1),newMD);
-            	zID = zID(zIDkeep,:);
-            end
-            % lowest priority, could alternatively remove things from 
-            zMD = [zMD; newMD];   % cummulative False Detection matrix
+            
         else
-            % find the brush color
+            % Find color code to assign ID signal type
             tfCompare = find(sum(bsxfun(@eq,colorTab,brushColor),2)==3);
             if ~isempty(tfCompare)
                 specID = tfCompare;
-                % write to ID file
+                
+                % Write to ID file
                 disp(['Number of ID Detections = ',num2str(length(brushDate))])
                 [newIDtimes,~] = intersect(t, brushDate);
                 spLabels = ones(size(newIDtimes)).*specID;
                 newID = [newIDtimes,spLabels];
                 zID = [zID;newID];
-                % remove new ID from MD
-                if ~isempty(zMD) % clear brushed set from ID set
-                    [~,zMDkeep] = setdiff(zMD,zID(:,1));
-                    zMD = zMD(zMDkeep,:);
-                end
             else
                 bFlag = 0;
             end
         end
     end
-    if ~isempty(zID) % remove any ID from FD
+    
+    % Remove any ID from FD
+    if ~isempty(zID) 
         [~,zIDkeep2] = setdiff(zID(:,1),zFD);
         zID = zID(zIDkeep2,:);
-    end
-    if ~isempty(zMD) % remove any MD from FD
-        [~,zMDkeep2] = setdiff(zMD(:,1),zFD);
-        zMD = zMD(zMDkeep2,:);
     end
 else
     bFlag = 0;

@@ -1,8 +1,30 @@
-function [ ] = Calicippfunc(MTT,MPP,MSP,sdir,detfn,p,srate)
-% Calculate the ICI and the PP 
+function [ ] = paramsHist(MTT,MPP,MSP,outDir,detfn,p)
+
+% paramsHist.m
+
+% Script takes annotated detection files and outputs histogram plots and 
+% parameter files of peak-to-peak amplitude, inter-detection-interval and 
+% peak frequencies
+
+% Input:
+%
+%   MTT - An [N x 1] vector of detection times, where N is the
+%       number of detections.
+%
+%   MPP - An [N x 1] vector of peak to peak received level (RL) amplitudes.
+%   
+%   MSP - An [N x nF] matrix of detection spectra, where nF is the length of
+%       the spectra.
+%   
+%   outDir - Directory path to save parameters and figures
+%
+%   detfn - TPWS file directory
+%
+%   p - A struct with parameter settings.
+ 
 close all
 
-%% Inter-Click Interval
+%% Inter-Detection Interval
 ici = diff(MTT)*24*60*60*1000; % in ms
 
 % apply user range for ici
@@ -39,7 +61,7 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
 % save ici data and figure
 icifn = strrep(detfn(1:end-4),'TPWS','ici');
 % saveas(h1,fullfile(sdir,icifn))
-saveas(h1,fullfile(sdir,icifn),'png')
+saveas(h1,fullfile(outDir,icifn),'png')
 
 %% Peak-to-peak
 % apply user range for db
@@ -74,12 +96,12 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
 % Save plot
 ppfn = strrep(detfn(1:end-4),'TPWS','pp');
 %saveas(h2,fullfile(sdir,ppfn)) 
-saveas(h2,fullfile(sdir,ppfn),'png') 
+saveas(h2,fullfile(outDir,ppfn),'png') 
 
 %% Peak Frequency
 smsp2 = size(MSP,2);% 2nd element is num fft points
 ift = 1:smsp2;
-fmsp = ((srate/2)/(smsp2-1))*ift - (srate/2)/(smsp2-1);
+fmsp = ((p.sampleRate/2)/(smsp2-1))*ift - (p.sampleRate/2)/(smsp2-1);
 
 [~,im] = max(MSP(:,p.frRange(1):p.frRange(2)),[],2); % maximum between flow-100kHz       
 peakFr = fmsp(im + p.frRange(1)-1);
@@ -96,7 +118,7 @@ h3 = gca;
 nbinsfr = (p.frRange(1):p.frRange(2));
 [y,centers] = hist(peakFr,nbinsfr);
 bar(h3,centers,y);
-xlim(h3,[0,srate/2])
+xlim(h3,[0,p.sampleRate/2])
 title(h3,sprintf('N=%d',length(peakFr)));
 xlabel(h3,'Peak Frequency (kHz)')
 
@@ -111,51 +133,6 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
 % Save plot
 % save ici data and figure
 pffn = strrep(detfn(1:end-4),'TPWS','peak');
-%saveas(h3,fullfile(sdir,pffn))
-saveas(h3,fullfile(sdir,pffn),'png')
+saveas(h3,fullfile(p.sdir,pffn))
 
-% %% Excel
-% % xls for Danielle
-% vecTimes = datevec(MTT(1:end-1));
-% icixls = [vecTimes, ici];
-% %xlswrite(fn3,icixls);  % write time and click count by bin data to XLS
-% % Open Excel, add workbook, change active worksheet,
-% % get/put array, save, and close
-% % First open an Excel Server
-% Excel = actxserver('Excel.Application');
-% set(Excel, 'Visible', 1);
-% % Insert a new workbook
-% Workbooks = Excel.Workbooks;
-% Workbook = invoke(Workbooks, 'Add');
-% % Make the second sheet active
-% Sheets = Excel.ActiveWorkBook.Sheets;
-% sheet2 = get(Sheets, 'Item', 1);
-% invoke(sheet2, 'Activate');
-% % Get a handle to the active sheet
-% Activesheet = Excel.Activesheet;
-% % Put a MATLAB array into Excel
-% %A = [1 2; 3 4];  
-% A = icixls;
-% la = length(A);
-% rstrg = ['A1:G',num2str(la)];
-% ActivesheetRange = get(Activesheet,'Range',rstrg);
-% set(ActivesheetRange, 'Value', A);
-% % Get back a range.  It will be a cell array, 
-% % since the cell range can
-% % contain different types of data.
-% % Range = get(Activesheet, 'Range', 'A1:B2');
-% % B = Range.value;
-% % % Convert to a double matrix.  The cell array must contain only scalars.
-% % B = reshape([B{:}], size(B));
-% % Now save the workbook
-% xlsfn = strrep(icifn,'.mat','.xls');
-% invoke(Workbook, 'SaveAs', xlsfn);
-% % To avoid saving the workbook and being prompted to do so,
-% % uncomment the following code.
-% Workbook.Saved = 1;
-% invoke(Workbook, 'Close');
-% % Quit Excel
-% invoke(Excel, 'Quit');
-% % End process
-% delete(Excel);
 

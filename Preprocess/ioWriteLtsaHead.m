@@ -1,5 +1,5 @@
 function ioWriteLtsaHead
-%write_ltsahead write ltsa files
+%ioWriteLtsaHead write ltsa files
 %
 % Prompt user to enter a directory path to save ltsa files
 %

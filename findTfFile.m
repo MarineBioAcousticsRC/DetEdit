@@ -1,5 +1,11 @@
 function PathFileList = findTfFile(indir,stationDeploy)
 
+% findTfFile.m
+
+% Simple script finds transfer function file based on given TPWS file name.
+% If site or deployment do not much the specified cases, user will be
+% propmpt to select the transfer function file (.tf)
+
 if (size(stationDeploy,1) > 1 || size(stationDeploy,2) > 1) && iscell(stationDeploy)
    stationDeploy = stationDeploy{2}; % skip site name if given 
 end

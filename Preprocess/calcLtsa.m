@@ -1,5 +1,5 @@
 function calcLtsa
-%calcLtsa calculate spectral averages and save to ltsa file, called by
+%calcLtsa calculate spectral averages and save them to ltsa file, called by
 %mkLtsa
 %
 % Copyright(C) 2018 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu

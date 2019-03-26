@@ -1,5 +1,8 @@
 function T = intervalToBinTimetable(Start,End,p) 
 
+% intervalToBinTimetable.m
+
+% Simple script to get bin times of specified time from given intervals
 
 Startnum = datenum(Start);
 timevec = datevec(Startnum);

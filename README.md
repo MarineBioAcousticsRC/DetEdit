@@ -1,44 +1,92 @@
 # DetEdit
-
-Visual user-interface for acoustic detection annotation designed for use with HARP data (x.wav files).
-
-Examples of detEdit with different species:
-https://drive.google.com/drive/folders/0B1N3RJM5Uw4ha25lVEhLRF9FMUk
+A graphical user interface for annotating and editing events detected in long-term acoustic monitoring data
 
 ----------
-Author: John A. Hildebrand, based on initial version by Sean M. Wiggins.
+## Introduction
+*DetEdit* is a tool to visualize and annotate events from large acoustic datasets. It is highly-configurable and can be used for multipurposes ranging from annotation and classification of individual or batches of signals and evaluation of signal properties, to removing false detections and obtaining false positive rates.
 
-Copyright: J. A. Hildebrand 2016  
-Date: 1/26/2016
+The tool has been used mainly to process extensive acoustic datasets of odontocete echolocation clicks and human impulsive noise. It can be used to process any stereotyped impulsive signals such as species-specific acoustic signals or calls from fish, crustaceans, bats, birds, insects, etc.
 
 
-### Workflow
+## Software and data requirments
+*DetEdit* is a MATLAB-based graphical user interface (GUI). It requires: 
+* MATLAB R2014b or newer versions (www.mathworks.com). A version of the repository for older versions of MATLAB (R2013b and older) is also provided.
+* Audio files in WAV or XWAV format
 
-#### 1. Detect
+## Runtime and setup
 
-##### Edetect.m  
-  `Edetect` is a basic energy detector designed for use with xwav files.
-  *For sperm whales: instead use the sperm whale detector following these steps: 	https://drive.google.com/drive/folders/1g1zpYMDO3sd32hSft4MFqCrZFxzdGom4 
-  
-  
-  - **Input:**  
-    User is prompted to supply inputs including:  
-     1. A text file or spreadsheet containing detection parameters (see `GOM_BW_pfile_320.xlsx` for example).  
-     2. A directory containing xwavs.
-    
-  - **Output:**  
-   A `*_TPWS.mat` file containing matrices of detected signal parameters.
+### Obtaining DetEdit
+- Download repository at https://github.com/ScrippsWhaleAcoustics/DetEdit
+- Examples of DetEdit files with different odontocete species: https://drive.google.com/drive/folders/0B1N3RJM5Uw4ha25lVEhLRF9FMUk
 
-     MPP = peak to peak amplitudes  
-     MTT = time  
-     MSN = timeseries (bandpassed)  
-     MSP = spectrum (bandpassed)  
+Set up *DetEdit* repository folder in MATLAB's path by using the MATLAB File pull-down and *Set Path...*. Click the *Add with Subfolders...* button, browse and select the folder containing the version of *DetEdit* that you want to run. Remove other versions of *DetEdit* from the path with the *Remove* button. Click *Save* and then *Close*.
 
-  *Optional*:  
-     MUSN = unfiltered timeseries  
-     MUSP = unfiltered spectrum  
+
+## Typical Workflow
+
+### Initial data preparation
+Create parameter files required to use the interface:
+
+#### 1. Make Long-Term Spectral Average (LTSA) files
+LTSA files (`.ltsa`) are generated from a collection of WAV or XWAV files by averaging spectra over a long time periods and arranging these spectra sequentially as frequency-time spectrogram plots. LTSA files provide a quick overview of long-term recordings.
+
+Using the Command Window in MATLAB, the `.ltsa` file is created as follows:   
+```bash
+> mkLtsa
+```
+and follow the prompt windows to specify audio file format, file directories and parameters (e.g. time average length and frequency bin size to average the data).
+
+Only 5 filename formats of WAV and XWAV files are supported:
+- `yymmdd-HHMMSS`: SiteName_190326-123700.wav
+- `yymmdd_HHMMSS`: SiteName_190326_123700.wav
+- `yyyymmdd_HHMMSS`: SiteName_20190326_123700.wav
+- `yymmddHHMMSS`: SiteName_190326123700.wav
+- `yyyymmddTHHMMS`: SiteName_20190326T123700.wav
+
+#### 2. Make `TPWS` files (start Time, Peak-to-peak amplitude, Waveform and Spectra parameters) 
+A `*_TPWS.mat` file contains the following matrices of detected signal parameters:
+
+|#| Variable | Description                               |
+|-|----------|-------------------------------------------|
+|1|   `MTT`  | Vector of start times of detections       |
+|2|   `MPP`  | Vector of received level amplitudes (dB<sub>pp</sub>)|
+|3|   `MSP`  | Matrix of detection spectra               |
+|4|   `MSN`  | Matrix of waveforms                       |
+
+Provide `*_TPWS.mat` file with these matrices is required:
+- user creates matrices manually
+- if user has start times of detected acoustic signals, can create the `*_TPWS.mat` file as follows:
+
+  ```bash
+  > edit make_TPWS
+  ```
+  In editor window, modify input/output locations and detection parameters to run script.
+- if user has no detections, a generic detector can be applied,
+	- for use with XWAV files:
+	  ```bash
+          > Edetect
+  	  ```
+	  User is prompted to supply inputs including a text file or spreadsheet containing detection parameters (see `GOM_BW_pfile_320.xlsx` for example), and directory containing XWAV files.
+		
+	- for use with WAV files:
+	  ```bash
+          > Edetect_wav ('paramFile','E:\DetEdit\GOM_BW_pfile_320.xlsx',...
+          'tfFile','E:\MyTransferFunctionFiles\example_sig1_invSensit.tf',...
+          'timeFile','E:\DetEdit\BW_Effort.xlsx',...
+          'wavDir','E:\MyWAVFiles',...
+          'channel',1)
+  	  ```
 
 #### 2. Make LTSA snippets
+A `*_LTSA.mat` file contains the following matrices of detected signal parameters:
+
+|#| Variable | Description                               |
+|-|----------|-------------------------------------------|
+|1|   `pt`   | Vector of start times of spectral averages|
+|2|   `pwr`  | Matrix of power spectral densities        |
+
+
++++++++++++++++ continue editing+++++++++++++++
 
 ##### mkLTSAsessions.m  
   `mkLTSAsessions` prepares small LTSAs for each detection bout.  

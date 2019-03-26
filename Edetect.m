@@ -1,5 +1,5 @@
-function Edetect_150806
-% Edetect_150806.m
+function Edetect
+% Edetect.m
 %
 % function runs simple energy detector on xwav data.
 % could be modified for typical wav files, but is xwav-centric

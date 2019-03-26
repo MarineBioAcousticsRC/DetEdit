@@ -43,6 +43,7 @@ Only 5 filename formats of WAV and XWAV files are supported:
 - `yymmddHHMMSS`: SiteName_190326123700.wav
 - `yyyymmddTHHMMS`: SiteName_20190326T123700.wav
 
+
 #### 2. Make `TPWS` files (start Time, Peak-to-peak amplitude, Waveform and Spectra parameters) 
 A `*_TPWS.mat` file contains the following matrices of detected signal parameters:
 
@@ -53,15 +54,15 @@ A `*_TPWS.mat` file contains the following matrices of detected signal parameter
 |3|   `MSP`  | Matrix of detection spectra               |
 |4|   `MSN`  | Matrix of waveforms                       |
 
-Provide `*_TPWS.mat` file with these matrices is required:
-- user creates matrices manually
-- if user has start times of detected acoustic signals, can create the `*_TPWS.mat` file as follows:
+Provide `*_TPWS.mat` files is required, so user can:
+- create matrices manually
+- if it has start times of detected acoustic signals, can create the `*_TPWS.mat` file as follows:
 
   ```bash
   > edit make_TPWS
   ```
   In editor window, modify input/output locations and detection parameters to run script.
-- if user has no detections, a generic detector can be applied,
+- if it does not have detections, a generic detector can be applied,
 	- for use with XWAV files:
 	  ```bash
           > Edetect
@@ -76,14 +77,48 @@ Provide `*_TPWS.mat` file with these matrices is required:
           'wavDir','E:\MyWAVFiles',...
           'channel',1)
   	  ```
+	  
+	  
+_**User data settings script**_
+
+Prior to invoke any of the following steps, create your own data settings script to define directories and parameters for the different analysis: to make LTSAs snippets (`mkLTSAsessions.m`), use the interface (`detEdit.m`), or modify annotation files (`modDet.m`). 
+
+Examples of data setttings scripts are found in `DetEdit\Settings` folder. You can make different versions of these templates, with different names for different species, sites or analysis.
+
+|#| Variable        | Description                              |
+|-|-----------------|------------------------------------------|
+|1| `filePrefix`    | `TPWS.mat` files name to match           |
+|2| `iterationNum`  | Iteration number                         |
+|3| `sampleRate`    | Your data sample rate                    |
+|4| `sp`            | Species code                             |
+|5| `tpwsDir`       | `TPWS.mat` files directory               |
+|6| `tfName`        | Transfer function file (`.tf`) directory |
+|7| `ltsaDir`       | `LTSA.mat` files directory               |
+
 
 #### 2. Make LTSA snippets
+After `*_TPWS.mat` files have been created, the following step is making the snippets of LTSAs corresponding to the batches of signals saved in `TPWS` files. 
+
 A `*_LTSA.mat` file contains the following matrices of detected signal parameters:
 
 |#| Variable | Description                               |
 |-|----------|-------------------------------------------|
 |1|   `pt`   | Vector of start times of spectral averages|
 |2|   `pwr`  | Matrix of power spectral densities        |
+
+Using a script containing the user data settings (see `YourDataSettings.m` for example), the LTSA snippets for each detection bout is performed as follows:
+
+```bash
+> mkLTSAsessions(@YourDataSettings)
+```
+or,
+
+```bash
+> mkLTSAsessions
+```
+and user is prompted to select the data settings script.
+
+Assumming `mkLTSAsessions.m` invocation, the data settings scripts should contain the required following variables:
 
 
 +++++++++++++++ continue editing+++++++++++++++

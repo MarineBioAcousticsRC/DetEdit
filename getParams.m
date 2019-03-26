@@ -1,12 +1,28 @@
 function params = getParams(userParams,varargin)
-%getParams get default and user defined parameters
+
+% getParams 
 %
-% Get parameters for the interface
+% Read initial and species default parameters, overwrite with user-defined 
 %
-% Copyright(C) 2019 by John A. Hildebrand, UCSD, jahildebrand@ucsd.edu
-%                      Kait E. Frasier, UCSD, krasier@ucsd.edu
-%                      Alba Solsona Berga, UCSD, asolsonaberga@ucsd.edu
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Inputs:
+%
+%   userFunc - Script user parameter settings.
+%
+%   'analysis' - REQUIRED.
+%       A string specifying the type of analysis to get the specific
+%       parameters.
+%       Three options are accepted:
+%           'detEdit' - interface parameters
+%           'mkLTSA' - parameters to calculate the LTSA sessions
+%           'modDet' - parameters to modify annotation files
+%           'SumPPICIBin' - parameters to summarize  
+%
+%
+% Output:
+%
+%   params - A struct with variable fields of parameter settings
+
+
 
 % get user input and set up file names
 n = 1;

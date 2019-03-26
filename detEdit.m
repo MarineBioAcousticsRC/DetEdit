@@ -1,23 +1,24 @@
 function detEdit(userFunc)
+
 % detEdit.m
-% 2/21/2016 modified for version 1.1
-% For Kogia JAH 5/22/15
-% Estimate the number of False Detections
-% JAH 10-19-2014
-% spec2 uses the LTSA for the click spectra
-% spec3 uses the TPWS file for the click spectra  JAH 9-26-14
-% spcc4 used the TPWS2 file JAH 10-12-14
-% 7-7-14 use Simone bouts and Sean Detector JAH
-% includes brushing FD in and out of files
-% Brushing only works in MATLAB ver 2013b, not 2013a or 2012b
-% modified for BW 140308 jah 140320 jah for small ici
-% 140311 smw detection editor based on evalSessions.m
-% clearvars
+
+% Main script to display interface, it takes the user parameter settings
+% and plots data in different panels to annotate the data.
+
+% Input
+%
+%   userFunc - Script user parameter settings.
+%       Optional, user wil be prompt to select a scrip if not provided 
+%
+% Examples:
+%
+% detEdit(@yourDataSettings)
+% 
+% detEdit
 
 sizePoints = 9; % the current points
 sizeBack = 5; % the background points
 colorPoints = [0 .4470 .7410];
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and

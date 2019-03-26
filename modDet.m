@@ -159,7 +159,7 @@ for iD = 1:length(fileMatchIdx)
             
             % Calculate parameters and make figure if specified by user in itr_modDet
             if p.calcParams
-                Calicippfunc(MTT,MPP,MSP,outDir,outFileTPWS,p)
+                paramsHist(MTT,MPP,MSP,outDir,outFileTPWS,p)
             else
                 disp('No parameters calculated')
             end

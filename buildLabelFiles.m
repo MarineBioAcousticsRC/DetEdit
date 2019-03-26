@@ -1,5 +1,27 @@
 function [zFD, zID,fNameList]= buildLabelFiles(matchingFile, sdir)
-% initialize variables
+
+% buildLabelFiles.m
+
+% Takes file name and directory and creates FD and ID files
+
+% Inputs:
+%
+%   matchingFile - TPWS file name
+%
+%   sdir - Directory path containing TPWS files
+%
+%
+%
+% Outputs:
+%
+%   zFD - Inicialize variable of detection times to label as false detections
+%
+%   zID - Inicialize variable of detection times to label as ID detections
+%
+%   fNameList - A struct with 3 fields indicating the directory path to
+%           FD,TD and ID files
+
+
 zFD = [];
 zID = [];
 

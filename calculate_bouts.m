@@ -1,5 +1,32 @@
 function [nb,eb,sb,bd] = calculate_bouts(clickTimes,p)
 
+% calculate_bouts.m
+
+% Takes detection times and parameters and outputs start, end, duration and
+% number of bout
+
+% Inputs:
+%
+%   clickTimes - An Nx1 vector of detection times, where N is the number of
+%           detection times.
+%
+%   p - A struct with parameter settings.
+%
+%
+%
+% Outputs:
+%
+%   nb - Number of bouts.
+%
+%   eb - An Nx1 vector of end times of bouts, where N is the number of
+%       bouts.
+%
+%   sb - An Nx1 vector of start times of bouts.
+%
+%   bd - An Nx1 vector of duration of bouts in days.
+
+
+
 % find edges (start and end times) of bouts or sessions
 dt = diff(clickTimes)*24*60*60; % calculate time between detections in seconds
 gt = p.gth*60*60;    % gap time in sec
@@ -16,7 +43,7 @@ if ~isempty(p.minBout)
     bd = bd(bdI);
     sb = sb(bdI);
     eb = eb(bdI);
-    nb = length(sb);        % number of bouts
+    nb = length(sb);
 end
 
 % limit the length of a bout

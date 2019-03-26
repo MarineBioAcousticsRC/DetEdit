@@ -1,4 +1,7 @@
 function [startsSec,stopsSec] = dST_choose_segments(hdr)
+
+% dt_choose_segments.m
+%
 % Divide acoustic data into smaller chunks to prevent over-committing memory
 % Find a reasonable length of data to handle taking into account that the
 % interleaved channels will also be read. To ensure that analysis

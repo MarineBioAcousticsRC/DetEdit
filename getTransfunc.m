@@ -1,5 +1,10 @@
 function [tf,tffreq,tfuppc] = getTransfunc(filePrefix, tfName,p)
 
+% getTransfunc.m
+
+% Simple script that get the vector of frequencies associated with the 
+% transfer function  
+
 if exist('tfName','var')
     disp('Load Transfer Function File');
     stndeploy = strsplit(filePrefix,'_'); % get only station and deployment

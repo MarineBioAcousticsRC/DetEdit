@@ -1,8 +1,30 @@
-function [ ] = Calicippfunc(MTT,MPP,MSP,outDir,detfn,p)
-% Calculate the ICI and the PP 
+function [ ] = paramsHist(MTT,MPP,MSP,outDir,detfn,p)
+
+% paramsHist.m
+
+% Script takes annotated detection files and outputs histogram plots and 
+% parameter files of peak-to-peak amplitude, inter-detection-interval and 
+% peak frequencies
+
+% Input:
+%
+%   MTT - An [N x 1] vector of detection times, where N is the
+%       number of detections.
+%
+%   MPP - An [N x 1] vector of peak to peak received level (RL) amplitudes.
+%   
+%   MSP - An [N x nF] matrix of detection spectra, where nF is the length of
+%       the spectra.
+%   
+%   outDir - Directory path to save parameters and figures
+%
+%   detfn - TPWS file directory
+%
+%   p - A struct with parameter settings.
+ 
 close all
 
-%% Inter-Click Interval
+%% Inter-Detection Interval
 ici = diff(MTT)*24*60*60*1000; % in ms
 
 % apply user range for ici

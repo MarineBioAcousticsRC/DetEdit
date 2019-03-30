@@ -68,3 +68,7 @@ ltsaDir = 'E:\MyLTSAfolder'; % identify folder containing ltsa files (.ltsa)
 % paramsUser.excludeID = 0; % yes - 1 | no - 0. Exclude ID times from MTT files 
 % paramsUser.calcParams = 0;% yes - 1 | no - 0. Calculate Parameters peak-to-peak, 
 % inter-detection-interval and peak frequency
+
+%% ID labels legend
+% Assign an ID to colors
+paramsUser.mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship'};

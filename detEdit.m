@@ -296,6 +296,12 @@ if (size(zTD,2) == 2) % this seems to patch on extra columns
     zTD = [zTD,-1.*ones(length(zTD),2)];
     save(fNameList.TD,'zTD');
 end
+
+% Display ID legend:
+% (note since it's not in the loop, if people close it,
+% it won't come back in this session.
+ID_legend(p)
+
 %% Main Loop
 % loop over the number of bouts (sessions)
 onerun = 1; % What does this do?

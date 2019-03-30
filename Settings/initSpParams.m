@@ -262,6 +262,7 @@ elseif strcmpi(sp,'whs')
 
 else
     warning('Unknown Species Type!!!')
+    spParams = [];
 end
 
 

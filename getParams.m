@@ -84,9 +84,9 @@ switch analysis
         params.gth = gth;
         params.colorTab = colorTab;
         params.ltsaDir = ltsaDir;
-        
+        params.mySpID = [];
         % apply species default parameters
-        if exist('spParams','var')
+        if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));
             fn = fieldnames(spParams);
             fnSel = fn(idx);

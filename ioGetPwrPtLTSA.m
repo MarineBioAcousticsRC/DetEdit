@@ -1,7 +1,7 @@
 function [pwr,pt] = ioGetPwrPtLTSA(p,fnames,L,K,rfTime,k)
 
 % grab the ltsa pwr matrix to plot
-hdr = ioReadLTSAHeader(fullfile(p.ltsadir,fnames(K,:)));
+hdr = ioReadLTSAHeader(fullfile(p.ltsaDir,fnames(K,:)));
 nbin = length(L) * hdr.ltsa.nave(L(1)); % # of time bins to get
 fid = fopen(fullfile(hdr.ltsa.inpath,hdr.ltsa.infile),'r');
 % samples to skip over in ltsa file

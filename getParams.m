@@ -84,7 +84,7 @@ switch analysis
         params.gth = gth;
         params.colorTab = colorTab;
         params.ltsaDir = ltsaDir;
-        params.mySpID = [];
+        params.mySpID = mySpID;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));
@@ -115,7 +115,6 @@ switch analysis
         params.frdbwRange = frdbwRange;
         params.durRange = durRange;
         params.durstep = durstep;
-        params.N = N;
         params.gth = gth;
         params.minBout = minBout;
         params.excludeID = excludeID;
@@ -123,7 +122,7 @@ switch analysis
         params.ltsaMax = ltsaMax;
         
         % apply species default parameters
-        if exist('spParams','var')
+        if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));
             fn = fieldnames(spParams);
             fnSel = fn(idx);
@@ -142,16 +141,19 @@ switch analysis
             end
         end
         
-    case {'SumPPICIBin'}
+    case {'summaryParams'}
+        params.tfSelect = tfSelect;
         params.iciRange = iciRange;
         params.speName = speName;
         params.threshRL = threshRL;
         params.gth = gth;
-        params.p1Hi = p1Hi;
+        params.rlHi = rlHi;
         params.binDur = binDur;
+        params.effortTimes = effortTimes;
+        params.referenceTime = referenceTime;
         
         % apply species default parameters
-        if exist('spParams','var')
+        if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));
             fn = fieldnames(spParams);
             fnSel = fn(idx);

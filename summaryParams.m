@@ -1,42 +1,91 @@
-function SumPPICIBin(varargin)
+function SumPPICIBin(userFunc)
 
-%% get user input and set up file names
-n = 1;
-while n <= length(varargin)
-    switch varargin{n}
-        case 'filePrefix'
-            filePrefix = varargin{n+1}; n=n+2;
-        case 'sp'
-            sp = varargin{n+1}; n=n+2;
-        case 'sdir'
-            sdir = varargin{n+1}; n=n+2;
-        case 'concatFiles'
-            concatFiles = varargin{n+1}; n=n+2;
-        case 'effort'
-            effort = varargin{n+1}; n=n+2;
-        case 'referenceTime'
-            refTime = varargin{n+1}; n=n+2;
-        otherwise
-            error('Bad optional argument: "%s"', varargin{n});
+%% Load Settings preferences
+% Get parameter settings worked out between user preferences, defaults, and
+% species-specific settings:
+
+% get user input and set up function name
+typeInput = exist('userFunc','var');
+if typeInput ~= 1
+    [userfile,userpath] = uigetfile('*.m',...
+        'Select Script with your Data Parameter Settings');
+    addpath(userpath) % it adds user folder path to the beggining of the set path
+    userFunc = str2func(['@',userfile(1:end-2)]);
+end
+
+p = getParams(userFunc,'analysis','summaryParams');
+
+%% Define subfolder that fit specified iteration
+if p.iterationNum > 1
+    for id = 2: str2num(p.iterationNum) % iternate id times according to p.iterationNum
+        subfolder = ['TPWS',num2str(id)];
+        p.tpwsDir = (fullfile(p.tpwsDir,subfolder));
     end
 end
 
-%% get default parameters
-p = sp_setting_defaults('sp',sp,'analysis','SumPPICIBin');
+%% Check if TPWS file exists (does not look in subdirectories)
+% Concatenate parts of file name
+if isempty(p.speName)
+    detfn = [p.filePrefix,'.*','TPWS',p.iterationNum,'.mat'];
+else
+    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.iterationNum,'.mat'];
+end
+% Get a list of all the files in the start directory
+fileList = cellstr(ls(p.tpwsDir));
+% Find the file name that matches the p.filePrefix
+fileMatchIdx = find(~cellfun(@isempty,regexp(fileList,detfn))>0);
+if isempty(fileMatchIdx)
+    % if no matches, throw error
+    error('No files matching filePrefix found!')
+end
 
-%% Concatenate variables
+matchingFile = fileList{fileMatchIdx};
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Handle Transfer Function
+if (p.tfSelect > 0)
+    [tf,~,~] = getTransfunc(p.filePrefix, p.tfName,p);
+else
+    tf = 0;
+    disp('No TF Applied')
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Get effort times matching prefix file
+allEfforts = readtable(p.effortTimes);
+effTable = allEfforts(ismember(allEfforts.Sites,p.filePrefix),:);
+
+% make Variable Names consistent
+startVar = find(~cellfun(@isempty,regexp(effTable.Properties.VariableNames,'Start.*Effort'))>0,1,'first');
+endVar = find(~cellfun(@isempty,regexp(effTable.Properties.VariableNames,'End.*Effort'))>0,1,'first');
+effTable.Properties.VariableNames{startVar} = 'Start';
+effTable.Properties.VariableNames{endVar} = 'End';
+
+Start = datetime(x2mdate(effTable.Start),'ConvertFrom','datenum');
+End = datetime(x2mdate(effTable.End),'ConvertFrom','datenum');
+
+effort = timetable(Start,End);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Concatenate matrices
 PPall = []; TTall = []; ICIall = []; % initialize matrices
-parfor idsk = 1 : length(concatFiles)
-    % Load file
-    fprintf('Loading %d/%d file %s\n',idsk,length(concatFiles),fullfile(sdir,concatFiles{idsk}))
-    D = load(fullfile(sdir,concatFiles{idsk}));
+for idsk = 1 : length(fileMatchIdx)
+
+    % Find files and load data
+    if iscell(matchingFile)
+        detfn = dir(fullfile(p.tpwsDir,matchingFile{idsk}));
+    else
+        detfn = dir(fullfile(p.tpwsDir,matchingFile));
+    end
+    fprintf('Loading %d/%d file %s\n',idsk,length(fileMatchIdx),detfn.name)
+    D = load(fullfile(p.tpwsDir,detfn.name));
     
     % find times outside effort (sometimes there are detections
     % which are from the audio test at the beggining of the wav file)
     within = cell2mat(arrayfun(@(x)sum(isbetween(x,datenum(effort.Start),datenum(effort.End))),D.MTT,'uni',false));
     goodIdx = find(within ~= 0);
     MTT = D.MTT(goodIdx); % only keep the good detections
-    MPP = D.MPP(goodIdx);
+    MPP = D.MPP(goodIdx) + tf;
     MSP = D.MSP(goodIdx,:);
     
     % concatenate
@@ -117,14 +166,14 @@ miciSel = mean(ICIall(iciIdx));
 sdiciSel = std(ICIall(iciIdx));
 meiciSel = median(ICIall(iciIdx));
 
-figure(1); set(1,'name','Inter-Click Interval')
+figure(1); set(1,'name','Inter-Detection Interval')
 h1 = gca;
 centerIci = p.iciRange(1):1:p.iciRange(2);
 [nhist] = histc(ICIall(iciIdx),centerIci);
 bar(h1,centerIci,nhist, 'barwidth', 1, 'basevalue', 1)
 xlim(h1,p.iciRange);
-title(h1,sprintf('%s N=%d',filePrefix,length(ICIall)), 'Interpreter', 'none')
-xlabel(h1,'Inter-Click Interval (ms)')
+title(h1,sprintf('%s N=%d',p.filePrefix,length(ICIall)), 'Interpreter', 'none')
+xlabel(h1,'Inter-Detection Interval (ms)')
 ylabel(h1,'Counts')
 % create labels and textbox
 [~,modeIdx] = max(nhist);
@@ -137,8 +186,8 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
     melabel,molabel});
 
 % save ici data and figure
-icifn = [filePrefix,'_',p.speName,'_ici'];
-saveas(h1,fullfile(sdir,icifn),'fig')
+icifn = [p.filePrefix,'_',p.speName,'_ici'];
+saveas(h1,fullfile(p.tpwsDir,icifn),'fig')
 
 
 %% Plot Peak-to-peak per click
@@ -150,13 +199,13 @@ mepp = median(PPall);
 % Plot histogram
 figure(2); set(2,'name','Received Levels')
 h2 = gca;
-center = p.threshRL:1:p.p1Hi;
+center = p.threshRL:1:p.rlHi;
 [nhist] = histc(PPall,center);
 bar(h2,center, nhist, 'barwidth', 1, 'basevalue', 1)
-title(h2,sprintf('%s N=%d',filePrefix,length(PPall)), 'Interpreter', 'none')
+title(h2,sprintf('%s N=%d',p.filePrefix,length(PPall)), 'Interpreter', 'none')
 xlabel(h2,'Peak-Peak Amplitude (dB)')
 ylabel(h2,'Click Counts')
-xlim(h2,[p.threshRL, p.p1Hi])
+xlim(h2,[p.threshRL, p.rlHi])
 % create labels and textbox
 [~,modeIdx] = max(nhist);
 mopp = center(modeIdx);
@@ -168,9 +217,9 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabel,stdlabel,...
     melabel,molabel});
 
 % Save plot
-ppfn = [filePrefix,'_',p.speName,'_pp'];
-save(fullfile(sdir,ppfn),'clickData','PPall','center')
-saveas(h2,fullfile(sdir,ppfn),'fig')
+ppfn = [p.filePrefix,'_',p.speName,'_pp'];
+save(fullfile(p.tpwsDir,ppfn),'clickData','PPall','center')
+saveas(h2,fullfile(p.tpwsDir,ppfn),'fig')
 
 % to store
 centerHist = center;
@@ -185,13 +234,13 @@ meppBin = median(binData.maxPP);
 % Plot histogram
 figure(3); set(3,'name','Received Levels per Bin')
 h3 = gca;
-centerBin = p.threshRL:1:p.p1Hi;
+centerBin = p.threshRL:1:p.rlHi;
 [nhistBin] = histc(binData.maxPP,centerBin);
 bar(h3,centerBin, nhistBin, 'barwidth', 1, 'basevalue', 1)
-title(h3,sprintf('%s N=%d',filePrefix,length(binData.maxPP)), 'Interpreter', 'none')
+title(h3,sprintf('%s N=%d',p.filePrefix,length(binData.maxPP)), 'Interpreter', 'none')
 xlabel(h3,'Peak-Peak Amplitude (dB)')
 ylabel(h3,[num2str(p.binDur),' min Bin Counts'])
-xlim(h3,[p.threshRL, p.p1Hi])
+xlim(h3,[p.threshRL, p.rlHi])
 % create labels and textbox
 [~,modeIdx] = max(nhist);
 moppBin = centerBin(modeIdx);
@@ -203,9 +252,9 @@ annotation('textbox',[0.58 0.75 0.1 0.1],'String',{mnlabelBin,stdlabelBin,...
     melabelBin,molabelBin});
 
 % Save plot
-binfn = [filePrefix,'_',p.speName,'_bin'];
-save(fullfile(sdir,binfn),'binData','centerBin')
-saveas(h3,fullfile(sdir,binfn),'fig')
+binfn = [p.filePrefix,'_',p.speName,'_bin'];
+save(fullfile(p.tpwsDir,binfn),'binData','centerBin')
+saveas(h3,fullfile(p.tpwsDir,binfn),'fig')
 
 % to store
 percHistBin = nhistBin*100/length(binData.maxPP);
@@ -228,8 +277,8 @@ title(h5(2),'Group Counting');
 
 ylim(h5(1),[0 round(max(weekTable.Count_Click./weekTable.Effort_Sec*100),2,'significant')*1.2])
 ylim(h5(2),[0 round(max(weekTable.Count_Bin./weekTable.Effort_Bin*100),2,'significant')*1.2])
-xlim(h5(1),[datetime(refTime),weekTable.tbin(end)+3])
-xlim(h5(2),[datetime(refTime),weekTable.tbin(end)+3])
+xlim(h5(1),[datetime(p.referenceTime),weekTable.tbin(end)+3])
+xlim(h5(2),[datetime(p.referenceTime),weekTable.tbin(end)+3])
 % define step according to number of weeks
 if length(weekTable.tbin) > 53 && length(weekTable.tbin) <= 104 % 2 years
     step = calmonths(1);
@@ -246,17 +295,17 @@ end
 if length(weekTable.tbin) > 53
     xtickformat(h5(1),'MMMyy')
     xtickformat(h5(2),'MMMyy')
-    xticks(h5(1),[datetime(refTime),weekTable.tbin(1):step:weekTable.tbin(end)])
-    xticks(h5(2),[datetime(refTime),weekTable.tbin(1):step:weekTable.tbin(end)])
+    xticks(h5(1),[datetime(p.referenceTime),weekTable.tbin(1):step:weekTable.tbin(end)])
+    xticks(h5(2),[datetime(p.referenceTime),weekTable.tbin(1):step:weekTable.tbin(end)])
     xtickangle(h5(1),45)
     xtickangle(h5(2),45)
 end
 
-weekfn = [filePrefix,'_',p.speName,'_weekly_presence'];
-saveas(h5,fullfile(sdir,weekfn),'fig')
+weekfn = [p.filePrefix,'_',p.speName,'_weekly_presence'];
+saveas(h5,fullfile(p.tpwsDir,weekfn),'fig')
 
-summaryfn = [filePrefix,'_',p.speName,'_summaryData_forDensity'];
-save(fullfile(sdir,summaryfn),'dayTable','weekTable','binData','refTime','NktTkt',...
+summaryfn = [p.filePrefix,'_',p.speName,'_summaryData'];
+save(fullfile(p.tpwsDir,summaryfn),'dayTable','weekTable','binData','NktTkt',...
     'NktTktbin','centerHist','percHist','percHistBin','histBins')
 
 end

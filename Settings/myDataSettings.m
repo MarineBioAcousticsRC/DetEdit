@@ -20,9 +20,12 @@ tpwsDir = 'E:\MyTPWSfolder'; % identify folder containing TPWS files
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
+% REQUIRED to run mkLTSAsessions.m:
 ltsaDir = 'E:\MyLTSAfolder'; % identify folder containing ltsa files (.ltsa)
-% REQUIRED to run mkLTSAsessions.m
 
+% REQUIRED to run summaryParams.m:
+effortTimes = 'E:\Effort.xls'; % specify excel file with effort times
+referenceTime = '2010-04-01'; %reference time format 'yyyy-MM-dd'
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Setting preferences to override defaults parameters for the interface
@@ -71,4 +74,4 @@ ltsaDir = 'E:\MyLTSAfolder'; % identify folder containing ltsa files (.ltsa)
 
 %% ID labels legend
 % Assign an ID to colors
-paramsUser.mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship'};
+% paramsUser.mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship'};

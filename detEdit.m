@@ -18,7 +18,8 @@ function detEdit(userFunc)
 
 sizePoints = 9; % the current points
 sizeBack = 5; % the background points
-colorPoints = [0 .4470 .7410];
+sizeFPR = 7; % the current points
+colorPoints = [1 .84 0];
 
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
@@ -895,8 +896,7 @@ while (k <= nb)
        cc = get(gcf,'CurrentCharacter');
     end
     
-    if strcmp(cc,'u') || strcmp(cc,'g') || strcmp(cc,'y') || ...
-            strcmp(cc,'r') || strcmp(cc,'i')
+    if strcmp(cc,'u') || strcmp(cc,'g') || strcmp(cc,'r')
         % detections were flagged by user
         disp(' Update Display') % Stay on same bout
         % get brushed data and figure out what to do based on color:
@@ -961,16 +961,18 @@ while (k <= nb)
             for inxfd = 1 : zTD(k,1)
                 hold(hA201(1),'on')
                 testTimes = xt(inxfd);
-                plot(hA201(1),testTimes,xPP(inxfd),'ro','MarkerSize',sizePoints);
+                xH201a = plot(hA201(1),testTimes,xPP(inxfd),'o','MarkerEdgeColor',colorPoints,...
+                    'MarkerSize',sizeFPR,'LineWidth',2);
                 hold(hA201(1),'off')
                 inxfdDT = inxfd(inxfd<length(dt));
                 hold(hA201(3),'on')
-                plot(hA201(3),testTimes,dt(inxfdDT),'ro','MarkerSize',sizePoints);
+                xH201b = plot(hA201(3),testTimes,dt(inxfdDT),'o','MarkerEdgeColor',colorPoints,...
+                    'MarkerSize',sizeFPR,'LineWidth',2);
                 hold(hA201(3),'off')
                 disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
-                if (p.p.specploton == 1)
+                if (p.specploton == 1)
                     hold(h50,'on')  % add click to spec plot in BLACK
-                    plot(h50,ft,trueSpec,'Linewidth',2);
+                    %plot(h50,ft,trueSpec,'Linewidth',2);
                     clickInBoutIdx = find(t==testTimes);
                     testSnip = csnJtrue(clickInBoutIdx,:);
                     testSpectrum = cspJtrue(clickInBoutIdx,:);
@@ -978,26 +980,34 @@ while (k <= nb)
                     
                     % make low freq part = 0
                     tempSPEC = norm_spec_simple(testSpectrum,fimint,fimaxt);
-                    xH0 = plot(h50,ft,tempSPEC,'k','Linewidth',4);
+                    xH0 = plot(h50,ft,tempSPEC,'Color',colorPoints,'Linewidth',4);
                     hold(h50,'off')
                     
                     hold(h52,'on') % add click to waveform plot in BLACK
-                    xH2 = plot(h52,norm_wav(testSnip)' + 1.5,'k');
+                    xH2 = plot(h52,norm_wav(testSnip)' + 1.5,'Color',colorPoints,...
+                        'Linewidth',2);
                     hold(h52,'off')
                     
                     hold(h51,'on')
                     % get click index relative to bout
-                    xH1 = plot(h51,pxmsp(clickInBoutIdx),xmpp(clickInBoutIdx),'ro','MarkerSize',sizePoints,...
+                    xH1 = plot(h51,pxmsp(clickInBoutIdx),xmpp(clickInBoutIdx),...
+                        'o','MarkerEdgeColor',colorPoints,'MarkerSize',sizeFPR,...
                         'LineWidth',2);
                     hold(h51,'off')
                     
                     hold(h53,'on')
-                    xH3 = plot(h53,pxmsp(clickInBoutIdx),freq(clickInBoutIdx),'ro','MarkerSize',sizePoints,...
+                    xH3 = plot(h53,pxmsp(clickInBoutIdx),freq(clickInBoutIdx),...
+                        'o','MarkerEdgeColor',colorPoints,'MarkerSize',sizeFPR,...
                         'LineWidth',2);
                     hold(h53,'off')
                 end
                 pause
                 cc = get(gcf,'CurrentCharacter');
+                % fill evaluated points
+                xH201a.MarkerFaceColor = colorPoints;
+                xH201b.MarkerFaceColor = colorPoints;
+                xH1.MarkerFaceColor = colorPoints;
+                xH3.MarkerFaceColor = colorPoints;
                 if (strcmp(cc,'z'))
                     zTD(k,2) = zTD(k,2) + 1;
                     zFD = [zFD; xt(inxfd)]; % add to FD
@@ -1009,7 +1019,7 @@ while (k <= nb)
             
         end
         k = k+1;
-    elseif (strcmp(cc,'w') && (zTD(k,2) > 0));  % test 5 min window
+    elseif (strcmp(cc,'w') && (zTD(k,2) > 0))  % test 5 min window
         % Test 5 min window
         zTD = test_false_bins(k,zTD,xt,xPP,binCX);
         k = k+1;

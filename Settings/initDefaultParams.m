@@ -1,6 +1,7 @@
 %initDefaultParams
 
-% Initialize default parameters for the interface, mkLTSAsessions and modDet
+% Initialize default string parameters for the interface, mkLTSAsessions,
+% modDet and summaryParams
 
 if ~exist('sampleRate','var')
     sampleRate = 200;
@@ -9,6 +10,8 @@ end
 speName = '';
 ltsaDir = '';
 tfName = '';
+effortTimes = '';
+referenceTime = '';
 
 % General bout parameters
 
@@ -64,6 +67,7 @@ colorTab = [191, 191, 0; ... % type 1 green
             153, 51,   0]./255; % type 10  brown
 colorTab = round(colorTab.*100)/100;      
 
+mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship'};
 
 % Parameters for modDet (if specified to compute)
 
@@ -78,6 +82,8 @@ durRange = []; % min/max duration in us
 frRange = [fLow, fHi];   % min/max frequency for plots of peak and center freq
 frdbwRange = [fLow, fHi]; % min/max frequency for plots of 3/10 db bw
 durstep = 1; % step range for number bins in histogram 
+
+
 
 
 

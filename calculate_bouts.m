@@ -50,7 +50,6 @@ end
 blim = p.ltsaMax/24;       % 6 hr bout length limit in days
 ib = 1;
 while ib <= nb
-    bd = (eb - sb);   %duration bout in days
     if (bd(ib) > blim)      % find long bouts
         nadd = ceil(bd(ib)/blim) - 1; % number of bouts to add
         for imove = nb : -1: (ib +1)
@@ -66,6 +65,7 @@ while ib <= nb
             eb(ib+iadd) = sb(ib) + blim*(iadd+1);
         end
         nb = nb + nadd;
+        bd = (eb - sb);
         ib = ib + nadd;
     end
     ib = ib + 1;

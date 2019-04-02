@@ -92,11 +92,6 @@ if ~isempty(brushID)
             [newFD,~] = intersect(t, brushDate);
             zFD = [zFD; newFD]; 
             
-        elseif isequal(brushColor,[1,1,0]) || strcmp(cc,'y')
-            % Yellow paintbrush or 'y' = Highlight Detections
-            disp(['Start time selected data: ',datestr(brushDate(1),'dd-mm-yyyy HH:MM:SS.FFF')]);
-            [~,yell] = intersect(t, brushDate);
-            
         elseif isequal(brushColor,[0,1,0]) || strcmp(cc,'g')
             % Green paintbrush or 'g' = True Detections
             disp(['Number of Detections Selected = ',num2str(length(brushDate))])
@@ -118,7 +113,12 @@ if ~isempty(brushID)
                     zFD = zFD(zFDkeep,:);
                 end
                 disp(['Remaining Number of False Detections = ',num2str(length(iC))])
-            end
+            end    
+            
+        elseif isequal(brushColor,[1,1,0]) %|| strcmp(cc,'y')
+            % Yellow paintbrush or 'y' = Highlight Detections
+            disp(['Start time selected data: ',datestr(brushDate(1),'dd-mm-yyyy HH:MM:SS.FFF')]);
+            [~,yell] = intersect(t, brushDate);
             
         else
             % Find color code to assign ID signal type

@@ -74,4 +74,4 @@ referenceTime = '2010-04-01'; %reference time format 'yyyy-MM-dd'
 
 %% ID labels legend
 % Assign an ID to colors
-% paramsUser.mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship'};
+% paramsUser.mySpID = {'Label1','Label2','Label3', 'Label4', 'Label5', 'Label6', 'Label7', 'Label8', 'Label9', 'Label10'};

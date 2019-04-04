@@ -67,7 +67,8 @@ colorTab = [191, 191, 0; ... % type 1 green
             153, 51,   0]./255; % type 10  brown
 colorTab = round(colorTab.*100)/100;      
 
-mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship'};
+mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship',...
+    '','','','Stenella spp.'};
 
 % Parameters for modDet (if specified to compute)
 

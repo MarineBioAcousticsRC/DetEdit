@@ -29,7 +29,7 @@ ltsaDir = 'E:\detEditexamples\Dolphin_Test_Set\LTSA'; % identify folder containi
 % initDefaultParams.m and initSpParams.m)
 
 %% Bout preferences
-paramsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
+paramsUser.threshRL = 120; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 % paramsUser.minBout = 0;% minimum bout duration in seconds
 % paramsUser.gth = .5;    % gap time in hrs between sessions
@@ -46,8 +46,8 @@ paramsUser.rlHi = 165; % PP plot window high limit
 paramsUser.ltsaContrast = 116; % ltsa contrast
 paramsUser.ltsaBright = 55; % ltsa brightness
 % paramsUser.ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
-paramsUser.ltsaMax = 3; % ltsa maximum duration per session
-paramsUser.dtHi = .3; % max yaxis value for ICI display in sec
+% paramsUser.ltsaMax = 3; % ltsa maximum duration per session
+paramsUser.dtHi = .6; % max yaxis value for ICI display in sec
 % paramsUser.minDur = []; % minimum window duration (if specified in minutes)
 
 %% Panel Frequency spectra

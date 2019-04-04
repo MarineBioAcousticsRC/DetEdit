@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'GofMX_DT03_disk01'; % TPWS file name to match. 
+filePrefix = 'GofMX_MC05_disk02'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,7 +14,7 @@ sampleRate = 200; % replace with your sample rate
 sp = 'Pm'; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'E:\detEditexamples\Spermwhale_Test_Set'; % identify folder containing TPWS files
+tpwsDir = 'H:\detEditexamples\Spermwhale_Test_Set'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 

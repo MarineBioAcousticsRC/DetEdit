@@ -833,10 +833,14 @@ while (k <= nb)
         if ff3 % plot ID'd in associated color
             for iC3 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC3);
-                hICI = plot(hA201(3),tID(thisIDset(2:end)),...
-                    dtID(thisIDset(2:end)),'.','MarkerSize',sizePoints,...
-                    'UserData',tID(thisIDset));
-                set(hICI,'Color',p.colorTab(specIDs(iC3),:))
+            hICI = plot(hA201(3),tID(thisIDset),dtID(thisIDset),'.',...
+                'MarkerSize',sizePoints,'UserData',tID(thisIDset));
+            set(hICI,'Color',p.colorTab(specIDs(iC2),:))
+%                 thisIDset = spCodeSet ==specIDs(iC3);
+%                 hICI = plot(hA201(3),tID(thisIDset(2:end)),...
+%                     dtID(thisIDset(2:end)),'.','MarkerSize',sizePoints,...
+%                     'UserData',tID(thisIDset));
+%                 set(hICI,'Color',p.colorTab(specIDs(iC2),:))
             end
         end
         hold(hA201(3),'off')

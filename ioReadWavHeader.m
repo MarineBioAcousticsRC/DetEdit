@@ -66,7 +66,10 @@ else
 
             case 'data'
                 hdr.dataChunk = length(Chunks)+1;  % Note chunk idx
-
+            case 'harp'
+                % it's an xwav file!
+                hdr = ioReadXwavHeader(Filename, DateRE);
+                return
             otherwise
                 Chunk.info = [];    % no meta information to store
         end

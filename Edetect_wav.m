@@ -41,7 +41,7 @@ function Edetect_wav(varargin)
 % <warning: another suite of 'Edetect' code exist for LTSA sonar processing>
 %
 % initial build 130306 smw
-% wav adaptation 17-020 kef
+% wav adaptation 17-20 kef
 
 clc
 
@@ -84,6 +84,8 @@ if ~exist('paramFile','var')
         disp('Canceled Load Parameter File')
         return
     end
+else
+    [paramFilePath, ~] = fileparts('paramFile');
 end
 
 fprintf('Parameter File: %s\n',paramFile)
@@ -127,16 +129,22 @@ countThresh = 10^((thDB - 6 - Ptf(tfAdjustFreq))/20);
 % Get event times from spreadsheet
 if ~exist('timeFile','var')
     % create user interface get file via dialog box
-    [timeFileName, timeFileDir] = uigetfile([pname,'*.xls;*.xlsx'],'Load Event Time File');
+    fprintf('Select Event Time File\n\n')
+    fprintf('Choose "Cancel" to run on entire files, ignoring event times\n')
+    [timeFileName, timeFileDir] = uigetfile([paramFilePath,'*.xls;*.xlsx'],'Load Event Time File');
     timeFile = fullfile(timeFileDir, timeFileName);
-    if strcmp(num2str(timeFile),'0')
-        disp('Canceled Load Time Event File')
-        return
+    
+    if strcmp(num2str(timeFileName),'0')
+        disp('No Event Time file selected')
+        disp('Detection will span entire files')
+        dates2Detect = [];
+
+    else
+        fprintf('Event Time File: %s\n',timeFile)    
+        fprintf('Load event time file\n\n');
+        [dates2Detect,~] = xlsread(timeFile);
     end
 end
-fprintf('Event Time File: %s\n',timeFile)    
-fprintf('Load event time file\n\n');
-[dates2Detect,~] = xlsread(timeFile);
 
 if ~exist('channel','var')
     fprintf('No channel specified. Detecting on channel 1.\n\n')
@@ -145,7 +153,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % save command line text to diary text file
 [pathstr, name, ~] = fileparts(timeFile);
-dname = fullfile(pathstr,[name,'_Edetect_output.txt']);
+dname = fullfile(paramFilePath,[datestr(now,'yymmdd_HHMM'),'_Edetect_output.txt']);
 diary(dname)
 fprintf('%s\n\n',dname)
 
@@ -153,11 +161,16 @@ fprintf('%s\n\n',dname)
 
 % drl = txt(2:end,1);
 % fd = txt(2:end,2);
-timeOffset = datenum([1900 0 -1 0 0 0]);   % xls is relative to 01Jan1900
-boutStartDNum = dates2Detect(:,1) + timeOffset; 
-boutEndDNum = dates2Detect(:,2) + timeOffset;
-N = length(boutStartDNum);
-
+if ~isempty(dates2Detect)
+    timeOffset = datenum([1900 0 -1 0 0 0]);   % xls is relative to 01Jan1900
+    boutStartDNum = dates2Detect(:,1) + timeOffset;
+    boutEndDNum = dates2Detect(:,2) + timeOffset;
+    N = length(boutStartDNum);
+else    
+    boutStartDNum = []; 
+    boutEndDNum = [];
+    N = 1;
+end
 fprintf('Number of Events to run Edetector : %.0f\n\n', N)
 
 % [fd,d1,t1,d2,t2] = textread(tfile,'%s %s %s %s %s');
@@ -241,8 +254,13 @@ for fk = 1 : nf      % loop over folders
         % check if this file overlaps with a time we are interested in
         thisFileStart = hdrs(k).start.dnum;
         thisFileEnd = hdrs(k).end.dnum;
-        afterEndList = thisFileStart>=boutEndDNum;
-        beforeStartList = thisFileEnd<=boutStartDNum;
+        if ~isempty(boutEndDNum)
+            afterEndList = thisFileStart>=boutEndDNum;
+            beforeStartList = thisFileEnd<=boutStartDNum;
+        else
+            afterEndList = zeros(size(thisFileStart));
+            beforeStartList = zeros(size(thisFileEnd));
+        end
         % if sum of these two vectors = 0 anywhere, it means the file
         % overlaps with a time we're interested in. 
         overlapBouts = find(afterEndList+beforeStartList==0);

@@ -16,10 +16,12 @@ date_fmt = 'mm/dd/yy HH:MM:SS';
 
 rfStarts = hdr.ltsa.dnumStart(L) + Y2K;
 diffRF_s = round(diff(rfStarts)*mnum2secs);
-nbin = length(L) * hdr.ltsa.nave(L(1));
+nbin = sum(hdr.ltsa.nave(L));
 t1 = rfStarts(1);
 dt_dnum = datenum([ 0 0 0 0 0 hdr.ltsa.tave ]);
-rfdt = (hdr.ltsa.dnumEnd(1) - hdr.ltsa.dnumStart(1))*(24*60*60);
+% Assume max raw file size in set is the standard. Anything less should be padded.
+rfdt = max((hdr.ltsa.dnumEnd - hdr.ltsa.dnumStart)*(24*60*60));
+
 gapsidx = find(diffRF_s~=rfdt);
 rfdt_dnum = datenum([ 0 0 0 0 0 rfdt-5 ]);
 if size(unique(diffRF_s), 2) > 1

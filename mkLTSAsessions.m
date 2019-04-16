@@ -28,7 +28,7 @@ p = getParams(userFunc,'analysis','mkLTSA');
 
 %% Define subfolder that fit specified iteration
 if p.iterationNum > 1
-    for id = 2: str2num(p.iterationNum) % iternate id times according to p.iterationNum
+    for id = 2: str2num(p.iterationNum) % iterate id times according to p.iterationNum
         subfolder = ['TPWS',num2str(id)];
         p.tpwsDir = (fullfile(p.tpwsDir,subfolder));
     end
@@ -120,17 +120,17 @@ for iD = 1:length(fileMatchIdx)
     
     % Load up rawfile start times
     doff = datenum([2000 0 0 0 0 0]);   % convert ltsa time to millenium time
-    global sTime eTime rfTime
+    sTime = []; eTime = []; rfTime = []; hdrStore = [];
     
     if isempty(sTime)
         if nltsas > 0
             sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
             disp('reading ltsa headers, please be patient ...')
             for k = 1:nltsas
-                hdr = ioReadLTSAHeader(fullfile(p.ltsaDir,fnames(k,:)));
-                sTime(k) = hdr.ltsa.start.dnum + doff;  % start time of ltsa files
-                eTime(k) = hdr.ltsa.end.dnum + doff;    % end time of ltsa files
-                rfTime{k} = hdr.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
+                hdrStore{k} = ioReadLTSAHeader(fullfile(p.ltsaDir,fnames(k,:)));
+                sTime(k) = hdrStore{k}.ltsa.start.dnum + doff;  % start time of ltsa files
+                eTime(k) = hdrStore{k}.ltsa.end.dnum + doff;    % end time of ltsa files
+                rfTime{k} = hdrStore{k}.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
             end
             disp('done reading ltsa headers')
         else
@@ -186,7 +186,7 @@ for iD = 1:length(fileMatchIdx)
                 if L ~= 1
                     L = [L(1)-1,L]; % get rawfile from before sb(k)
                 end
-                [pwr{k},pt{k}] = ioGetPwrPtLTSA(p,fnames(K,:),L,K,rfTime,k);
+                [pwr{k},pt{k}] = ioGetPwrPtLTSA(p,fnames(K,:),L,K,rfTime,k,hdrStore{K});
             else
                 rfT = rfTime{K};
                 disp('L is empty')
@@ -219,10 +219,10 @@ for iD = 1:length(fileMatchIdx)
                 if Ls ~= 1
                     Ls = [Ls(1)-1,Ls]; % get rawfile from before sb(k)
                 end
-                [pwrLs,ptLs] = ioGetPwrPtLTSA(p,fnames(Ks,:),Ls,Ks,rfTime,[]);
+                [pwrLs,ptLs] = ioGetPwrPtLTSA(p,fnames(Ks,:),Ls,Ks,rfTime,[],hdrStore{Ks});
             end
             if ~isempty(Le)
-                [pwrLe,ptLe] = ioGetPwrPtLTSA(p,fnames(Ke,:),Le,Ke,rfTime,[]);
+                [pwrLe,ptLe] = ioGetPwrPtLTSA(p,fnames(Ke,:),Le,Ke,rfTime,[],hdrStore{Ke});
             end
             
             if isempty(Ls) || isempty(Le)

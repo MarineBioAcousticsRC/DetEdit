@@ -15,11 +15,3 @@ The tool has been used mainly to process extensive acoustic datasets of odontoce
 ------------
 
 Learn more about the interface at the [Wiki section](https://github.com/ScrippsWhaleAcoustics/DetEdit/wiki).
-
-See the following links of different scientific research examples that made use of the software:
-
-- [Assessing Seasonality and Density From Passive Acoustic Monitoring of Signals Presumed to be From Pygmy and Dwarf Sperm Whales in the Gulf of Mexico.](http://cetus.ucsd.edu/Publications/Publications/HildebrandFrontiers2019.pdf)
-
-- [Automated classification of dolphin echolocation click types from the Gulf of Mexico.](http://cetus.ucsd.edu/Publications/Publications/FrasierPLOSCB2017.pdf)
-
-- [Passive acoustic monitoring of beaked whale densities in the Gulf of Mexico.](http://cetus.ucsd.edu/Publications/Publications/HildebrandSR2015.pdf)

@@ -14,4 +14,4 @@ The tool has been used mainly to process extensive acoustic datasets of odontoce
 
 ------------
 
-Learn more about the interface at the [Wiki section](https://github.com/ScrippsWhaleAcoustics/DetEdit/wiki).
+Learn more about the interface at the [Wiki Section](https://github.com/ScrippsWhaleAcoustics/DetEdit/wiki).

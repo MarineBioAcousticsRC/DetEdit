@@ -3,10 +3,7 @@
 % Initialize default string parameters for the interface, mkLTSAsessions,
 % modDet and summaryParams
 
-if ~exist('sampleRate','var')
-    sampleRate = 200;
-    disp('Default Sample Rate: 200 kHz. Modify in your settings script')
-end
+sampleRate = 200;
 speName = '';
 ltsaDir = '';
 tfName = '';

@@ -59,7 +59,7 @@ switch analysis
         params.tfSelect = tfSelect;
         params.dtHi = dtHi;
         params.fLow = fLow;
-        params.fHi = fHi;
+        params.fHi = params.sampleRate/2;
         params.threshRL = threshRL;
         params.threshRMS = threshRMS;
         params.threshPP = threshPP;

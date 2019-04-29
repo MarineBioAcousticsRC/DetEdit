@@ -129,6 +129,16 @@ if ~isempty(brushID)
                 % Write to ID file
                 disp(['Number of ID Detections = ',num2str(length(brushDate))])
                 [newIDtimes,~] = intersect(t, brushDate);
+                
+                % check if already brushed
+                if ~isempty(zID)
+                    [~,oldIDtimes] = intersect(zID(:,1), newIDtimes);
+                    if ~isempty(oldIDtimes)
+                        % remove any old labels for these times
+                        zID(oldIDtimes, :) = [];
+                    end
+                end
+
                 spLabels = ones(size(newIDtimes)).*specID;
                 newID = [newIDtimes,spLabels];
                 zID = [zID;newID];

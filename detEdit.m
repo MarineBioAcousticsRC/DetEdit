@@ -589,7 +589,7 @@ while (k <= nb)
             
             % plot average ID'd click waveform(s)
             hold(h52, 'on')
-            hID2 = plot(h52,(wavID + repmat(-1*rand(size(hID)),1,length(wavID)))');
+            hID2 = plot(h52,(wavID + repmat(-1*rand(size(hID)),1,size(wavID,2)))');
             
             for iC = 1:length(hID) % set colors
                 set(hID(iC),'Color',p.colorTab(specIDs(iC),:))
@@ -669,7 +669,8 @@ while (k <= nb)
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.','MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
+                hPP = plot(h51,pxmsp(K3(thisIDset)),xmpp(K3(thisIDset)),'.',...
+                    'MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
                 set(hPP,'Color',p.colorTab(specIDs(iC2),:))
             end
         end
@@ -719,7 +720,8 @@ while (k <= nb)
         if ff3 % ID'd in associated color
             for iC2 = 1:length(specIDs) % set colors
                 thisIDset = spCodeSet ==specIDs(iC2);
-                hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.','MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
+                hPP = plot(h53,pxmsp(K3(thisIDset)),freq(K3(thisIDset)),'.',...
+                    'MarkerSize',sizePoints,'UserData',t(K3(thisIDset)));
                 set(hPP,'Color',p.colorTab(specIDs(iC2),:))
             end
         end
@@ -746,7 +748,7 @@ while (k <= nb)
         ylim(h51,[plotaxes.minPP,plotaxes.maxPP])
     end
     
-    xlabel(h52,'Time (1ms @ 200kHz)');
+    xlabel(h52,sprintf('Samples (%0.1fms @ %0.0fkHz)',(size(wavID,2)/p.sampleRate),p.sampleRate));
     ylabel(h52,' Normalized Amplitude');
     
     xlabel(h53,'dB RMS')

@@ -748,7 +748,7 @@ while (k <= nb)
         ylim(h51,[plotaxes.minPP,plotaxes.maxPP])
     end
     
-    xlabel(h52,sprintf('Samples (%0.1fms @ %0.0fkHz)',(size(wavID,2)/p.sampleRate),p.sampleRate));
+    xlabel(h52,sprintf('Samples (%0.1fms @ %0.0fkHz)',(size(wtrue,2)/p.sampleRate),p.sampleRate));
     ylabel(h52,' Normalized Amplitude');
     
     xlabel(h53,'dB RMS')

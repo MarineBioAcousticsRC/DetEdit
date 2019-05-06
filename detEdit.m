@@ -904,6 +904,10 @@ while (k <= nb)
         % get brushed data and figure out what to do based on color:
         [yell,zFD,zID,bFlag] = brush_color(gca,cc,zFD,zID,p.colorTab,t);
         
+    elseif ~isempty(str2num(cc))
+        
+        [zFD,zID] = brush_color_number(gca,cc,zFD,zID,p.colorTab,t);
+        
     elseif strcmp(cc,'s') % change time diff scale on bottom plot of 201
         p.dtHi = input(' Update IPI scale (sec):  '); % Set IPI scale
         

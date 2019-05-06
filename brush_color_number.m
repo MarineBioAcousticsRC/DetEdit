@@ -90,8 +90,8 @@ if ~isempty(brushID)
     
     % Remove any ID from FD
     if ~isempty(zID) 
-        [~,zIDkeep2] = setdiff(zID(:,1),zFD);
-        zID = zID(zIDkeep2,:);
+        [~,zFDkeep2] = setdiff(zFD,zID(:,1));
+        zFD = zFD(zFDkeep2,:);
     end
 else
 end

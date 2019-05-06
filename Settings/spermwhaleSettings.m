@@ -14,7 +14,7 @@ sampleRate = 200; % replace with your sample rate
 sp = 'Pm'; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'C:\Users\albas\Downloads\detEdit examples\detEdit examples\SpermWhale_Test_Set'; % identify folder containing TPWS files
+tpwsDir = 'E:\detEditexamples\SpermWhale_Test_Set'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 

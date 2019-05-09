@@ -99,7 +99,7 @@ switch stationDeploy
         autoSel = false;
         disp(['Transfer function not specified for automatic selection. ',...
         'Add path in findTfFile for automatic selection ']);
-        [fname,pname] = uigetfile(fullfile(indir,'*.tf'),'Select TF File');
+        [fname,pname] = uigetfile(fullfile(indir,'*.tf'),'Select Transfer Function File (.tf)');
         
 end
 

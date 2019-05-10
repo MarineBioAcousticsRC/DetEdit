@@ -20,7 +20,7 @@ tpwsDir = 'E:\detEditexamples\Dolphin_Test_Set'; % identify folder containing TP
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'E:\detEditexamples\Dolphin_Test_Set\LTSA'; % identify folder containing 
+ltsaDir = 'E:\detEditexamples\LTSA'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

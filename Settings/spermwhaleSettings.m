@@ -20,7 +20,7 @@ tpwsDir = 'E:\detEditexamples\SpermWhale_Test_Set'; % identify folder containing
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'E:\detEditexamples\Spermwhale_Test_Set\LTSA'; % identify folder containing ltsa files (.ltsa)
+ltsaDir = 'E:\detEditexamples\LTSA'; % identify folder containing ltsa files (.ltsa)
 % REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

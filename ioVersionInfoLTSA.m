@@ -40,7 +40,7 @@ ver{vidx}.dir_entry_bytes = 2080; % # bytes per directory entry (includes dir_pa
 ver{vidx}.dir_pad = 17; % Number of bytes to pad directory entry
 
 
-error(nargchk(0, 1, nargin, 'struct'));
+narginchk(0, 1);
 if nargin == 0
   version = length(ver);
 end

@@ -96,6 +96,9 @@ for iD = 1:length(fileMatchIdx)
     % Load detections
     load(fNameList.TPWS)
     
+    if isrow(MTT); MTT = MTT'; end
+    if isrow(MPP); MPP = MPP'; end
+    
     % Apply tf (if defined) and remove low amplitude detections
     MPP = MPP + tf;
     ib = find(MPP >= p.threshRL);
@@ -147,6 +150,9 @@ for iD = 1:length(fileMatchIdx)
         % Calculate bout duration and find encounters longer than minBout
         [~,~,~,bd] = calculate_bouts(MTT,p);
         bdI = find(bd > (p.minBout / secInDay), 1);
+        if tf > 0
+           MPP = MPP - tf; 
+        end
         
         if ~isempty(bdI)
             disp(['Save ',fullfile(outDir,outFileTPWS)])

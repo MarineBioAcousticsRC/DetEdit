@@ -74,13 +74,17 @@ else
     disp('No TF Applied');
 end
 %% Generate FD, TD, and ID files if needed
-[zFD,zID,fNameList] = buildLabelFiles(matchingFile, p.tpwsDir);
+[zFD,zID,fNameList] = buildLabelFiles(matchingFile, p);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
 fNameList.TPWS = fullfile(p.tpwsDir,matchingFile);
 load(fNameList.TPWS,'MTT','MPP')
+
+if isrow(MTT); MTT = MTT'; end
+if isrow(MPP); MPP = MPP'; end
+
 
 % if you have more than "maxDetLoad" detections, don't load all spectra and
 % time series into memory. You can access them from the disk instead.

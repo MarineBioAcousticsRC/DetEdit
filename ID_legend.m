@@ -1,5 +1,6 @@
-function ID_legend(p)
+function ID_legend(hID,p)
 
+figure(hID);clf
 % set up column sizes
 rowCount = size(p.colorTab,1);
 if isempty(p.mySpID)

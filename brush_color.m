@@ -115,7 +115,7 @@ if ~isempty(brushID)
                 disp(['Remaining Number of False Detections = ',num2str(length(iC))])
             end    
             
-        elseif isequal(brushColor,[1,1,0]) %|| strcmp(cc,'y')
+        elseif isequal(brushColor,[1,1,0]) || strcmp(cc,'y')
             % Yellow paintbrush or 'y' = Highlight Detections
             disp(['Start time selected data: ',datestr(brushDate(1),'dd-mm-yyyy HH:MM:SS.FFF')]);
             [~,yell] = intersect(t, brushDate);

@@ -4,12 +4,12 @@ function figure53
 global dPARAMS dHANDLES p
 
 % Make RMS versus frequency plot for all clicks
-figure(dHANDLES.PPvFreqfig);clf
+figure(dHANDLES.RMSvFreqfig);clf
 dHANDLES.h53 = gca;
 
 
 % plot RMS vs frequency plot, keeping RMS vertical like in fig(51)
-if p.specploton && p.loadMSP
+if p.loadMSP
     plot(dHANDLES.h53,dPARAMS.pxmspAll,dPARAMS.freqAll,'o',...
         'MarkerSize',p.sizeBack,'MarkerEdgeColor',[.7,.7,.7],'UserData',dPARAMS.clickTimes)
     title(dHANDLES.h53,['Based on total of ',num2str(length(dPARAMS.freqAll)),' clicks']);
@@ -29,8 +29,8 @@ plot(dHANDLES.h53,dPARAMS.pxmsp,dPARAMS.freq,'.','MarkerSize',...
     p.sizePoints,'UserData',dPARAMS.t) % true ones in blue
 
 if ~p.loadMSP
-    if p.threshHiFreq > 0 && exist('plotaxes','var')
-        xtline = [plotaxes.minRMS,plotaxes.maxRMS];
+    if p.threshHiFreq > 0 && isfield(dPARAMS,'plotaxes')
+        xtline = [dPARAMS.plotaxes.minRMS,dPARAMS.plotaxes.maxRMS];
         ytline = [p.threshHiFreq ,p.threshHiFreq];
     elseif p.threshHiFreq > 0
         xtline = [min(dHANDLES.pxmsp),max(dHANDLES.pxmsp)];
@@ -44,10 +44,12 @@ if dPARAMS.ff2 % false in red
         'r.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K2))
 end
 if dPARAMS.ff3 % ID'd in associated color
+    
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
-        hPP = plot(dHANDLES.h53,dPARAMS.pxmsp(dPARAMS.K3(dPARAMS.thisIDset)),...
-            dPARAMS.freq(dPARAMS.K3(dPARAMS.thisIDset)),'.',...
-            'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(dPARAMS.thisIDset)));
+        thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC2);
+        hPP = plot(dHANDLES.h53,dPARAMS.pxmsp(dPARAMS.K3(thisIDset)),...
+            dPARAMS.freq(dPARAMS.K3(thisIDset)),'.',...
+            'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
         set(hPP,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
     end
 end
@@ -62,8 +64,8 @@ end
 
 xlabel(dHANDLES.h53,'dB RMS')
 ylabel(dHANDLES.h53,'Peak Frequency (kHz)')
-if exist('plotaxes','var')
-    xlim(dHANDLES.h53,[plotaxes.minRMS,plotaxes.maxRMS])
+if isfield(dPARAMS,'plotaxes')
+    xlim(dHANDLES.h53,[dPARAMS.plotaxes.minRMS,dPARAMS.plotaxes.maxRMS])
 end
 
 if p.specploton && ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)

@@ -3,10 +3,10 @@ function figure201
 global dPARAMS dHANDLES fNameList p
 
 warning('off') % why turn off warning? why not fix problem?
-figure(dHANDLES.LTSAfig)
+figure(dHANDLES.LTSAfig);clf
 dHANDLES.LTSAsubs = subplot_layout; % Top panel, Figure 201: Received Level
 
-set(dHANDLES.hbLTSA,'ActionPostCallback',@brushAction)
+% set(dHANDLES.hbLTSA,'ActionPostCallback',@brushAction)
 
 plot(dHANDLES.LTSAsubs(1),dPARAMS.t,dPARAMS.RL,'.','MarkerSize',p.sizePoints,...
     'UserData',dPARAMS.t)
@@ -74,7 +74,7 @@ if ldt > 0
     end
     if dPARAMS.ff3 % plot ID'd in associated color
         for iC3 = 1:length(dPARAMS.specIDs) % set colors
-            thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC3);
+            thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC3);
             hICI = plot(dHANDLES.LTSAsubs(3),dPARAMS.tID(thisIDset(2:end)),...
                 dPARAMS.dtID(thisIDset(2:end)),'.','MarkerSize',p.sizePoints,...
                 'UserData',dPARAMS.tID(thisIDset));
@@ -89,7 +89,7 @@ end
 if p.specploton && ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
     hold(dHANDLES.LTSAsubs(1),'on')
     plot(dHANDLES.LTSAsubs(1),dPARAMS.t(dPARAMS.yell),dPARAMS.RL(dPARAMS.yell),...
-        'ko','MarkerSize',p.sizeBack,'UserData',t(dPARAMS.yell));
+        'ko','MarkerSize',p.sizeBack,'UserData',dPARAMS.t(dPARAMS.yell));
     hold(dHANDLES.LTSAsubs(1),'off');
     
     

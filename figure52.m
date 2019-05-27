@@ -20,9 +20,11 @@ if p.specploton
     if dPARAMS.ff3
         % plot average ID'd click waveform(s)
         hold(dHANDLES.h52, 'on')
-        hID2 = plot(dHANDLES.h52,(wavID + repmat(-1*rand(size(hID)),1,size(wavID,2)))');
+        hID2 = plot(dHANDLES.h52,(dPARAMS.wavID +...,
+            repmat(-1*rand(size(dPARAMS.wavID,1)),1,...
+            size(dPARAMS.wavID,2)))');
         
-        for iC = 1:length(hID) % set colors
+        for iC = 1:size(dPARAMS.wavID,1) % set colors
             set(hID2(iC),'Color',p.colorTab(dPARAMS.specIDs(iC),:))
         end
         hold(dHANDLES.h52, 'off')
@@ -37,7 +39,7 @@ ylabel(dHANDLES.h52,' Normalized Amplitude');
 if p.specploton && ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
     
     hold(dHANDLES.h52,'on') % add click to waveform plot in BLACK
-    plot(dHANDLES.h52,dPARAMS.norm_wav(mean(dPARAMS.csnJ(dPARAMS.yell,:),1))' + 1.5,'k');
+    plot(dHANDLES.h52,norm_wav(mean(dPARAMS.csnJ(dPARAMS.yell,:),1))' + 1.5,'k');
     hold(dHANDLES.h52,'off')
     
 end

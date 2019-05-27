@@ -1,9 +1,10 @@
 function keyAction(varargin)
 
-global zID zFD zTD fNameList p dPARAMS
+global zID zFD zTD fNameList p dPARAMS dHANDLES
 
 disp('Key action detected')
 dPARAMS.cc = get(gcf,'CurrentCharacter');
+dPARAMS.yell = [];
 % if brush selected get key
 % if strcmp(dPARAMS.cc,'p')
 %     h = brush;
@@ -13,7 +14,8 @@ dPARAMS.cc = get(gcf,'CurrentCharacter');
 %     dPARAMS.cc = get(gcf,'CurrentCharacter');
 % end
 
-if strcmp(dPARAMS.cc,'u') || strcmp(dPARAMS.cc,'g') || strcmp(dPARAMS.cc,'r')
+if strcmp(dPARAMS.cc,'u') || strcmp(dPARAMS.cc,'g') || strcmp(dPARAMS.cc,'r')...
+    || strcmp(dPARAMS.cc,'y')
     % detections were flagged by user
     disp(' Update Display') % Stay on same bout
     % get brushed data and figure out what to do based on color:
@@ -77,69 +79,91 @@ elseif strcmp(dPARAMS.cc,'j')% jump to non-consecutive session
     dPARAMS.onerun = 1;
     
 elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for random False Detect
-%    if ~isempty(dPARAMS.XFD)
-%         zTD(k,2) = 0;
-%         for inxfd = 1 : zTD(k,1)
-%             hold(hA201(1),'on')
-%             testTimes = xt(inxfd);
-%             xH201a = plot(hA201(1),testTimes,xPP(inxfd),'o','MarkerEdgeColor',colorPoints,...
-%                 'MarkerSize',sizeFPR,'LineWidth',2);
-%             hold(hA201(1),'off')
-%             inxfdDT = inxfd(inxfd<length(dt));
-%             hold(hA201(3),'on')
-%             xH201b = plot(hA201(3),testTimes,dt(inxfdDT),'o','MarkerEdgeColor',colorPoints,...
-%                 'MarkerSize',sizeFPR,'LineWidth',2);
-%             hold(hA201(3),'off')
-%             disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
-%             if (p.specploton == 1)
-%                 hold(h50,'on')  % add click to spec plot in BLACK
-%                 %plot(h50,ft,trueSpec,'Linewidth',2);
-%                 clickInBoutIdx = find(t==testTimes);
-%                 testSnip = csnJtrue(clickInBoutIdx,:);
-%                 testSpectrum = cspJtrue(clickInBoutIdx,:);
-%                 
-%                 
-%                 % make low freq part = 0
-%                 tempSPEC = norm_spec_simple(testSpectrum,fimint,fimaxt);
-%                 xH0 = plot(h50,ft,tempSPEC,'Color',colorPoints,'Linewidth',4);
-%                 hold(h50,'off')
-%                 
-%                 hold(h52,'on') % add click to waveform plot in BLACK
-%                 xH2 = plot(h52,norm_wav(testSnip)' + 1.5,'Color',colorPoints,...
-%                     'Linewidth',2);
-%                 hold(h52,'off')
-%                 
-%                 hold(h51,'on')
-%                 % get click index relative to bout
-%                 xH1 = plot(h51,pxmsp(clickInBoutIdx),xmpp(clickInBoutIdx),...
-%                     'o','MarkerEdgeColor',colorPoints,'MarkerSize',sizeFPR,...
-%                     'LineWidth',2);
-%                 hold(h51,'off')
-%                 
-%                 hold(h53,'on')
-%                 xH3 = plot(h53,pxmsp(clickInBoutIdx),freq(clickInBoutIdx),...
-%                     'o','MarkerEdgeColor',colorPoints,'MarkerSize',sizeFPR,...
-%                     'LineWidth',2);
-%                 hold(h53,'off')
-%             end
-%             pause
-%             dPARAMS.cc = get(gcf,'CurrentCharacter');
-%             % fill evaluated points
-%             xH201a.MarkerFaceColor = colorPoints;
-%             xH201b.MarkerFaceColor = colorPoints;
-%             xH1.MarkerFaceColor = colorPoints;
-%             xH3.MarkerFaceColor = colorPoints;
-%             if (strcmp(dPARAMS.cc,'z'))
-%                 zTD(k,2) = zTD(k,2) + 1;
-%                 zFD = [zFD; xt(inxfd)]; % add to FD
-%             end
-%             delete([xH0,xH1,xH2,xH3])
-%         end
-%         disp([' Tested: ',num2str(zTD(k,1)),' False: ',...
-%             num2str(zTD(k,2))]);
-%         
-%     end
+    if ~isempty(dPARAMS.XFD)
+        zTD(dPARAMS.k,2) = 0;
+        % entering test mode, temporarily disable other callbacks to avoid
+        % confusion with keys enered here
+        set(dHANDLES.LTSAfig, 'KeyPressFcn',[])
+        set(dHANDLES.RMSvPPfig, 'KeyPressFcn',[])
+        set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',[])
+        set(dHANDLES.spectrafig, 'KeyPressFcn',[])
+        set(dHANDLES.wavefig, 'KeyPressFcn',[])
+        for inxfd = 1:zTD(dPARAMS.k,1)
+            % update LTSA to show highlighted click
+            hold(dHANDLES.LTSAsubs(1),'on')
+            testTimes = dPARAMS.xt(inxfd);
+            xH201a = plot(dHANDLES.LTSAsubs(1),testTimes,dPARAMS.xPP(inxfd),'o','MarkerEdgeColor',...
+                p.colorPoints,'MarkerSize',p.sizeFPR,'LineWidth',2);
+            hold(dHANDLES.LTSAsubs(1),'off')
+            inxfdDT = inxfd(inxfd<length(dPARAMS.dt));
+            hold(dHANDLES.LTSAsubs(3),'on')
+            xH201b = plot(dHANDLES.LTSAsubs(3),testTimes,dPARAMS.dt(inxfdDT),...
+                'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,'LineWidth',2);
+            hold(dHANDLES.LTSAsubs(3),'off')
+            disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
+            
+            % update spectra  
+            hold(dHANDLES.h50,'on')  % add click to spec plot in BLACK
+            plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',2);
+            clickInBoutIdx = find(dPARAMS.trueTimes==testTimes);
+            testSnip = dPARAMS.csnJtrue(clickInBoutIdx,:);
+            testSpectrum = dPARAMS.cspJtrue(clickInBoutIdx,:);
+            
+            % Normalize spectrum
+            tempSPEC = norm_spec_simple(testSpectrum,dPARAMS.fimint,dPARAMS.fimaxt);
+            xH0 = plot(dHANDLES.h50,dPARAMS.ft,tempSPEC,'Color',p.colorPoints,'Linewidth',4);
+            hold(dHANDLES.h50,'off')
+                
+            % Update waveform
+            hold(dHANDLES.h52,'on') % add click to waveform plot in BLACK
+            xH2 = plot(dHANDLES.h52,norm_wav(testSnip)' + 1.5,'Color',p.colorPoints,...
+                'Linewidth',2);
+            hold(dHANDLES.h52,'off')
+                
+            % Update rms v pp
+            hold(dHANDLES.h51,'on')
+            % get click index relative to bout
+            xH1 = plot(dHANDLES.h51,dPARAMS.pxmsp(clickInBoutIdx),dPARAMS.xmpp(clickInBoutIdx),...
+                'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,...
+                'LineWidth',2);
+            hold(dHANDLES.h51,'off')
+                
+            % Update rms v freq.
+            hold(dHANDLES.h53,'on')
+            xH3 = plot(dHANDLES.h53,dPARAMS.pxmsp(clickInBoutIdx),dPARAMS.freq(clickInBoutIdx),...
+                'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,...
+                'LineWidth',2);
+            hold(dHANDLES.h53,'off')
+            
+            % wait for key
+            pause
+            
+            dPARAMS.cc = get(gcf,'CurrentCharacter');
+           
+            % fill evaluated points
+            xH201a.MarkerFaceColor = p.colorPoints;
+            xH201b.MarkerFaceColor = p.colorPoints;
+            xH1.MarkerFaceColor = p.colorPoints;
+            xH3.MarkerFaceColor = p.colorPoints;
+           
+            if (strcmp(dPARAMS.cc,'z'))
+                zTD(k,2) = zTD(k,2) + 1;
+                zFD = [zFD; xt(inxfd)]; % add to FD
+            end
+            
+            delete([xH0,xH1,xH2,xH3]) % can we just overwrite and delete after loop?
+        end
+        disp([' Tested: ',num2str(zTD(dPARAMS.k,1)),' False: ',...
+            num2str(zTD(dPARAMS.k,2))]);
+        
+    end
     dPARAMS.k = dPARAMS.k+1;
+    % re-eneable normal callbacks
+    set(dHANDLES.LTSAfig, 'KeyPressFcn',@keyAction)
+    set(dHANDLES.RMSvPPfig, 'KeyPressFcn',@keyAction)
+    set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',@keyAction)
+    set(dHANDLES.spectrafig, 'KeyPressFcn',@keyAction)
+    set(dHANDLES.wavefig, 'KeyPressFcn',@keyAction)
 elseif (strcmp(dPARAMS.cc,'w') && (zTD(k,2) > 0))  % test 5 min window
     % Test 5 min window
     zTD = test_false_bins(k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
@@ -170,7 +194,7 @@ else
         commandwindow
         return
     else
-        k = k+1;  % move forward one bout
+        dPARAMS.k = dPARAMS.k+1;  % move forward one bout
         onerun = 1;
     end
 end

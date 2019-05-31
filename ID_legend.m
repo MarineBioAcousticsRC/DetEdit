@@ -14,7 +14,7 @@ end
 h = 1/(rowCount+1);% +1 to save room for title
 
 % Set up window placement & size on screen
-defaultPos=[0.005,0.035,0.05*colCount,.025*rowCount];
+defaultPos=[0,0.2,0.03*colCount,.02*rowCount];
 % open and setup figure window
 h10 = set(hID, ...
     'NumberTitle','off', ...

@@ -77,6 +77,7 @@ mepp = median(MPP);
 % Plot histogram
 figure(2); set(2,'name','Received Levels')
 h2 = gca;
+p.p1Hi=180;
 center = p.threshRL:1:p.p1Hi;
 [nhist] = histc(MPP,center);
 bar(h2,center, nhist, 'barwidth', 1, 'basevalue', 1)
@@ -84,6 +85,7 @@ xlim(h2,[p.threshRL-0.5, p.p1Hi+0.5])
 ylim(h2,[1 inf]);
 title(h2,sprintf('N=%d',length(MPP)))
 xlabel(h2,'Peak-Peak Amplitude (dB)')
+ylabel(h2,'Bin Counts')
 
 % create labels and textbox
 mnlabel = sprintf('Mean = %0.2f', mpp);
@@ -103,7 +105,7 @@ smsp2 = size(MSP,2);% 2nd element is num fft points
 ift = 1:smsp2;
 fmsp = ((p.sampleRate/2)/(smsp2-1))*ift - (p.sampleRate/2)/(smsp2-1);
 
-[~,im] = max(MSP(:,p.frRange(1):p.frRange(2)),[],2); % maximum between flow-100kHz       
+[~,im] = max(MSP(:,max(1,p.frRange(1)):min(p.frRange(2),size(MSP,2))),[],2); % maximum between flow-100kHz       
 peakFr = fmsp(im + p.frRange(1)-1);
 
 % statistics
@@ -121,6 +123,7 @@ bar(h3,centers,y);
 xlim(h3,[0,p.sampleRate/2])
 title(h3,sprintf('N=%d',length(peakFr)));
 xlabel(h3,'Peak Frequency (kHz)')
+ylabel(h3,'Bin Counts')
 
 % create labels and textbox
 mnlabel = sprintf('Mean = %0.2f', mpeakFr);

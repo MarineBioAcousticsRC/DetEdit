@@ -15,7 +15,7 @@ dPARAMS.yell = [];
 % end
 
 if strcmp(dPARAMS.cc,'u') || strcmp(dPARAMS.cc,'g') || strcmp(dPARAMS.cc,'r')...
-    || strcmp(dPARAMS.cc,'y')
+        || strcmp(dPARAMS.cc,'y')
     % detections were flagged by user
     disp(' Update Display') % Stay on same bout
     % get brushed data and figure out what to do based on color:
@@ -102,7 +102,7 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             hold(dHANDLES.LTSAsubs(3),'off')
             disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
             
-            % update spectra  
+            % update spectra
             hold(dHANDLES.h50,'on')  % add click to spec plot in BLACK
             plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',2);
             clickInBoutIdx = find(dPARAMS.trueTimes==testTimes);
@@ -113,13 +113,13 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             tempSPEC = norm_spec_simple(testSpectrum,dPARAMS.fimint,dPARAMS.fimaxt);
             xH0 = plot(dHANDLES.h50,dPARAMS.ft,tempSPEC,'Color',p.colorPoints,'Linewidth',4);
             hold(dHANDLES.h50,'off')
-                
+            
             % Update waveform
             hold(dHANDLES.h52,'on') % add click to waveform plot in BLACK
             xH2 = plot(dHANDLES.h52,norm_wav(testSnip)' + 1.5,'Color',p.colorPoints,...
                 'Linewidth',2);
             hold(dHANDLES.h52,'off')
-                
+            
             % Update rms v pp
             hold(dHANDLES.h51,'on')
             % get click index relative to bout
@@ -127,7 +127,7 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
                 'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,...
                 'LineWidth',2);
             hold(dHANDLES.h51,'off')
-                
+            
             % Update rms v freq.
             hold(dHANDLES.h53,'on')
             xH3 = plot(dHANDLES.h53,dPARAMS.pxmsp(clickInBoutIdx),dPARAMS.freq(clickInBoutIdx),...
@@ -139,13 +139,13 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             pause
             
             dPARAMS.cc = get(gcf,'CurrentCharacter');
-           
+            
             % fill evaluated points
             xH201a.MarkerFaceColor = p.colorPoints;
             xH201b.MarkerFaceColor = p.colorPoints;
             xH1.MarkerFaceColor = p.colorPoints;
             xH3.MarkerFaceColor = p.colorPoints;
-           
+            
             if (strcmp(dPARAMS.cc,'z'))
                 zTD(k,2) = zTD(k,2) + 1;
                 zFD = [zFD; xt(inxfd)]; % add to FD
@@ -169,6 +169,53 @@ elseif (strcmp(dPARAMS.cc,'w') && (zTD(k,2) > 0))  % test 5 min window
     zTD = test_false_bins(k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
     k = k+1;
     
+elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
+    % detect if data have been brushed, otherwise use whole set.
+    [brushDate, ~, ~] = get_brushed(gca);
+    if isempty(brushDate)
+        tEdit = dPARAMS.t;
+    else
+        tTemp = brushDate;
+        tEdit = intersect(tTemp,dPARAMS.t);
+    end
+    oldID = input(' Enter the ID you want to overwrite:  ');
+    newID  = input(' Enter the ID you want to change it to (enter 0 for no ID):  ');
+    addFlag = 0; % flag gets turned to 1 if we have to append to zID rather than change existing IDs
+    if oldID == 0 %get everything that's unlabeled
+        addFlag = 1;
+        [dates2Append,~] = setdiff(tEdit,[dPARAMS.tfd;dPARAMS.tID]);
+        
+    elseif oldID ==99 % get everything that's false
+        addFlag = 1;
+        [dates2Append,iCFD] = intersect(zFD(:,1),tEdit);
+        zFD(iCFD) = [];
+    else
+        [~,iCID] = intersect(zID(:,1),tEdit);
+        oldIDLocs = find(zID(iCID,2)==oldID);
+    end
+    
+    if newID == 0  && ~addFlag % user wants previously ID'd thing changed to unlabeled
+        zID(iCID(oldIDLocs),:) = [];
+    elseif newID == 99 && ~addFlag % user wants previously ID'd thing changed to false
+        zFD = [zFD;zID(iCID(oldIDLocs),1)];
+        zID(iCID(oldIDLocs),:) = [];
+    elseif newID == 99 && oldID == 0 % user wants to change unlabeled to false
+        zFD = [zFD;dates2Append];
+    elseif newID ==0 && oldID == 99 % user wants to change false to unlabeled
+        % nothing needs to happen, because they've already been removed
+        % from zFD above.
+    else
+        if addFlag % user wants previously false or unlabeled thing changed to ID
+            zID = [zID; [dates2Append,ones(size(dates2Append))*newID]];
+        else  % user wants previously ID'dthing changed to different ID
+            zID(iCID(oldIDLocs),2) = newID;
+        end
+    end
+    
+    % check for accidental zeros in ID, this can happen if people enter a
+    % 0, remove those from the ID set.
+    accidentalZeros = zID(:,2)==0;
+    zID(accidentalZeros,:)=[];
 else
     if dPARAMS.k == dPARAMS.nb
         uZFD = [];  ia = []; ic = [];

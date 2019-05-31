@@ -1,4 +1,4 @@
-function detEdit2(userFunc)
+function detEdit(userFunc)
 
 % detEdit.m
 
@@ -25,8 +25,11 @@ global dPARAMS p dHANDLES fNameList zID zFD zTD
 % get user input and set up function name
 typeInput = exist('userFunc','var');
 if typeInput ~= 1
-    [userfile,userpath] = uigetfile('*.m',...
-        'Select Script with your Data Parameter Settings');
+    % detfault point to settings folder
+    thisPath = mfilename('fullpath');
+    
+    [userfile,userpath] = uigetfile(fullfile(fileparts(thisPath),...
+         'Settings\*.m'),'Select Script with your Data Parameter Settings');
     addpath(userpath) % it adds user folder path to the beggining of the set path
     userFunc = str2func(['@',userfile(1:end-2)]);
 end
@@ -311,13 +314,21 @@ end
 hID = figure(10);
 ID_legend(hID,p)
 
+% Check if LTSA plot exists, is so, don't reset position
+% if ishghandle(201)   
+%    existLTSA = 1;
+% else
+%    existLTSA = 0; 
+% end
 dHANDLES.LTSAfig = figure(201); colormap(dHANDLES.LTSAfig, jet)
-% hManager = uigetmodemanager(dHANDLES.LTSAfig);
-% [hManager.WindowListenerHandles.Enabled] = deal(false);
-
 set(dHANDLES.LTSAfig,'name','LTSA and time series',...
     'KeyPressFcn',{@keyAction})
-%
+% if ~existLTSA
+%     defaultPosLTSA=[.30,0,.55,1];
+%     set(dHANDLES.LTSAfig,'Units','normalized')
+%     set(dHANDLES.LTSAfig,'Position',defaultPosLTSA)
+% end
+
 dHANDLES.hbLTSA = brush(dHANDLES.LTSAfig);
 set(dHANDLES.hbLTSA,'ActionPostCallback',{@brushOff,dHANDLES.LTSAfig})
 

@@ -150,7 +150,7 @@ if ~isempty(J) % if there are detection in this session
         disp(' No identified detections (ID)')
     end
     
-    % Calculate indices of detections which are neither false, ID'd,
+    % Calculate indices of detections which are neither false nor ID'd
     JFD = J(dPARAMS.K2);
     JID = J(dPARAMS.K3);
     JFIM = union(JFD,JID);

@@ -12,7 +12,7 @@ function [zFD,zID] = brush_color_number(hFig,cc,zFD,zID,colorTab,t)
 %       'Number' - Type ID signal
 %
 %   zID - An [N x 2] matrix of detection labeled as ID detections, where
-%         1st column contains the detection times and 2nd column an ID  
+%         1st column contains the detection times and 2nd column an ID
 %         number associated with the colorTab
 %
 %   colorTab - Color code for classification - ID signal types
@@ -40,58 +40,35 @@ function [zFD,zID] = brush_color_number(hFig,cc,zFD,zID,colorTab,t)
 %         where N is the number of detections.
 %
 %   zID - An [N x 2] matrix of detection labeled as ID detections, where
-%         1st column contains the detection times and 2nd column an ID  
+%         1st column contains the detection times and 2nd column an ID
 %         number associated with the colorTab
 
 
-% Find brushed axes
-hBrushAll = get(hFig,'Children');
-selLine = arrayfun(@(x) hBrushAll(x).Marker == '.', 1:length(hBrushAll), 'UniformOutput', false);
-if iscell(selLine)
-    lenAx = cell2mat(cellfun(@length,selLine,'UniformOutput',false));
-    selLine(lenAx > 1) = {false};
-    selLine = cell2mat(selLine);
-end
-brushedLine = find(selLine,1,'last');
-hBrush = hBrushAll(brushedLine);
-
-% Get indices of brushed data
-brushID = find(get(hBrush, 'BrushData'));
-
-if ~isempty(brushID)
+[brushDate, ~, ~] = get_brushed(hFig);
+if ~isempty(brushDate)
     
-    % Get key associated to color info from brush
-    specID = str2num(cc);
+    % Find color code to assign ID signal type
+    % Write to ID file
+    disp(['Number of ID Detections = ',num2str(length(brushDate))])
+    [newIDtimes,~] = intersect(t, brushDate);
     
-    % Get vector of dates associated with these points
-    markerDates = hBrush.UserData;
-    brushDate = markerDates(brushID);
-    
-    if ~isempty(brushDate)
-        
-        % Find color code to assign ID signal type
-        % Write to ID file
-        disp(['Number of ID Detections = ',num2str(length(brushDate))])
-        [newIDtimes,~] = intersect(t, brushDate);
-        
-        % check if already brushed
-        if ~isempty(zID)
-            [~,oldIDtimes] = intersect(zID(:,1), newIDtimes);
-            if ~isempty(oldIDtimes)
-                % remove any old labels for these times
-                zID(oldIDtimes, :) = [];
-            end
+    % check if already brushed
+    if ~isempty(zID)
+        [~,oldIDtimes] = intersect(zID(:,1), newIDtimes);
+        if ~isempty(oldIDtimes)
+            % remove any old labels for these times
+            zID(oldIDtimes, :) = [];
         end
-        
-        spLabels = ones(size(newIDtimes)).*specID;
-        newID = [newIDtimes,spLabels];
-        zID = [zID;newID];
     end
     
-    % Remove any ID from FD
-    if ~isempty(zID) 
-        [~,zFDkeep2] = setdiff(zFD,zID(:,1));
-        zFD = zFD(zFDkeep2,:);
-    end
-else
+    spLabels = ones(size(newIDtimes)).*specID;
+    newID = [newIDtimes,spLabels];
+    zID = [zID;newID];
 end
+
+% Remove any ID from FD
+if ~isempty(zID)
+    [~,zFDkeep2] = setdiff(zFD,zID(:,1));
+    zFD = zFD(zFDkeep2,:);
+end
+

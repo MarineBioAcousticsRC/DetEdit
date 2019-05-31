@@ -287,7 +287,7 @@ dPARAMS.ft = dPARAMS.fmsp(fi);
 
 % for the PP vs RMS plot
 if (p.tfSelect > 0)
-    dPARAMS.Ptfpp = interp1(tffreq,tfuppc,fmsp*1000,'linear','extrap');
+    dPARAMS.Ptfpp = interp1(tffreq,tfuppc,dPARAMS.fmsp*1000,'linear','extrap');
 else
     dPARAMS.Ptfpp = zeros(1,smsp2);
 end

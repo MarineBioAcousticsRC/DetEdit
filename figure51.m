@@ -14,14 +14,14 @@ if p.specploton && p.loadMSP
         %%% why is x/ytline used for different variables?
         if p.threshPP > 0
             xtline = [p.threshRMS,p.threshRMS];
-            ytline = [ min(xmppAll),p.threshPP];
+            ytline = [ min(dPARAMS.xmppAll),p.threshPP];
         else
             xtline = [p.threshRMS,p.threshRMS];
-            ytline = [ min(xmppAll),max(xmppAll)];
+            ytline = [ min(dPARAMS.xmppAll),max(xmppAll)];
         end
-        hold(h51,'on');
-        plot(h51,xtline,ytline,'r')
-        hold(h51,'off');
+        hold(dHANDLES.h51,'on');
+        plot(dHANDLES.h51,xtline,ytline,'r')
+        hold(dHANDLES.h51,'off');
         
     end
 end

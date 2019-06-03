@@ -43,7 +43,7 @@ function [zFD,zID] = brush_color_number(hFig,cc,zFD,zID,colorTab,t)
 %         1st column contains the detection times and 2nd column an ID
 %         number associated with the colorTab
 
-
+global dPARAMS
 [brushDate, ~, ~] = get_brushed(hFig);
 if ~isempty(brushDate)
     
@@ -61,7 +61,7 @@ if ~isempty(brushDate)
         end
     end
     
-    spLabels = ones(size(newIDtimes)).*specID;
+    spLabels = ones(size(newIDtimes)).*cc;
     newID = [newIDtimes,spLabels];
     zID = [zID;newID];
 end

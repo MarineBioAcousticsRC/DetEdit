@@ -23,7 +23,7 @@ if strcmp(dPARAMS.cc,'u') || strcmp(dPARAMS.cc,'g') || strcmp(dPARAMS.cc,'r')...
     
 elseif ~isempty(str2num(dPARAMS.cc))
     
-    [zFD,zID] = brush_color_number(gca,dPARAMS.cc,zFD,zID,p.colorTab,dPARAMS.t);
+    [zFD,zID] = brush_color_number(gca,str2num(dPARAMS.cc),zFD,zID,p.colorTab,dPARAMS.t);
     
 elseif strcmp(dPARAMS.cc,'s') % change time diff scale on bottom plot of 201
     p.dtHi = input(' Update IPI scale (sec):  '); % Set IPI scale

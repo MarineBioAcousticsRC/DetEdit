@@ -9,55 +9,7 @@ load(fNameList.FD); % brings in zFD
 load(fNameList.ID); % brings in zID
 load(fNameList.TD); % brings in zTD
 
-if p.loadMSP
-    
-    dPARAMS.xmsp0All = dPARAMS.csp + repmat(dPARAMS.Ptfpp,size(dPARAMS.csp,1),1);
-    [dPARAMS.xmspAll,im] = max(dPARAMS.xmsp0All(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2); % maximum between flow-100kHz
-    
-    % calculate peak-to-peak amplitude including transfer function
-    %%% does this need to be recalculated every time?
-    if isrow(dPARAMS.clickLevels) %%% click levels should be rotated once at the start in detEdit not here!!!
-        dPARAMS.xmppAll = dPARAMS.clickLevels-dPARAMS.tf+ ...
-            dPARAMS.Ptfpp(im + dPARAMS.fimint-1); % vectorized version
-    else
-        dPARAMS.xmppAll = dPARAMS.clickLevels'-dPARAMS.tf+ ...
-            dPARAMS.Ptfpp(im + dPARAMS.fimint-1); % vectorized version
-    end
-    
-    % turn diagonal to vertical (easier way to find thresholds)
-    if isrow(dPARAMS.xmspAll)  %%% same as above, check dimensions and rotate once at start, not here.
-        dPARAMS.pxmspAll = dPARAMS.xmspAll' - p.slope*(dPARAMS.xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
-    elseif isrow(dPARAMS.xmppAll)
-        dPARAMS.pxmspAll = dPARAMS.xmspAll - p.slope*(dPARAMS.xmppAll' - p.threshRL); %use slope of 1 to mod xmsp for plot
-    else
-        dPARAMS.pxmspAll = dPARAMS.xmspAll - p.slope*(dPARAMS.xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
-    end
-    
-    % apply RMS threshold to figure (51)
-    if (p.threshRMS > 0)
-        if dPARAMS.onerun == 1
-            if p.threshPP > 0
-                badClickTime = dPARAMS.clickTimes(dPARAMS.pxmspAll < p.threshRMS &...
-                    dPARAMS.xmppAll' < p.threshPP);  % for all false if below RMS threshold
-            else
-                badClickTime = dPARAMS.clickTimes(dPARAMS.pxmspAll < p.threshRMS);
-            end
-            disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
-            zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-            save(fNameList.FD,'zFD')
-        end
-    end
-    
-    dPARAMS.freqAll = dPARAMS.fmsp(im + dPARAMS.fimint-1);
-    if dPARAMS.onerun == 1
-        if (p.threshHiFreq > 0)
-            badClickTime = dPARAMS.clickTimes(dPARAMS.freqAll > p.threshHiFreq);  % for all false if below RMS threshold
-            disp(['Number of Detections Below Freq threshold = ',num2str(length(badClickTime))])
-            zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-            save(fNameList.FD,'zFD')
-        end
-    end
-end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % find detections and false detections within this session
@@ -117,7 +69,7 @@ if ~isempty(J) % if there are detection in this session
             dPARAMS.specFD = dPARAMS.cspJ(dPARAMS.K2,:); % get set of false spectra
         end
         disp([' False detections:',num2str(length(dPARAMS.K2))])
-   else
+    else
         dPARAMS.ff2 = 0;
         disp(' No False Detections')
     end
@@ -210,7 +162,7 @@ dPARAMS.pwr1 = dPARAMS.pwr{1,dPARAMS.k};  % LTSA power vector
 nbinS = length(dPARAMS.PT);
 if (nbinS == 0)
     disp('No LTSA for this Session');
-    dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ; 
+    dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ;
     dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k); % start end times for plots
     dPARAMS.pwr1(1:length(f)) = ones; % make uniform LTSA
 else
@@ -246,82 +198,64 @@ end
 %%% Does this have to be calculated every time? %%%
 xmsp0 = dPARAMS.cspJ + repmat(dPARAMS.Ptfpp,size(dPARAMS.cspJ,1),1); % add transfer fun to session's spectra
 [xmsp,im] = max(xmsp0(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
-if isrow(dPARAMS.RL)
-    dPARAMS.xmpp = dPARAMS.RL - dPARAMS.tf + dPARAMS.Ptfpp([im + dPARAMS.fimint - 1]);
-else
-    dPARAMS.xmpp = dPARAMS.RL' - dPARAMS.tf + dPARAMS.Ptfpp([im + dPARAMS.fimint - 1]);
-end
+% if isrow(dPARAMS.RL)
+%     dPARAMS.xmpp = dPARAMS.RL - dPARAMS.tf + dPARAMS.Ptfpp([im + dPARAMS.fimint - 1]);
+% else
+dPARAMS.xmpp = dPARAMS.RL' - dPARAMS.tf + dPARAMS.Ptfpp([im + dPARAMS.fimint - 1]);
+%end
 
 % turn diagonal to vertical
-if ~isempty(xmsp) && ~isempty(dPARAMS.xmpp)
-    if isrow(xmsp)
-        dPARAMS.pxmsp = xmsp' - p.slope*(dPARAMS.xmpp - p.threshRL); %use slope of 1 to mod xmsp for plot
-    elseif isrow(dPARAMS.xmpp)
-        dPARAMS.pxmsp = xmsp - p.slope*(dPARAMS.xmpp' - p.threshRL);
-    else
-        dPARAMS.pxmsp = xmsp - p.slope*(dPARAMS.xmpp - p.threshRL);
-    end
-end
+% if ~isempty(xmsp) && ~isempty(dPARAMS.xmpp)
+%     if isrow(xmsp)
+%         dPARAMS.pxmsp = xmsp' - p.slope*(dPARAMS.xmpp - p.threshRL); %use slope of 1 to mod xmsp for plot
+%     elseif isrow(dPARAMS.xmpp)
+dPARAMS.pxmsp = xmsp - p.slope*(dPARAMS.xmpp' - p.threshRL);
+%     else
+%         dPARAMS.pxmsp = xmsp - p.slope*(dPARAMS.xmpp - p.threshRL);
+%     end
+% end
 %%%-----%%%
 
 if ~p.loadMSP % plot threshold line now because no background data
     if (p.threshRMS > 0)
-        if p.onerun == 1
-            if p.threshPP > 0
-                badClickTime = dPARAMS.t(dPARAMS.pxmsp < p.threshRMS &...
-                    dPARAMS.xmpp' < p.threshPP);  % for all false if below RMS threshold
-                %%% should not transpose every time!!!
-            else
-                badClickTime = dPARAMS.t(dPARAMS.pxmsp < p.threshRMS);
+        
+        if ~isempty(zFD) % get times and indices of false detections
+            [dPARAMS.tfd,dPARAMS.K2,~] = intersect(dPARAMS.t,zFD(:,1));
+            dPARAMS.rlFD = dPARAMS.RL(dPARAMS.K2);
+        end
+        if ~isempty(dPARAMS.K2) % if this session contains false detections
+            dPARAMS.ff2 = 1; %%% these should be set only once, not in figure
+            if p.specploton
+                dPARAMS.wavFD = norm_wav(mean(dPARAMS.csnJ(dPARAMS.K2,:),1)); % calculate mean false time series
+                dPARAMS.specFD = dPARAMS.cspJ(dPARAMS.K2,:); % get set of false spectra
             end
-            disp(['Number of Detections Below RMS threshold = ',num2str(length(badClickTime))])
-            zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-            save(fNameList.FD,'zFD')
-            if ~isempty(zFD) % get times and indices of false detections
-                [dPARAMS.tfd,dPARAMS.K2,~] = intersect(fNameList.t,zFD(:,1));
-                dPARAMS.rlFD = dPARAMS.RL(dPARAMS.K2);
-            end
-            if ~isempty(dPARAMS.K2) % if this session contains false detections
-                dPARAMS.ff2 = 1; %%% these should be set only once, not in figure!!!
-                if p.specploton
-                    dPARAMS.wavFD = norm_wav(mean(dPARAMS.csnJ(dPARAMS.K2,:),1)); % calculate mean false time series
-                    dPARAMS.specFD = dPARAMS.cspJ(dPARAMS.K2,:); % get set of false spectra
-                end
-                dPARAMS.dtFD = dPARAMS.dt(dPARAMS.K2(1:end-1));
-                disp([' False detections:',num2str(length(dPARAMS.K2))])
-            else
-                dPARAMS.ff2 = 0;%%% these should be set only once, not in figure!!!
-                disp(' No False Detections')
-            end
+            dPARAMS.dtFD = dPARAMS.dt(dPARAMS.K2(1:end-1));
+            disp([' False detections:',num2str(length(dPARAMS.K2))])
+        else
+            dPARAMS.ff2 = 0;%%% these should be set only once, not in figure
+            disp(' No False Detections')
         end
     end
 end
 
+
 dPARAMS.freq = dPARAMS.fmsp(im + dPARAMS.fimint -1);
 if ~p.loadMSP
-    if onerun == 1
-        if (p.threshHiFreq > 0) 
-            %%% this seems to repeat calculations from above??
-            badClickTime = dPARAMS.t(dPARAMS.freq > p.threshHiFreq);  % for all false if below RMS threshold
-            disp(['Number of Detections Below Freq threshold = ',num2str(length(badClickTime))])
-            zFD = [zFD; badClickTime];   % cummulative False Detection matrix
-            save(fNameList.FD,'zFD')
-            if ~isempty(zFD) % get times and indices of false detections
-                [dPARAMS.tfd,dPARAMS.K2,~] = intersect(dPARAMS.t,zFD(:,1));
-                dPARAMS.rlFD = dPARAMS.RL(dPARAMS.K2);
-            end
-            if ~isempty(dPARAMS.K2) % if this session contains false detections
-                dPARAMS.ff2 = 1; % set false flag to true
-                if p.specploton
-                    dPARAMS.wavFD =  norm_wav(mean(csnJ(dPARAMS.K2,:),1)); % calculate mean false time series
-                    dPARAMS.specFD = cspJ(dPARAMS.K2,:); % get set of false spectra
-                end
-                disp([' False detections:',num2str(length(dPARAMS.K2))])
-                dPARAMS.dtFD = dPARAMS.dt(dPARAMS.K2(1:end-1));
-            else
-                dPARAMS.ff2 = 0;
-                disp(' No False Detections')
-            end
+    if (p.threshHiFreq > 0)
+        if ~isempty(zFD) % get times and indices of false detections
+            [dPARAMS.tfd,dPARAMS.K2,~] = intersect(dPARAMS.t,zFD(:,1));
+            dPARAMS.rlFD = dPARAMS.RL(dPARAMS.K2);
+        end
+        if ~isempty(dPARAMS.K2) % if this session contains false detections
+            dPARAMS.ff2 = 1; % set false flag to true
+            dPARAMS.wavFD =  norm_wav(mean(dPARAMS.csnJ(dPARAMS.K2,:),1)); % calculate mean false time series
+            dPARAMS.specFD = dPARAMS.cspJ(dPARAMS.K2,:); % get set of false spectra
+            
+            disp([' False detections:',num2str(length(dPARAMS.K2))])
+            dPARAMS.dtFD = dPARAMS.dt(dPARAMS.K2(1:end-1));
+        else
+            dPARAMS.ff2 = 0;
+            disp(' No False Detections')
         end
     end
 end

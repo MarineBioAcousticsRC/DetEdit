@@ -85,6 +85,7 @@ switch analysis
         params.colorTab = colorTab;
         params.ltsaDir = ltsaDir;
         params.mySpID = mySpID;
+        params.autoFalse = autoFalse;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));

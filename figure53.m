@@ -33,7 +33,7 @@ if ~p.loadMSP
         xtline = [dPARAMS.plotaxes.minRMS,dPARAMS.plotaxes.maxRMS];
         ytline = [p.threshHiFreq ,p.threshHiFreq];
     elseif p.threshHiFreq > 0
-        xtline = [min(dHANDLES.pxmsp),max(dHANDLES.pxmsp)];
+        xtline = [min(dPARAMS.pxmsp),max(dPARAMS.pxmsp)];
         ytline = [p.threshHiFreq ,p.threshHiFreq];
     end
     plot(dHANDLES.h53,xtline,ytline,'r')
@@ -68,7 +68,7 @@ if isfield(dPARAMS,'plotaxes')
     xlim(dHANDLES.h53,[dPARAMS.plotaxes.minRMS,dPARAMS.plotaxes.maxRMS])
 end
 
-if p.specploton && ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
+if ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
     
     hold(dHANDLES.h53,'on')
     plot(dHANDLES.h53,dPARAMS.pxmsp(dPARAMS.yell),dPARAMS.freq(dPARAMS.yell),'ko',...

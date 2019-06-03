@@ -17,7 +17,7 @@ if p.specploton && p.loadMSP
             ytline = [ min(dPARAMS.xmppAll),p.threshPP];
         else
             xtline = [p.threshRMS,p.threshRMS];
-            ytline = [ min(dPARAMS.xmppAll),max(xmppAll)];
+            ytline = [ min(dPARAMS.xmppAll),max(dPARAMS.xmppAll)];
         end
         hold(dHANDLES.h51,'on');
         plot(dHANDLES.h51,xtline,ytline,'r')

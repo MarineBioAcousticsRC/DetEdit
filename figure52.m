@@ -21,8 +21,7 @@ if p.specploton
         % plot average ID'd click waveform(s)
         hold(dHANDLES.h52, 'on')
         hID2 = plot(dHANDLES.h52,(dPARAMS.wavID +...,
-            repmat(-1*rand(size(dPARAMS.wavID,1)),1,...
-            size(dPARAMS.wavID,2)))');
+            -ones(size(dPARAMS.wavID)).*rand(min(size(dPARAMS.wavID,1)),1)));
         
         for iC = 1:size(dPARAMS.wavID,1) % set colors
             set(hID2(iC),'Color',p.colorTab(dPARAMS.specIDs(iC),:))

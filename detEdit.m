@@ -95,12 +95,12 @@ if isrow(MPP); MPP = MPP'; end
 % select non-contiguous sets from files stored on disk.
 nDets = length(MTT);
 
-if ~exist('maxDetLoad')
+if ~isfield(p,'maxDetLoad')
     p.loadMSP = true;
-elseif isempty(maxDetLoad)
+elseif isempty(p.maxDetLoad)
     p.loadMSP = true;
 else
-    p.loadMSP = nDets <= maxDetLoad; % true/false, if you have more detections than
+    p.loadMSP = nDets <= p.maxDetLoad; % true/false, if you have more detections than
 end
 % the maximum load this becomes false.
 ic1 = [];
@@ -291,7 +291,14 @@ if (p.tfSelect > 0)
 else
     dPARAMS.Ptfpp = zeros(1,smsp2);
 end
+if ~isrow(dPARAMS.Ptfpp); dPARAMS.Ptfpp = dPARAMS.Ptfpp'; end
 
+compute_transformations
+if p.autoFalse
+    % apply automatic false thresholds based on frequency and RMS
+    % amplitude
+    apply_auto_thresh
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dPARAMS.k = input('Starting Session:  ');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -330,14 +337,15 @@ set(dHANDLES.LTSAfig,'name','LTSA and time series',...
 % end
 
 dHANDLES.hbLTSA = brush(dHANDLES.LTSAfig);
+set(dHANDLES.hbLTSA,'Color',[1,1,0],'Enable','on'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbLTSA,'ActionPostCallback',{@brushOff,dHANDLES.LTSAfig})
-
 % 
 dHANDLES.RMSvPPfig = figure(51);
 set(dHANDLES.RMSvPPfig,'name',...
     sprintf('RL pp vs. RL rms (left shift by %d)',p.threshRL),...
     'KeyPressFcn',@keyAction)
 dHANDLES.hbRMSvPP = brush(dHANDLES.RMSvPPfig);
+set(dHANDLES.hbRMSvPP,'Color',[1,1,0],'Enable','on'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvPP,'ActionPostCallback',{@brushOff,dHANDLES.RMSvPPfig})
 
 dHANDLES.RMSvFreqfig = figure(53);
@@ -345,6 +353,7 @@ set(dHANDLES.RMSvFreqfig,'name',...
     sprintf('RL rms vs. Peak freq. (left shift by %d)',p.threshRL),...
     'KeyPressFcn',@keyAction)
 dHANDLES.hbRMSvFreq = brush(dHANDLES.RMSvFreqfig);
+set(dHANDLES.hbRMSvFreq,'Color',[1,1,0],'Enable','on'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvFreq,'ActionPostCallback',{@brushOff,dHANDLES.RMSvFreqfig})
 
 dHANDLES.spectrafig = figure(50);
@@ -359,9 +368,7 @@ set(dHANDLES.wavefig,'name','Waveform',...
 if exist('plotaxes','var')
     dPARAMS.plotaxes = plotaxes;
 end
-%% Main Loop
-% loop over the number of bouts (sessions)
-dPARAMS.onerun = 1; % need comment here about what this does.
+
 
 % figures out a max for spectral plot
 if p.threshHiFreq ~=0 %any(strcmp('threshHiFreq',fieldnames(p)))
@@ -370,6 +377,9 @@ else
     dPARAMS.ymax = dPARAMS.fmsp(end);  % yaxis max of plot 53 (Default)
 end
 
+
+%% Main Loop
+% loop over the number of bouts (sessions)
 boutMotion % run it once to set up first view. After that it will be 
 % run after key press only.
 

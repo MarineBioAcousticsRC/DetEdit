@@ -79,8 +79,13 @@ disp(['Number of samples for fft: ', num2str(PARAMS.ltsa.nfft)])
 
 % compression factor
 PARAMS.ltsa.cfact = PARAMS.ltsa.tave * PARAMS.ltsa.fs / PARAMS.ltsa.nfft;
-disp(['XWAV to LTSA Compression Factor: ',num2str(PARAMS.ltsa.cfact)])
+if PARAMS.ltsa.ftype == 1
+    disp(['WAV to LTSA Compression Factor: ',num2str(PARAMS.ltsa.cfact)])
+else
+    disp(['XWAV to LTSA Compression Factor: ',num2str(PARAMS.ltsa.cfact)])
+end
 disp(' ')
+
 
 % number of frequencies in each spectral average:
 if mod(PARAMS.ltsa.nfft,2) % odd

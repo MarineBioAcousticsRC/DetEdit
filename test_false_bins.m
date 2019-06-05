@@ -1,12 +1,12 @@
 function zTD = test_false_bins(k,zTD,xt,xPP,binCX)
 %%% Checks a window in a session and asks if it's true or false
 % moved into subroutine kf 10/4/2016
-
+global dHANDLES
 % (Might be nice to highlight the clicks in question on fig 51 also?)
 % Plot all test clicks in session
 figure(201)
 subplot(3,1,1)  % top panel RL vs Time
-hold on
+hold(dHANDLES.LTSAsubs(1),'on')
 for inxfd = 1 : zTD(k,1)
     plot(xt(inxfd),xPP(inxfd),...
         'ro','MarkerSize',10,'UserData',xt(inxfd));

@@ -60,6 +60,7 @@ elseif strcmp(sp,'Pm')
     spParams.ltsaBright = 73;
     spParams.dtHi = 2;
     spParams.minDur = 60;
+    spParams.rlLow = 125;
     % Panel Frequency spectra
     spParams.fLow = 5;
     % Panel RL rms vs. RL pp | Peak freq.

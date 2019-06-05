@@ -70,6 +70,8 @@ switch analysis
         params.ltsaMax = ltsaMax;
         params.rlLow = rlLow;
         params.rlHi = rlHi;
+        params.rmsLow = rmsLow;
+        params.rmsHi = rmsHi;
         params.dfManual = dfManual;
         params.dfManual = dfManual;
         params.minBout = minBout;
@@ -85,6 +87,7 @@ switch analysis
         params.colorTab = colorTab;
         params.ltsaDir = ltsaDir;
         params.mySpID = mySpID;
+        params.autoFalse = autoFalse;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));

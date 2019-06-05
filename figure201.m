@@ -31,7 +31,7 @@ tstr(1) = {fNameList.TPWS};
 tstr(2) = {['Session: ',num2str(dPARAMS.k),'/',num2str(dPARAMS.nb),' Start Time ',...
     datestr(dPARAMS.sb(dPARAMS.k)),' Detect = ',num2str(dPARAMS.nd)]};
 title(dHANDLES.LTSAsubs(1),tstr);
-ylabel(dHANDLES.LTSAsubs(1),'RL [dB re 1\muPa]')
+ylabel(dHANDLES.LTSAsubs(1),'Received Level (dB_p_p re 1\muPa)')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -63,7 +63,8 @@ if ldt > 0
     set(dHANDLES.LTSAsubs(3),'YTick',Ytick)
     datetick(dHANDLES.LTSAsubs(3),'x',15,'keeplimits')
     grid(dHANDLES.LTSAsubs(3),'on')
-    ylabel(dHANDLES.LTSAsubs(3),'Time between detections [s]')
+    ylabel(dHANDLES.LTSAsubs(3),'Time between detections (s)')
+    xlabel(dHANDLES.LTSAsubs(3),'Time (GMT)')
     
     %%% plot FD, ID
     hold(dHANDLES.LTSAsubs(3),'on')

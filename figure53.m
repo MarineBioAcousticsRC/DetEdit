@@ -29,10 +29,10 @@ plot(dHANDLES.h53,dPARAMS.pxmsp,dPARAMS.freq,'.','MarkerSize',...
     p.sizePoints,'UserData',dPARAMS.t) % true ones in blue
 
 if ~p.loadMSP
-    if p.threshHiFreq > 0 && isfield(dPARAMS,'plotaxes')
-        xtline = [dPARAMS.plotaxes.minRMS,dPARAMS.plotaxes.maxRMS];
-        ytline = [p.threshHiFreq ,p.threshHiFreq];
-    elseif p.threshHiFreq > 0
+    if p.threshHiFreq > 0 %&& isfield(dPARAMS,'plotaxes')
+%         xtline = [p.rmsLow,p.rmsHi];
+%         ytline = [p.threshHiFreq ,p.threshHiFreq];
+%     elseif p.threshHiFreq > 0
         xtline = [min(dPARAMS.pxmsp),max(dPARAMS.pxmsp)];
         ytline = [p.threshHiFreq ,p.threshHiFreq];
     end
@@ -57,16 +57,14 @@ end
 
 hold(dHANDLES.h53, 'off')
 if p.threshHiFreq > 0
-    ylim(dHANDLES.h53,[p.fLow dPARAMS.ymax+10])
+    ylim(dHANDLES.h53,[p.fLow p.threshHiFreq+10])
 else
-    ylim(dHANDLES.h53,[p.fLow dPARAMS.ymax])
+    ylim(dHANDLES.h53,[p.fLow p.fHi])
 end
+xlim(dHANDLES.h53,[p.rmsLow,p.rmsHi])
 
-xlabel(dHANDLES.h53,'dB RMS')
+xlabel(dHANDLES.h53,'Transformed Received Level (dB_r_m_s re 1\muPa)')
 ylabel(dHANDLES.h53,'Peak Frequency (kHz)')
-if isfield(dPARAMS,'plotaxes')
-    xlim(dHANDLES.h53,[dPARAMS.plotaxes.minRMS,dPARAMS.plotaxes.maxRMS])
-end
 
 if ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
     

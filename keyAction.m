@@ -29,24 +29,29 @@ elseif strcmp(dPARAMS.cc,'s') % change time diff scale on bottom plot of 201
     p.dtHi = input(' Update IPI scale (sec):  '); % Set IPI scale
     
 elseif strcmp(dPARAMS.cc,'d') % change RL scale on top plot of 201
-    p.rlLow = input(' Update RL low (dB):  '); % Set RL low
-    p.rlHi = input(' Update RL high (dB):  '); % Set RL high
+    p.rlLow = input(' Update minimum Received Level (dB_p_p 1 re \muPa):  '); % Set RL low
+    p.rlHi = input(' Update maximum Received Level (dB_p_p 1 re \muPa):  '); % Set RL high
+    
+elseif strcmp(dPARAMS.cc,'m') % change RMS scale on plot 51 and 53
+    p.rmsLow = input(' Update minimum Received Level (dB_r_m_s 1 re \muPa):  '); % Set RLrms low
+    p.rmsHi = input(' Update maximum Received Level (dB_r_m_s 1 re \muPa):  '); % Set RLrms high
+    
+elseif strcmp(dPARAMS.cc,'h') % change High Frequency scale plot 51
+    p.fLow = input(' Update minimum High Frequency (kHz):  '); % Set false thres
+    p.fHi = input(' Update maximum High Frequency (kHz):  '); % Set false thres
     
 elseif strcmp(dPARAMS.cc,'a')% change LTSA parameters
     p.ltsaContrast = input(sprintf('  Current Contrast %d. Update Contrast:  ',p.ltsaContrast));
     p.ltsaBright = input(sprintf('  Current Brightness %d. Update Brightness:  ',p.ltsaBright));
     
 elseif strcmp(dPARAMS.cc,'<') % change RMS threshold plot 51
-    p.threshRMS = input(' Set RMS Threshold:  '); % Set false thres
+    p.threshRMS = input(' Set Received Level (dB_r_m_s 1 re \muPa) Threshold:  '); % Set false thres
     
 elseif strcmp(dPARAMS.cc,':') % change RMS threshold plot 51
-    p.threshPP = input(' Set PP Threshold:  '); % Set false thres
+    p.threshPP = input(' Set Received Level (dB_p_p 1 re \muPa) Threshold:  '); % Set false thres
     
 elseif strcmp(dPARAMS.cc,'^') % change High Frequency threshold plot 51
     p.threshHiFreq = input(' Set High Frequency Threshold:  '); % Set false thres
-    
-elseif strcmp(dPARAMS.cc,'!') % change High Frequency threshold plot 51
-    dPARAMS.ymax = input(' Update High Frequency axis:  '); % Set false thres
     
 elseif strcmp(dPARAMS.cc,'b') % Move backward one bout
     if dPARAMS.k ~= 1

@@ -8,7 +8,7 @@ dHANDLES.h51 = gca;
 if p.specploton && p.loadMSP
     plot(dHANDLES.h51,dPARAMS.pxmspAll,dPARAMS.xmppAll,'o','MarkerSize',...
         p.sizeBack,'MarkerEdgeColor',[.7,.7,.7],'UserData',dPARAMS.clickTimes)
-    title(dHANDLES.h51,['Based on ',num2str(length(dPARAMS.xmppAll)),' clicks']);
+    title(dHANDLES.h51,['Based on total of ',num2str(length(dPARAMS.xmppAll)),' clicks']);
     
     if (p.threshRMS > 0)
         %%% why is x/ytline used for different variables?
@@ -60,12 +60,10 @@ end
 
 hold(dHANDLES.h51, 'off')
 
-xlabel(dHANDLES.h51,'dB RMS')
-ylabel(dHANDLES.h51,'dB Peak-to-peak')
-if isfield(dPARAMS,'plotaxes')
-    xlim(dHANDLES.h51,[dPARAMS.plotaxes.minRMS,dPARAMS.plotaxes.maxRMS])
-    ylim(dHANDLES.h51,[dPARAMS.plotaxes.minPP,dPARAMS.plotaxes.maxPP])
-end
+xlabel(dHANDLES.h51,'Transformed Received Level (dB_r_m_s re 1\muPa)')
+ylabel(dHANDLES.h51,'Received Level (dB_p_p re 1\muPa)')
+xlim(dHANDLES.h51,[p.rmsLow,p.rmsHi])
+ylim(dHANDLES.h51,[p.rlLow,p.rlHi])
 
 
 % if you have items brushed in yellow, highlight those on each plot

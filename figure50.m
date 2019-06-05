@@ -30,6 +30,7 @@ end
 
 % add figure labels
 xlabel(dHANDLES.h50,'Frequency (kHz)');
+ylabel(dHANDLES.h50,'Normalized Received Level')
 grid(dHANDLES.h50,'on')
 xlim(dHANDLES.h50, 'manual');
 ylim(dHANDLES.h50,[0 1]);

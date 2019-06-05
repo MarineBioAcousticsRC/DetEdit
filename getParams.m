@@ -70,6 +70,8 @@ switch analysis
         params.ltsaMax = ltsaMax;
         params.rlLow = rlLow;
         params.rlHi = rlHi;
+        params.rmsLow = rmsLow;
+        params.rmsHi = rmsHi;
         params.dfManual = dfManual;
         params.dfManual = dfManual;
         params.minBout = minBout;

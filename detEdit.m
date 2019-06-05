@@ -35,9 +35,9 @@ if typeInput ~= 1
 end
 
 p = getParams(userFunc,'analysis','detEdit');
-p.sizePoints = 9; % the current points
+p.sizePoints = 8; % the current points
 p.sizeBack = 5; % the background points
-p.sizeFPR = 7; % the current points
+p.sizeFPR = 8; % the current points
 p.colorPoints = [1 .84 0];
 
 %% Define subfolder that fit specified iteration

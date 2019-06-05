@@ -337,7 +337,7 @@ set(dHANDLES.LTSAfig,'name','LTSA and time series',...
 % end
 
 dHANDLES.hbLTSA = brush(dHANDLES.LTSAfig);
-set(dHANDLES.hbLTSA,'Color',[1,1,0],'Enable','on'); % light yellow [.9290 .6940 .1250]
+set(dHANDLES.hbLTSA,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbLTSA,'ActionPostCallback',{@brushOff,dHANDLES.LTSAfig})
 % 
 dHANDLES.RMSvPPfig = figure(51);

@@ -345,7 +345,7 @@ set(dHANDLES.RMSvPPfig,'name',...
     sprintf('RL pp vs. RL rms (left shift by %d)',p.threshRL),...
     'KeyPressFcn',@keyAction)
 dHANDLES.hbRMSvPP = brush(dHANDLES.RMSvPPfig);
-set(dHANDLES.hbRMSvPP,'Color',[1,1,0],'Enable','on'); % light yellow [.9290 .6940 .1250]
+set(dHANDLES.hbRMSvPP,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvPP,'ActionPostCallback',{@brushOff,dHANDLES.RMSvPPfig})
 
 dHANDLES.RMSvFreqfig = figure(53);
@@ -353,7 +353,7 @@ set(dHANDLES.RMSvFreqfig,'name',...
     sprintf('RL rms vs. Peak freq. (left shift by %d)',p.threshRL),...
     'KeyPressFcn',@keyAction)
 dHANDLES.hbRMSvFreq = brush(dHANDLES.RMSvFreqfig);
-set(dHANDLES.hbRMSvFreq,'Color',[1,1,0],'Enable','on'); % light yellow [.9290 .6940 .1250]
+set(dHANDLES.hbRMSvFreq,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvFreq,'ActionPostCallback',{@brushOff,dHANDLES.RMSvFreqfig})
 
 dHANDLES.spectrafig = figure(50);

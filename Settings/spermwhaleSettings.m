@@ -58,7 +58,8 @@ ltsaDir = 'E:\detEditexamples\LTSA'; % identify folder containing ltsa files (.l
 % paramsUser.slope = 0.7; % slope for shifting data vertically
 % paramsUser.threshRMS = 0; % default for < command, RMS threshold cutoff
 % paramsUser.threshPP = 0; % default for : command, PP threshold cutoff
-paramsUser.threshHiFreq = 40; % default for ^ command, high freq cutoff for clicks
+% paramsUser.threshHiFreq = 40; % default for ^ command, high freq cutoff for clicks
+paramsUser.autoFalse = true;
 
 %%% Setting preferences to override modDet.m defaults
 % (Uncomment these in as needed to override detEdit defaults defined at

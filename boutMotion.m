@@ -164,7 +164,7 @@ if (nbinS == 0)
     disp('No LTSA for this Session');
     dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ;
     dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k); % start end times for plots
-    dPARAMS.pwr1(1:length(f)) = ones; % make uniform LTSA
+    dPARAMS.pwr1(1:length(dPARAMS.f)) = ones; % make uniform LTSA
 else
     dPARAMS.pwr1 = dPARAMS.pwr1((1000*dPARAMS.fiminLTSA/dPARAMS.df)+1:round(1000*dPARAMS.fimaxLTSA/dPARAMS.df)+1,:);
 end

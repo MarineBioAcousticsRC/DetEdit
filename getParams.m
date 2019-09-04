@@ -1,8 +1,8 @@
 function params = getParams(userParams,varargin)
 
-% getParams 
+% getParams
 %
-% Read initial and species default parameters, overwrite with user-defined 
+% Read initial and species default parameters, overwrite with user-defined
 %
 % Inputs:
 %
@@ -15,7 +15,7 @@ function params = getParams(userParams,varargin)
 %           'detEdit' - interface parameters
 %           'mkLTSA' - parameters to calculate the LTSA sessions
 %           'modDet' - parameters to modify annotation files
-%           'SumPPICIBin' - parameters to summarize  
+%           'SumPPICIBin' - parameters to summarize
 %
 %
 % Output:
@@ -54,7 +54,7 @@ params.ltsaDir = ltsaDir;
 
 %% create struct to return parameters
 switch analysis
-    case {'detEdit','mkLTSA'} 
+    case {'detEdit','mkLTSA'}
         params.speName = speName;
         params.tfSelect = tfSelect;
         params.dtHi = dtHi;
@@ -81,13 +81,19 @@ switch analysis
         params.rawFileDur = rawFileDur;
         params.c4fd = c4fd;
         params.specploton = specploton;
-        params.minNdet = minNdet; 
+        params.minNdet = minNdet;
         params.maxDetLoad = maxDetLoad;
         params.gth = gth;
         params.colorTab = colorTab;
         params.ltsaDir = ltsaDir;
         params.mySpID = mySpID;
         params.autoFalse = autoFalse;
+        params.plotTemplate = plotTemplate;
+        params.template_spectra = template_spectra;
+        params.template_spectra2 = template_spectra2;
+        params.template_color = template_color;
+        params.template_color2 = template_color2;
+        params.outdir = outdir;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));
@@ -108,7 +114,7 @@ switch analysis
             end
         end
         
-    case {'modDet'} 
+    case {'modDet'}
         params.speName = speName;
         params.tfSelect = tfSelect;
         params.threshRL = threshRL;
@@ -123,6 +129,11 @@ switch analysis
         params.excludeID = excludeID;
         params.calcParams = calcParams;
         params.ltsaMax = ltsaMax;
+        params.plotTemplate = plotTemplate;
+        params.template_spectra = template_spectra;
+        params.template_spectra2 = template_spectra2;
+        params.template_color = template_color;
+        params.template_color2 = template_color2;
         
         % apply species default parameters
         if ~isempty(spParams)
@@ -154,6 +165,11 @@ switch analysis
         params.binDur = binDur;
         params.effortTimes = effortTimes;
         params.referenceTime = referenceTime;
+        params.plotTemplate = plotTemplate;
+        params.template_spectra = template_spectra;
+        params.template_spectra2 = template_spectra2;
+        params.template_color = template_color;
+        params.template_color2 = template_color2;
         
         % apply species default parameters
         if ~isempty(spParams)
@@ -177,6 +193,6 @@ switch analysis
         
     otherwise
         sprintf(['No analysis specified. Please add one of these options:\n',...
-        'detEdit, mkLTSA or modDet'])
+            'detEdit, mkLTSA or modDet'])
 end
 

@@ -170,6 +170,8 @@ else
 end
 dPARAMS.durS = dPARAMS.PT(end) - dPARAMS.PT(1);
 
+dPARAMS.normTemp =[];
+dPARAMS.normTemp2 =[];
 
 dPARAMS.trueSpec = [];
 if ~isempty(dPARAMS.trueTimes)

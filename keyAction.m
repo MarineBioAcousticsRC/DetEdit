@@ -25,6 +25,13 @@ elseif ~isempty(str2num(dPARAMS.cc))
     
     [zFD,zID] = brush_color_number(gca,str2num(dPARAMS.cc),zFD,zID,p.colorTab,dPARAMS.t);
     
+elseif strcmp(dPARAMS.cc,'p') %save current figures as one MATLAB fig file
+    figsave = [dHANDLES.LTSAfig; dHANDLES.RMSvPPfig; ...
+        dHANDLES.RMSvFreqfig; dHANDLES.spectrafig; dHANDLES.wavefig];
+    figFilename = fullfile(p.outdir,sprintf('%s_detEdit_bout%d.fig',p.filePrefix,dPARAMS.k));
+    savefig(figsave,figFilename)
+    disp('Saving figures from this bout')
+
 elseif strcmp(dPARAMS.cc,'s') % change time diff scale on bottom plot of 201
     p.dtHi = input(' Update IPI scale (sec):  '); % Set IPI scale
     

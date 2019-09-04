@@ -5,6 +5,16 @@ global dPARAMS dHANDLES p
 figure(dHANDLES.spectrafig);clf
 dHANDLES.h50 = gca;
 
+if p.plotTemplate
+    hold on
+    dPARAMS.normTemp = norm_spec_simple(p.template_spectra,dPARAMS.fimint,dPARAMS.fimaxt);
+    plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.normTemp,'-.','Color',p.template_color,'Linewidth',2)
+    if ~isempty(p.template_spectra2)
+        dPARAMS.normTemp2 = norm_spec_simple(p.template_spectra2,dPARAMS.fimint,dPARAMS.fimaxt);
+        plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.normTemp2,'-.','Color',p.template_color2,'Linewidth',2)
+    end
+end
+
 if ~isempty(dPARAMS.trueTimes)
     % plot average true click spectrum
     plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',4)

@@ -37,7 +37,7 @@ if  strcmpi(sp,'De')
   
     % Bout parameters 
     spParams.threshRL = 118;
-    spParams.c4fd = 1000; 
+    spParams.c4fd = 5000; 
     % Panel LTSA and time series
     spParams.rlLow = spParams.threshRL - 6.9;
     spParams.rlHi = 190;

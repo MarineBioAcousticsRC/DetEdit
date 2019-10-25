@@ -221,6 +221,7 @@ nf = fk - 1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get dnumstart of all raw files in directories
+DateRE = '\d+_\d+';
 fullFileName = [];
 for fk = 1 : nf      % loop over folders
     %%%%%%%%%%%%%%%%%%%%%%%%%%%

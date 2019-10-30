@@ -20,7 +20,8 @@ function Edetect(varargin)
 %         'timeFile','G:\GofMXArraySpRecs\Pc\MOTU\edetect_test.xlsx',...
 %         'audioDir',{'G:\GofMXArraySpRecs\Pc\MOTU';'G:\GofMXArraySpRecs\Gmsp\MOTU'},...
 %         'fileType',1,...
-%         'channel',1)
+%         'channel',1,...
+%         'outputFileName','siteA_2012')
 %   paramFile: Spreadsheet containing detector parameters
 %   tfFile: Transfer function
 %   timeFile: Spreadsheet containing bout times
@@ -29,6 +30,7 @@ function Edetect(varargin)
 %       subfolders (eg: 'E:\myFolder' and 'E:\myFolder\mySubFolder').
 %   fileType: Audio file type: 1 - wav, 2 - pseudo-wav (x.wav). Defaults to 2.
 %   channel: Which wav file channel to detect on. Defaults to 1.
+%   outputFileName: Output File Name
 
 
 % Output parameters are saved to a binary matfile as
@@ -73,6 +75,8 @@ while n <= length(varargin)
             ftype = varargin{n+1}; n=n+2;
         case 'channel'
             channel = varargin{n+1}; n=n+2;
+        case 'outputFileName'
+            outputFileName = varargin{n+1}; n=n+2;
         otherwise
             error('Bad optional argument: "%s"', varargin{n});
     end
@@ -151,10 +155,14 @@ if ~exist('channel','var')
     channel = 1;
 end
 
+if ~exist('outputFileName','var')
+   [~, outputFileName, ~] = fileparts(timeFile);
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % save command line text to diary text file
-[pathstr, name, ~] = fileparts(timeFile);
-dname = fullfile(pathstr,[name,'_Edetect_output.txt']);
+[pathstr, ~, ~] = fileparts(timeFile);
+dname = fullfile(pathstr,[outputFileName,'_Edetect_output.txt']);
 diary(dname)
 fprintf('%s\n\n',dname)
 
@@ -284,10 +292,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % move from cell to matrix
-MTT = cell2mat(TT);
-MPP = cell2mat(PP);
-MSN = cell2mat(SN');
-MSP = cell2mat(SP');
+MTT = cell2mat(TT)';
+MPP = cell2mat(PP)';
+MSN = cell2mat(SN);
+MSP = cell2mat(SP);
 if (un == 1)
     MUSN = cell2mat(USN');
     MUSP = cell2mat(USP');
@@ -295,12 +303,13 @@ if (un == 1)
 end
 
 % output file with Time and max RL
-[pathstr, name, ext] = fileparts(timeFile);
-oname = fullfile(pathstr,[name,'_TPWS.mat']); % TimePeakWaveformSpectra
+outputPath = fullfile(pathstr,[outputFileName,'_TPWS1.mat']); % TimePeakWaveformSpectra
 if (un == 1)
-    save(oname,'MTT','MPP','MSN','MUSN','MSP','MUSP','MNSP')
+    save(outputPath,'MTT','MPP','MSN','MUSN','MSP','MUSP','MNSP')
+    disp(['TPWS file saved in ',outputPath])
 else
-    save(oname,'MTT','MPP','MSN','MSP')
+    save(outputPath,'MTT','MPP','MSN','MSP')
+    disp(['TPWS file saved in ',outputPath])
 end
 
 disp(['Total Number of Detections for All Events = ',num2str(length(MTT))])
@@ -486,13 +495,13 @@ for k = 1:NRF
         nspecdb = 10.*log10(nspec);
         Ptfx = interp1(tfFreq,tfPower,f,'linear','extrap');
         %         for i = 1:Ndet
-        specdb = specdb + ones(Ndet,1) *  Ptfx';
-        ufspecdb = ufspecdb + ones(Ndet,1) *  Ptfx';
-        nspecdb = nspecdb + ones(Ndet,1) *  Ptfx';
+        specdb = specdb + ones(Ndet,1);
+        ufspecdb = ufspecdb + ones(Ndet,1);
+        nspecdb = nspecdb + ones(Ndet,1);
         %         end
         % group for output
-        TT = [TT T];
-        PP = [PP ppdb];
+        TT = [TT, T];
+        PP = [PP, ppdb];
         SN = [SN; snip];
         USN = [USN; ufsnip];
         SP = [SP; specdb];

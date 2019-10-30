@@ -90,7 +90,7 @@ elseif (strcmp(sp,'Zc') || strcmp(sp,'z') || strcmp(sp,'Cuviers'))
     % Panel Frequency spectra
     spParams.fLow = 10;
     % Panel RL rms vs. RL pp | Peak freq.
-    spParams.threshRMS = 55;
+%     spParams.threshRMS = 55;
     % parameters for modDet plots (if specified to compute)
     spParams.iciRange = [40, 750];
     spParams.dbRange = [90, 170];

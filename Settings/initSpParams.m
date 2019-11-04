@@ -78,7 +78,7 @@ elseif (strcmp(sp,'Zc') || strcmp(sp,'z') || strcmp(sp,'Cuviers'))
     spParams.speName = 'Cuviers'; 
     
     % Bout parameters 
-    spParams.tfSelect = 40200; 
+%     spParams.tfSelect = 40200; 
     spParams.dfManual = 100;
     spParams.threshRL = 121;
     spParams.c4fd = 3000;

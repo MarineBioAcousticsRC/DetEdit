@@ -196,7 +196,7 @@ else
     end
     peakFrTfVal = tfFunResampled(peakFrIdx);
     % Compute amplitude from waveform and add tf.
-    MPP = 20*log10(max(MSN,[],2)+abs(min(MSN,[],2))) + peakFrTfVal';
+    MPP = 20*log10(max(MSN*2^15,[],2)+abs(min(MSN*2^15,[],2))) + peakFrTfVal';
     
 end
 

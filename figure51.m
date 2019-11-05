@@ -6,7 +6,7 @@ figure(dHANDLES.RMSvPPfig);clf
 dHANDLES.h51 = gca;
 
 if p.specploton && p.loadMSP
-    plot(dHANDLES.h51,dPARAMS.pxmspAll,dPARAMS.xmppAll,'o','MarkerSize',...
+    plot(dHANDLES.h51,dPARAMS.transfRMSall,dPARAMS.xmppAll,'o','MarkerSize',...
         p.sizeBack,'MarkerEdgeColor',[.7,.7,.7],'UserData',dPARAMS.clickTimes)
     title(dHANDLES.h51,['Based on total of ',num2str(length(dPARAMS.xmppAll)),' clicks']);
     
@@ -29,7 +29,7 @@ end
 % Plot  PP versus RMS Plot for this session
 hold(dHANDLES.h51, 'on')
 dHANDLES.h51.ColorOrderIndex = 1;
-plot(dHANDLES.h51,dPARAMS.pxmsp,dPARAMS.xmpp,'.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t)% true ones in blue
+plot(dHANDLES.h51,dPARAMS.transfRMS,dPARAMS.xmpp,'.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t)% true ones in blue
 
 if p.threshPP > 0 && isfield(dPARAMS,'plotaxes') % why doesn't plot axes just either exist or not??? messy.
     xtline = [p.threshRMS,p.threshRMS];
@@ -45,13 +45,13 @@ plot(dHANDLES.h51,xtline,ytline,'r')
 
 
 if dPARAMS.ff2 % false in red
-    plot(dHANDLES.h51,dPARAMS.pxmsp(dPARAMS.K2),dPARAMS.xmpp(dPARAMS.K2),...
+    plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K2),dPARAMS.xmpp(dPARAMS.K2),...
         'r.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K2))
 end
 if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
-        hPP = plot(dHANDLES.h51,dPARAMS.pxmsp(dPARAMS.K3(thisIDset)),...
+        hPP = plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K3(thisIDset)),...
             dPARAMS.xmpp(dPARAMS.K3(thisIDset)),'.',...
             'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
         set(hPP,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
@@ -70,7 +70,7 @@ ylim(dHANDLES.h51,[p.rlLow,p.rlHi])
 if ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
     
     hold(dHANDLES.h51,'on')
-    plot(dHANDLES.h51,dPARAMS.pxmsp(dPARAMS.yell),dPARAMS.xmpp(dPARAMS.yell),'ko',...
+    plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.yell),dPARAMS.xmpp(dPARAMS.yell),'ko',...
         'MarkerSize',p.sizeBack,...
         'LineWidth',2,'UserData',dPARAMS.clickTimes(dPARAMS.K2))
     hold(dHANDLES.h51,'off')

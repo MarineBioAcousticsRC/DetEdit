@@ -4,13 +4,13 @@ global p dPARAMS
 
 if p.loadMSP % if all spectra are loaded into memory
     % compute peak freq directly
-    dPARAMS.xmsp0All = dPARAMS.csp + repmat(dPARAMS.Ptfpp,size(dPARAMS.csp,1),1);
-    %     [dPARAMS.xmspAll,im] = max(dPARAMS.xmsp0All(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2); % maximum between flow-100kHz
-    [~,im] = max(dPARAMS.xmsp0All(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2); % maximum between flow-100kHz
+    [~,im] = max(dPARAMS.csp(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2); % maximum between flow-100kHz
     
-    linearsp = 10.^(dPARAMS.xmsp0All/20);
-    binWidth = (dPARAMS.ft(2)-dPARAMS.ft(1))*1000;%Fs/nfft;
-    dPARAMS.xmspAll = 10*log10(sum(linearsp(:,dPARAMS.fimint:dPARAMS.fimaxt).*binWidth,2)); % maximum between flow-100kHz
+    % compute rms
+    cspLinear = 10.^(dPARAMS.csp/10);
+    binWidth = (dPARAMS.ft(2)-dPARAMS.ft(1));%Fs/nfft;
+    dPARAMS.RMSall = 10*log10(sum(cspLinear(:,dPARAMS.fimint:dPARAMS.fimaxt)...
+        .*binWidth,2)) + dPARAMS.tf;
     
 else
     % otherwise, load spectra in batches and calculate peak freq
@@ -24,20 +24,20 @@ else
     for iBatch = 1:length(batchList)-1
         thisBatch = (batchList(iBatch)+1):batchList(iBatch+1);
         cspTemp = dPARAMS.inFileMat.MSP(thisBatch,:);
-        xmsp0AllTemp = cspTemp + repmat(dPARAMS.Ptfpp,size(cspTemp,1),1);
-        %         [xmspAllTemp,imTemp] = max(xmsp0AllTemp(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
-        [~,imTemp] = max(xmsp0AllTemp(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
+        [~,imTemp] = max(cspTemp(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
         
-        linearsp = 10.^(dPARAMS.xmsp0AllTemp/20);
-        binWidth = (dPARAMS.ft(2)-dPARAMS.ft(1))*1000;%Fs/nfft;
-        dPARAMS.xmspAllTemp = 10*log10(sum(linearsp(:,dPARAMS.fimint:dPARAMS.fimaxt).*binWidth,2)); % maximum between flow-100kHz
+        % compute rms
+        cspTempLinear = 10.^(dPARAMS.cspTemp/10);
+        binWidth = (dPARAMS.ft(2)-dPARAMS.ft(1));%Fs/nfft;
+        dPARAMS.RMSallTemp = 10*log10(sum(cspTempLinear(:,dPARAMS.fimint:dPARAMS.fimaxt)...
+            .*binWidth,2)) + dPARAMS.tf;
         
-        dPARAMS.xmspAll = [dPARAMS.xmspAll;xmspAllTemp];
+        dPARAMS.RMSall = [dPARAMS.RMSall;RMSallTemp];
         im = [im;imTemp];
     end
 end
 dPARAMS.xmppAll = dPARAMS.clickLevels - dPARAMS.tf+ ...
     dPARAMS.Ptfpp(im + dPARAMS.fimint-1)'; % vectorized version
-dPARAMS.pxmspAll = dPARAMS.xmspAll - p.slope*(dPARAMS.clickLevels - p.threshRL); %use slope of 1 to mod xmsp for plot
+dPARAMS.transfRMSall = dPARAMS.RMSall - p.slope*(dPARAMS.xmppAll - p.threshRL); %use slope of 1 to mod xmsp for plot
 
 dPARAMS.freqAll = dPARAMS.fmsp(im + dPARAMS.fimint-1);

@@ -146,6 +146,13 @@ end
 % Make MSN
 MSN = timeSeries;
 
+% Check if waveform is in counts
+iscounts = max(max(MSN)) > 1;
+
+if ~iscounts
+   error('Time series variable is normalized [-1 1]. Please provide time series amplitude in counts')  
+end
+
 % make MTT 
 MTT = detectionTimes;
 
@@ -162,7 +169,8 @@ else
     
     % Compute power spectral density
     [MSP,fHz] = pwelch(padZeros',fftWindow,0,fftLength,sampleRate);
-
+    MSP = MSP*sampleRate/2;
+    
     % convert to dBs
     MSP = 10.*log10(abs(MSP'));
 
@@ -196,7 +204,7 @@ else
     end
     peakFrTfVal = tfFunResampled(peakFrIdx);
     % Compute amplitude from waveform and add tf.
-    MPP = 20*log10(max(MSN*2^15,[],2)+abs(min(MSN*2^15,[],2))) + peakFrTfVal';
+    MPP = 20*log10(max(MSN,[],2)+abs(min(MSN,[],2))) + peakFrTfVal';
     
 end
 

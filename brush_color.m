@@ -58,7 +58,7 @@ function [yell,zFD,zID,bFlag] = brush_color(hFig,cc,zFD,zID,colorTab,t)
 yell = [];
 
 % Find brushed axes
-[brushDate, brushColor, bFlag] = get_brushed(hFig)
+[brushDate, brushColor, bFlag] = get_brushed(hFig);
 
 if ~isempty(brushDate)
     

@@ -490,9 +490,9 @@ for k = 1:NRF
         ppdb = 20.*log10(pp);     % logify
         %     snipdb = 20.*log10(snip);
         % apply transfer function
-        specdb = 10.*log10(spec);
-        ufspecdb = 10.*log10(ufspec);
-        nspecdb = 10.*log10(nspec);
+        specdb = 10.*log10(spec*fs/2);
+        ufspecdb = 10.*log10(ufspec*fs/2);
+        nspecdb = 10.*log10(nspec*fs/2);
         Ptfx = interp1(tfFreq,tfPower,f,'linear','extrap');
         %         for i = 1:Ndet
         specdb = specdb + ones(Ndet,1);

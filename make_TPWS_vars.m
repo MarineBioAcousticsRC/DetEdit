@@ -169,10 +169,10 @@ else
     
     % Compute power spectral density
     [MSP,fHz] = pwelch(padZeros',fftWindow,0,fftLength,sampleRate);
-    MSP = MSP*sampleRate/2;
+    MSP = MSP'*sampleRate/2;
     
     % convert to dBs
-    MSP = 10.*log10(abs(MSP'));
+    MSP = 10.*log10(abs(MSP));
 
     f = fHz./1000; % Convert to kHz
     

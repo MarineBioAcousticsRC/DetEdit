@@ -47,7 +47,7 @@ fHi = sampleRate/2; % Maximum frequency of interest
 
 % Panel RL rms vs. RL pp | Peak freq.
 slope = 1; % slope for shifting data vertically
-rmsLow = 40; % transformed received level (dBrms) plot window low limit
+rmsLow = 80; % transformed received level (dBrms) plot window low limit
 rmsHi = 140; % transformed received level (dBrms) plot window high limit
 threshRMS = 0; % default for < command, RMS threshold cutoff
 threshPP = 0; % default for : command, PP threshold cutoff

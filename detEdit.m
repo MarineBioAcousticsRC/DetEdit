@@ -171,6 +171,11 @@ save(fNameList.FD,'zFD');
 % Make ID file intersect with MTT
 load(fNameList.ID)  % identified detection times zID
 zID = rmUnmatchedDetections(MTT, zID);
+if exist('labels','var')
+    % a label struct was fount in ID file. Add it to p. This will overwrite
+    % whatever was in mySpID before.
+    p.mySpID = labels;
+end
 save(fNameList.ID,'zID');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

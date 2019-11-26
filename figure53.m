@@ -35,8 +35,9 @@ if ~p.loadMSP
 %     elseif p.threshHiFreq > 0
         xtline = [min(dPARAMS.pxmsp),max(dPARAMS.pxmsp)];
         ytline = [p.threshHiFreq ,p.threshHiFreq];
+    
+        plot(dHANDLES.h53,xtline,ytline,'r')
     end
-    plot(dHANDLES.h53,xtline,ytline,'r')
 end
 
 if dPARAMS.ff2 % false in red

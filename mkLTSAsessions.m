@@ -134,7 +134,7 @@ for iD = 1:length(fileMatchIdx)
             end
             disp('done reading ltsa headers')
         else
-            disp(['No LTSAs found to match wildcard: ', [p.ltsaDir,p.filePrefix,'*']])
+            disp(['No LTSAs found to match wildcard: ', fullfile(p.ltsaDir,[p.filePrefix,'*'])])
             return
         end
     end

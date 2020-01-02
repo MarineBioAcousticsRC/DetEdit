@@ -197,23 +197,14 @@ end
 % for all detections in this session, calculate xmpp and xmsp
 %%% Does this have to be calculated every time? %%%
 xmsp0 = dPARAMS.cspJ + repmat(dPARAMS.Ptfpp,size(dPARAMS.cspJ,1),1); % add transfer fun to session's spectra
-[xmsp,im] = max(xmsp0(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
-% if isrow(dPARAMS.RL)
-%     dPARAMS.xmpp = dPARAMS.RL - dPARAMS.tf + dPARAMS.Ptfpp([im + dPARAMS.fimint - 1]);
-% else
+[~,im] = max(dPARAMS.cspJ(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
+cspJLinear = 10.^(dPARAMS.cspJ/10);
+binWidth = (dPARAMS.ft(2)-dPARAMS.ft(1));%Fs/nfft;
+RMS = 10*log10(sum(cspJLinear(:,dPARAMS.fimint:dPARAMS.fimaxt).*binWidth,2))+ dPARAMS.tf; % maximum between flow-100kHz
 dPARAMS.xmpp = dPARAMS.RL' - dPARAMS.tf + dPARAMS.Ptfpp([im + dPARAMS.fimint - 1]);
-%end
 
-% turn diagonal to vertical
-% if ~isempty(xmsp) && ~isempty(dPARAMS.xmpp)
-%     if isrow(xmsp)
-%         dPARAMS.pxmsp = xmsp' - p.slope*(dPARAMS.xmpp - p.threshRL); %use slope of 1 to mod xmsp for plot
-%     elseif isrow(dPARAMS.xmpp)
-dPARAMS.pxmsp = xmsp - p.slope*(dPARAMS.xmpp' - p.threshRL);
-%     else
-%         dPARAMS.pxmsp = xmsp - p.slope*(dPARAMS.xmpp - p.threshRL);
-%     end
-% end
+dPARAMS.transfRMS = RMS - p.slope*(dPARAMS.xmpp' - p.threshRL);
+
 %%%-----%%%
 
 if ~p.loadMSP % plot threshold line now because no background data

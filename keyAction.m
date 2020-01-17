@@ -184,7 +184,7 @@ elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
         tEdit = intersect(tTemp,dPARAMS.t);
     end
     oldID = input(' Enter the ID you want to overwrite:  ');
-    newID  = input(' Enter the ID you want to change it to (enter 0 for no ID):  ');
+    newID  = input(' Enter the ID you want to change it to (0 = no ID, 99 = False):  ');
     addFlag = 0; % flag gets turned to 1 if we have to append to zID rather than change existing IDs
     if oldID == 0 %get everything that's unlabeled
         addFlag = 1;

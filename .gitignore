@@ -2,3 +2,4 @@
 *.asv
 *.m~
 detEdit_settings_asb.m
+Settings/initSpParams.m

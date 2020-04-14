@@ -20,6 +20,7 @@ else
         batchList = [batchList,length(dPARAMS.clickTimes)];
     end
     dPARAMS.xmspAll = [];
+    dPARAMS.RMSall = [];
     im = [];
     for iBatch = 1:length(batchList)-1
         thisBatch = (batchList(iBatch)+1):batchList(iBatch+1);
@@ -27,9 +28,9 @@ else
         [~,imTemp] = max(cspTemp(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
         
         % compute rms
-        cspTempLinear = 10.^(dPARAMS.cspTemp/10);
+        cspTempLinear = 10.^(cspTemp/10);
         binWidth = (dPARAMS.ft(2)-dPARAMS.ft(1));%Fs/nfft;
-        dPARAMS.RMSallTemp = 10*log10(sum(cspTempLinear(:,dPARAMS.fimint:dPARAMS.fimaxt)...
+        RMSallTemp = 10*log10(sum(cspTempLinear(:,dPARAMS.fimint:dPARAMS.fimaxt)...
             .*binWidth,2)) + dPARAMS.tf;
         
         dPARAMS.RMSall = [dPARAMS.RMSall;RMSallTemp];

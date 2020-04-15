@@ -72,8 +72,26 @@ elseif strcmp(sp,'Pm')
     spParams.iciRange = [300, 2000];
     spParams.N = 512;
 
-    
 %%% Beaked whales
+elseif strcmp(sp,'Bw')
+    spParams.speName = 'BeakedWhale';
+    
+    % Bout parameters
+%     spParams.dfManual = 100;
+    spParams.threshRL = 100;
+    spParams.c4fd = 3000;
+    
+    % Panel LTSA and time series
+    spParams.ltsaContrast = 180; 
+    spParams.ltsaBright = 73;
+    spParams.dtHi = 1;
+    spParams.minDur = 30;
+    spParams.rlLow = spParams.threshRL - 6.9;
+    
+    % Panel Frequency spectra
+    spParams.fLow = 5;
+    
+%%% Beaked whales by species
 elseif (strcmp(sp,'Zc') || strcmp(sp,'z') || strcmp(sp,'Cuviers'))
     spParams.speName = 'Cuviers'; 
     

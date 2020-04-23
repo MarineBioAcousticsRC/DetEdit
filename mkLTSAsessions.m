@@ -160,8 +160,18 @@ for iD = 1:length(fileMatchIdx)
         end
         % only if start or end time pass the ltsa time after adding minimum
         % duration
-        sb(sb<sTime(1)) = sTime(1);
-        eb(eb>eTime(end)) = eTime(end);
+        if length(sTime) > 1
+            % find which ltsa corresponds to
+            idxLtsa = find(sTime <= sb(1) & eTime >= eb(end));
+            if isempty(idxLtsa) % cases where end is way pass end of ltsa
+                idxLtsa = find(sTime <= sb(1),1,'last');
+            end
+            sb(sb<sTime(idxLtsa)) = sTime(idxLtsa);
+            eb(eb>eTime(idxLtsa)) = eTime(idxLtsa);
+        else
+        sb(sb<sTime(1)) = sTime;
+        eb(eb>eTime(end)) = eTime;
+        end
     end
     
     %%% Main Loop

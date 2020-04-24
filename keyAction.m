@@ -21,7 +21,7 @@ if strcmp(dPARAMS.cc,'u') || strcmp(dPARAMS.cc,'g') || strcmp(dPARAMS.cc,'r')...
     % get brushed data and figure out what to do based on color:
     [dPARAMS.yell,zFD,zID,dPARAMS.bFlag] = brush_color(gca,dPARAMS.cc,zFD,zID,p.colorTab,dPARAMS.t);
     
-elseif ~isempty(str2num(dPARAMS.cc))
+elseif isnumeric(dPARAMS.cc)
     
     [zFD,zID] = brush_color_number(gca,str2num(dPARAMS.cc),zFD,zID,p.colorTab,dPARAMS.t);
     

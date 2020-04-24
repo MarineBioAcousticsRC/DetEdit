@@ -21,7 +21,15 @@ if strcmp(dPARAMS.cc,'u') || strcmp(dPARAMS.cc,'g') || strcmp(dPARAMS.cc,'r')...
     % get brushed data and figure out what to do based on color:
     [dPARAMS.yell,zFD,zID,dPARAMS.bFlag] = brush_color(gca,dPARAMS.cc,zFD,zID,p.colorTab,dPARAMS.t);
     
-elseif isnumeric(dPARAMS.cc)
+elseif strcmp(dPARAMS.cc,'j')% jump to non-consecutive session
+    prompt = 'Jump to Session: ';
+    kjump = input(prompt);
+    if (kjump > 0 && kjump < dPARAMS.nb)
+        dPARAMS.k = kjump;
+    end
+    dPARAMS.onerun = 1;
+    
+elseif ~isempty(str2num(dPARAMS.cc))
     
     [zFD,zID] = brush_color_number(gca,str2num(dPARAMS.cc),zFD,zID,p.colorTab,dPARAMS.t);
     
@@ -75,13 +83,7 @@ elseif strcmp(dPARAMS.cc,'t') %assign ALL as true
         [~,iCID] = setdiff(zID(:,1),dPARAMS.t);
         zID = zID(iCID,:);
     end
-elseif strcmp(dPARAMS.cc,'j')% jump to non-consecutive session
-    prompt = 'Jump to Session: ';
-    kjump = input(prompt);
-    if (kjump > 0 && kjump < dPARAMS.nb)
-        dPARAMS.k = kjump;
-    end
-    dPARAMS.onerun = 1;
+
     
 elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for random False Detect
     if ~isempty(dPARAMS.XFD)

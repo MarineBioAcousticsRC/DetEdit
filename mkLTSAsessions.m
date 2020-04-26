@@ -150,6 +150,18 @@ for iD = 1:length(fileMatchIdx)
     
     % Define bouts if minimum bout duration is given
     if ~isempty(p.minDur)
+        % find ltsa to after apply start or end time if pass the ltsa time
+        % after adding minimum duration
+        if length(sTime)>1
+            % find which ltsa corresponds to
+            idxLtsa = find(sTime <= sb(1) & eTime >= eb(end));
+            if isempty(idxLtsa) % cases where end is way pass end of ltsa
+                idxLtsa = find(sTime <= sb(1),1,'last');
+            end
+        else
+            idxLtsa = 1; % only one ltsa
+        end
+        
         minbcount = 1;  %counter for while loop
         while minbcount <= nb
             if bd(minbcount) <= (p.minDur/(60*24))
@@ -160,18 +172,8 @@ for iD = 1:length(fileMatchIdx)
         end
         % only if start or end time pass the ltsa time after adding minimum
         % duration
-        if length(sTime) > 1
-            % find which ltsa corresponds to
-            idxLtsa = find(sTime <= sb(1) & eTime >= eb(end));
-            if isempty(idxLtsa) % cases where end is way pass end of ltsa
-                idxLtsa = find(sTime <= sb(1),1,'last');
-            end
-            sb(sb<sTime(idxLtsa)) = sTime(idxLtsa);
-            eb(eb>eTime(idxLtsa)) = eTime(idxLtsa);
-        else
-        sb(sb<sTime(1)) = sTime;
-        eb(eb>eTime(end)) = eTime;
-        end
+        sb(sb<sTime(idxLtsa)) = sTime(idxLtsa);
+        eb(eb>eTime(idxLtsa)) = eTime(idxLtsa);
     end
     
     %%% Main Loop
@@ -182,7 +184,7 @@ for iD = 1:length(fileMatchIdx)
         K = [];
         K = find(sTime <= sb(k) & eTime >= eb(k));
         if length(K) > 1
-            K = find(sTime(k) <= sb(k) & eTime(k) >= eb(k));
+            K = find(sTime(K) <= sb(k) & eTime(K) >= eb(k));
         end
         % find which rawfiles to plot ltsa
         if ~isempty(K) && length(K) == 1

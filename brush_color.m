@@ -69,6 +69,12 @@ if ~isempty(brushDate)
         [newFD,~] = intersect(t, brushDate);
         zFD = [zFD; newFD];
         
+        % Clear brushed set from ID set (if exist ID)
+        if ~isempty(zID)
+            [~,zIDkeep] = setdiff(zID(:,1),zFD);
+            zID = zID(zIDkeep,:);
+        end
+        
     elseif isequal(brushColor,[0,1,0]) || strcmp(cc,'g')
         % Green paintbrush or 'g' = True Detections
         disp(['Number of Detections Selected = ',num2str(length(brushDate))])
@@ -123,12 +129,6 @@ if ~isempty(brushDate)
             bFlag = 0;
         end
     end
-end
-
-% Remove any ID from FD
-if ~isempty(zID)
-    [~,zFDkeep2] = setdiff(zFD,zID(:,1));
-    zFD = zFD(zFDkeep2,:);
 end
 
 

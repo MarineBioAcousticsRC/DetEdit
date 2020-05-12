@@ -67,7 +67,7 @@ elseif strcmp(dPARAMS.cc,'b') % Move backward one bout
     end
     dPARAMS.onerun = 1;
 elseif strcmp(dPARAMS.cc,'f') % assign ALL as false
-    disp(['Number of False Detections Added = ',num2str(length(dPARAMS.trueTimes))])
+    disp(['Number of False Detections Added = ',num2str(length(dPARAMS.t))])
     if ~isempty(zID)
         %[newFD,~] = setdiff(t,zID(:,1)); % remove from zID
         [~,iCID] = setdiff(zID(:,1),dPARAMS.t); % remove from zID
@@ -154,7 +154,7 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             xH3.MarkerFaceColor = p.colorPoints;
             
             if (strcmp(dPARAMS.cc,'z'))
-                zTD(k,2) = zTD(k,2) + 1;
+                zTD(dPARAMS.k,2) = zTD(dPARAMS.k,2) + 1;
                 zFD = [zFD; xt(inxfd)]; % add to FD
             end
             
@@ -171,10 +171,10 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
     set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',@keyAction)
     set(dHANDLES.spectrafig, 'KeyPressFcn',@keyAction)
     set(dHANDLES.wavefig, 'KeyPressFcn',@keyAction)
-elseif (strcmp(dPARAMS.cc,'w') && (zTD(k,2) > 0))  % test 5 min window
+elseif (strcmp(dPARAMS.cc,'w') && (zTD(dPARAMS.k,2) > 0))  % test 5 min window
     % Test 5 min window
-    zTD = test_false_bins(k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
-    k = k+1;
+    zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
+    dPARAMS.k = dPARAMS.k+1;
     
 elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
     % detect if data have been brushed, otherwise use whole set.

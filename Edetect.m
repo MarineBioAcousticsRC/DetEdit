@@ -211,7 +211,9 @@ for k = 1: ndr          % loop over disks
     
     % Now check for subfolders that might contain .wav files
     subDirList = dir([audioDirList{k},'/']);     % get subdirectory list into structure d
-    subDirList = subDirList(3:end); % get rid of the . and .. folders
+    subDirList = subDirList(~ismember({subDirList.name},{'.','..','$RECYCLE.BIN',...
+        'System Volume Information'})); % get rid of the . and .. folders (and recycle 
+    % and system volume information if exist)
     isDir = [subDirList.isdir];
     subDirListPrune = subDirList(isDir); % remove anythign that isn't a directory
     ndl = length(subDirListPrune);    % number of files and folders

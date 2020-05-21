@@ -253,7 +253,9 @@ for fk = 1 : nf      % loop over folders
     else
         disp(' ')
         disp([num2str(nfldrFiles),'  audio data files in directory ',char(fldrName{fk})])
-        fullFileName = [fullFileName;fullfile(fldrName{fk},fn)];
+        for w = 1:nfldrFiles % build full path for each file
+            fullFileName = [fullFileName;fullfile(fldrName{fk},fn(w,:))];
+        end
     end
 end
 nfiles = size(fullFileName,1);
@@ -451,8 +453,8 @@ for k = 1:NRF
             if J(c) <= dur/2 +2  % put zeros on the front (ie beginning of file)
                 dc = dur/2 +2 - J(c);
                 if dc > 0
-                    snip(c,:) = [zeros(dc,1);fts(1:J(c)+dur/2)]';
-                    ufsnip(c,:) = [zeros(dc,1);ts(1:J(c)+dur/2)]';
+                    snip(c,:) = [zeros(1,dc),fts(1:J(c)+dur/2)];
+                    ufsnip(c,:) = [zeros(1,dc),ts(1:J(c)+dur/2)];
                 elseif dc == 0
                     snip(c,:) = fts(1:J(c)+dur/2);
                     ufsnip(c,:) = ts(1:J(c)+dur/2);
@@ -463,8 +465,8 @@ for k = 1:NRF
                     snip(c,:) = [fts(J(c)-dur/2-1:spts)];
                     ufsnip(c,:) = [ts(J(c)-dur/2-1:spts)];
                 else
-                    snip(c,:) = [fts(J(c)-dur/2-1:spts);zeros(dc,1)]';
-                    ufsnip(c,:) = [ts(J(c)-dur/2-1:spts);zeros(dc,1)]';
+                    snip(c,:) = [fts(J(c)-dur/2-1:spts),zeros(1,dc)];
+                    ufsnip(c,:) = [ts(J(c)-dur/2-1:spts),zeros(1,dc)];
                 end
             else
                 snip(c,:) = fts(J(c)-dur/2-1:J(c)+dur/2);

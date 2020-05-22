@@ -267,6 +267,8 @@ nfiles = size(fullFileName,1);
 for b = 1:N
     % read times from each audio file name
     % loop over audio files and run detector
+    fprintf('Event %d: %s %s',b,datestr(boutStartDNum(b),31),...
+        datestr(boutEndDNum(b),31));
     for k = 1:nfiles
         inFileName = fullfile(fullFileName(k,:));
         hdrs(k) = ioReadXwavHeader(inFileName,DateRE,ftype);
@@ -286,8 +288,8 @@ for b = 1:N
             fprintf('Number of Detections in Event = %.0f\n\n',length(TT{k}))
             
         else
-            fprintf('Skipping file %s\n',inFileName)
-            fprintf('Outside bout ranges.\n\n')
+            %fprintf('Skipping file %s\n',inFileName)
+            %fprintf('Outside bout ranges.\n\n')
         end
     end
 end
@@ -295,15 +297,28 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% remove empty cells before moving cells to matrix
+TT(cellfun('isempty',TT)) = [];
+PP(cellfun('isempty',PP)) = [];
+SN(cellfun('isempty',SN)) = [];
+SP(cellfun('isempty',SP)) = [];
+
 % move from cell to matrix
-MTT = cell2mat(TT)';
-MPP = cell2mat(PP)';
+MTT = cell2mat(TT);
+MPP = cell2mat(PP);
 MSN = cell2mat(SN);
 MSP = cell2mat(SP);
 if (un == 1)
     MUSN = cell2mat(USN');
     MUSP = cell2mat(USP');
     MNSP = cell2mat(NSP');
+end
+
+if ~iscolumn(MTT)
+    MTT = MTT';
+end
+if ~iscolumn(MPP)
+    MPP = MPP';
 end
 
 % output file with Time and max RL

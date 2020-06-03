@@ -267,7 +267,7 @@ nfiles = size(fullFileName,1);
 for b = 1:N
     % read times from each audio file name
     % loop over audio files and run detector
-    fprintf('Event %d: %s %s',b,datestr(boutStartDNum(b),31),...
+    fprintf('Event %d: %s %s\n',b,datestr(boutStartDNum(b),31),...
         datestr(boutEndDNum(b),31));
     for k = 1:nfiles
         inFileName = fullfile(fullFileName(k,:));
@@ -304,21 +304,14 @@ SN(cellfun('isempty',SN)) = [];
 SP(cellfun('isempty',SP)) = [];
 
 % move from cell to matrix
-MTT = cell2mat(TT);
-MPP = cell2mat(PP);
-MSN = cell2mat(SN);
-MSP = cell2mat(SP);
+MTT = cell2mat(TT');
+MPP = cell2mat(PP');
+MSN = cell2mat(SN');
+MSP = cell2mat(SP');
 if (un == 1)
     MUSN = cell2mat(USN');
     MUSP = cell2mat(USP');
     MNSP = cell2mat(NSP');
-end
-
-if ~iscolumn(MTT)
-    MTT = MTT';
-end
-if ~iscolumn(MPP)
-    MPP = MPP';
 end
 
 % output file with Time and max RL
@@ -519,8 +512,8 @@ for k = 1:NRF
         nspecdb = nspecdb + ones(Ndet,1);
         %         end
         % group for output
-        TT = [TT, T];
-        PP = [PP, ppdb];
+        TT = [TT; T'];
+        PP = [PP; ppdb'];
         SN = [SN; snip];
         USN = [USN; ufsnip];
         SP = [SP; specdb];

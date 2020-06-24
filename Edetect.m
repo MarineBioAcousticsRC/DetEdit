@@ -211,7 +211,9 @@ for k = 1: ndr          % loop over disks
     
     % Now check for subfolders that might contain .wav files
     subDirList = dir([audioDirList{k},'/']);     % get subdirectory list into structure d
-    subDirList = subDirList(3:end); % get rid of the . and .. folders
+    subDirList = subDirList(~ismember({subDirList.name},{'.','..','$RECYCLE.BIN',...
+        'System Volume Information'})); % get rid of the . and .. folders (and recycle 
+    % and system volume information if exist)
     isDir = [subDirList.isdir];
     subDirListPrune = subDirList(isDir); % remove anythign that isn't a directory
     ndl = length(subDirListPrune);    % number of files and folders
@@ -253,16 +255,35 @@ for fk = 1 : nf      % loop over folders
     else
         disp(' ')
         disp([num2str(nfldrFiles),'  audio data files in directory ',char(fldrName{fk})])
-        fullFileName = [fullFileName;fullfile(fldrName{fk},fn)];
+        for w = 1:nfldrFiles % build full path for each file
+            fullFileName = [fullFileName;fullfile(fldrName{fk},fn(w,:))];
+        end
     end
 end
 nfiles = size(fullFileName,1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % loop over bouts from event time files
+% move from cell to matrix
+TTbout =[];
+PPbout =[];
+SNbout =[];
+SPbout =[];
+USNbout =[];
+USPbout =[];
+NSPbout =[];
 for b = 1:N
     % read times from each audio file name
     % loop over audio files and run detector
+    fprintf('Event %d: %s %s\n',b,datestr(boutStartDNum(b),31),...
+        datestr(boutEndDNum(b),31));
+    TT =[];
+    PP =[];
+    SN =[];
+    SP =[];
+    USN =[];
+    USP =[];
+    NSP =[];
     for k = 1:nfiles
         inFileName = fullfile(fullFileName(k,:));
         hdrs(k) = ioReadXwavHeader(inFileName,DateRE,ftype);
@@ -282,24 +303,54 @@ for b = 1:N
             fprintf('Number of Detections in Event = %.0f\n\n',length(TT{k}))
             
         else
-            fprintf('Skipping file %s\n',inFileName)
-            fprintf('Outside bout ranges.\n\n')
+            %fprintf('Skipping file %s\n',inFileName)
+            %fprintf('Outside bout ranges.\n\n')
         end
+    end
+    
+    % remove empty cells before moving cells to matrix
+    TT(cellfun('isempty',TT)) = [];
+    PP(cellfun('isempty',PP)) = [];
+    SN(cellfun('isempty',SN)) = [];
+    SP(cellfun('isempty',SP)) = [];
+    
+    % move from cell to matrix
+    MTT = cell2mat(TT');
+    MPP = cell2mat(PP');
+    MSN = cell2mat(SN');
+    MSP = cell2mat(SP');
+    if (un == 1)
+        MUSN = cell2mat(USN');
+        MUSP = cell2mat(USP');
+        MNSP = cell2mat(NSP');
     end
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% remove empty cells before moving cells to matrix
+TTbout(cellfun('isempty',TTbout)) = [];
+PPbout(cellfun('isempty',PPbout)) = [];
+SNbout(cellfun('isempty',SNbout)) = [];
+SPbout(cellfun('isempty',SPbout)) = [];
+
 % move from cell to matrix
-MTT = cell2mat(TT)';
-MPP = cell2mat(PP)';
-MSN = cell2mat(SN);
-MSP = cell2mat(SP);
+MTT = cell2mat(TTbout');
+MPP = cell2mat(PPbout');
+MSN = cell2mat(SNbout');
+MSP = cell2mat(SPbout');
 if (un == 1)
-    MUSN = cell2mat(USN');
-    MUSP = cell2mat(USP');
-    MNSP = cell2mat(NSP');
+    MUSN = cell2mat(USNbout');
+    MUSP = cell2mat(USPbout');
+    MNSP = cell2mat(NSPbout');
+end
+
+if ~iscolumn(MTT)
+    MTT = MTT';
+end
+if ~iscolumn(MPP)
+    MPP = MPP';
 end
 
 % output file with Time and max RL
@@ -451,8 +502,8 @@ for k = 1:NRF
             if J(c) <= dur/2 +2  % put zeros on the front (ie beginning of file)
                 dc = dur/2 +2 - J(c);
                 if dc > 0
-                    snip(c,:) = [zeros(dc,1);fts(1:J(c)+dur/2)]';
-                    ufsnip(c,:) = [zeros(dc,1);ts(1:J(c)+dur/2)]';
+                    snip(c,:) = [zeros(1,dc),fts(1:J(c)+dur/2)];
+                    ufsnip(c,:) = [zeros(1,dc),ts(1:J(c)+dur/2)];
                 elseif dc == 0
                     snip(c,:) = fts(1:J(c)+dur/2);
                     ufsnip(c,:) = ts(1:J(c)+dur/2);
@@ -463,8 +514,8 @@ for k = 1:NRF
                     snip(c,:) = [fts(J(c)-dur/2-1:spts)];
                     ufsnip(c,:) = [ts(J(c)-dur/2-1:spts)];
                 else
-                    snip(c,:) = [fts(J(c)-dur/2-1:spts);zeros(dc,1)]';
-                    ufsnip(c,:) = [ts(J(c)-dur/2-1:spts);zeros(dc,1)]';
+                    snip(c,:) = [fts(J(c)-dur/2-1:spts),zeros(1,dc)];
+                    ufsnip(c,:) = [ts(J(c)-dur/2-1:spts),zeros(1,dc)];
                 end
             else
                 snip(c,:) = fts(J(c)-dur/2-1:J(c)+dur/2);
@@ -500,8 +551,8 @@ for k = 1:NRF
         nspecdb = nspecdb + ones(Ndet,1);
         %         end
         % group for output
-        TT = [TT, T];
-        PP = [PP, ppdb];
+        TT = [TT; T'];
+        PP = [PP; ppdb'];
         SN = [SN; snip];
         USN = [USN; ufsnip];
         SP = [SP; specdb];

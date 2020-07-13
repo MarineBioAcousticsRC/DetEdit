@@ -20,18 +20,18 @@ nbin = sum(hdr.ltsa.nave(L));
 t1 = rfStarts(1);
 dt_dnum = datenum([ 0 0 0 0 0 hdr.ltsa.tave ]);
 % Assume max raw file size in set is the standard. Anything less should be padded.
-rfdt = max((hdr.ltsa.dnumEnd - hdr.ltsa.dnumStart)*(24*60*60));
+rfdt = hdr.ltsa.dur(L);%rfdt = max((hdr.ltsa.dnumEnd - hdr.ltsa.dnumStart)*(24*60*60));
 
-gapsidx = find(diffRF_s~=rfdt);
-rfdt_dnum = datenum([ 0 0 0 0 0 rfdt-5 ]);
+gapsidx = find(diffRF_s~=rfdt(1:end-1));
+rfdt1_dnum = datenum([ 0 0 0 0 0 rfdt(1)-5 ]);
 if size(unique(diffRF_s), 2) > 1
     fprintf('Duty cycle or gap encountered!\n')
     fprintf('\tBout starting at %s\n', datestr(rfStarts(1),date_fmt));
-    pt = t1:dt_dnum:t1+rfdt_dnum; % make first raw file's part of pt;
+    pt = t1:dt_dnum:t1+rfdt1_dnum; % make first raw file's part of pt;
     rf = 2;
     while rf <= length(L)
         if ismember(rf,gapsidx+1) % if there's a duty cycle or gap, pad pwr for later
-            tdt = round((rfStarts(rf) - rfStarts(rf-1))*mnum2secs-rfdt);
+            tdt = round((rfStarts(rf) - rfStarts(rf-1))*mnum2secs-rfdt(rf));
             numaves2pad = ceil(tdt/hdr.ltsa.tave);
             pwrpad = ones(size(pwr,1),numaves2pad).*-128;
             gaveidx = length(pt); % last average before gap
@@ -39,7 +39,7 @@ if size(unique(diffRF_s), 2) > 1
             padavetimes = pt(end)+dt_dnum:dt_dnum:rfStarts(rf)-dt_dnum;
             pt = [ pt, padavetimes ];
         end
-        
+        rfdt_dnum = datenum([ 0 0 0 0 0 rfdt(rf)-5 ]);
         tpt = rfStarts(rf):dt_dnum:rfStarts(rf)+rfdt_dnum;
         pt = [ pt, tpt ];
         rf = rf+1;

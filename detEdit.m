@@ -175,8 +175,10 @@ if exist('labels','var')
     % a label struct was fount in ID file. Add it to p. This will overwrite
     % whatever was in mySpID before.
     p.mySpID = labels;
+elseif exist('mySpID','var')
+    p.mySpID = mySpID;
 end
-save(fNameList.ID,'zID');
+save(fNameList.ID,'zID','-append');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Calculate bout starts and ends
@@ -198,15 +200,21 @@ else
     load(fNameList.LTSA)   % LTSA sessions: pwr and pt structures
     dPARAMS.pwr = pwr;
     dPARAMS.pt = pt;
-    clear pt pwr
-    
-    disp('Done Loading LTSA Sessions')
     sltsa = size(dPARAMS.pt);
+    
     if (sltsa(2) ~= dPARAMS.nb)
         disp(['Error: Number of LTSA sessions calculated here doesn''t match ',...
             'input LTSA file. Check ltsaMax parameter.'])
-        return
+        dPARAMS.pwr = pwr(1:dPARAMS.nb);
+        dPARAMS.pt = pt(1:dPARAMS.nb);
+        % return
     end
+    
+    clear pt pwr
+    
+    disp('Done Loading LTSA Sessions')
+
+
 end
 
 %% Set up Tests for False Detections

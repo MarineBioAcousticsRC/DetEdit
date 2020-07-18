@@ -50,11 +50,14 @@ if dPARAMS.ff2 % false in red
 end
 if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
-        thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
-        hPP = plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K3(thisIDset)),...
-            dPARAMS.xmpp(dPARAMS.K3(thisIDset)),'.',...
-            'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
-        set(hPP,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
+        thisID = dPARAMS.specIDs(iC2);
+        if dPARAMS.ID_Toggle(thisID)
+            thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
+            hPP = plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K3(thisIDset)),...
+                dPARAMS.xmpp(dPARAMS.K3(thisIDset)),'.',...
+                'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
+            set(hPP,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
+        end
     end
 end
 

@@ -328,11 +328,6 @@ if (size(zTD,2) == 2) % this seems to patch on extra columns
     save(fNameList.TD,'zTD');
 end
 
-% Display ID legend:
-% (note since it's not in the loop, if people close it,
-% it won't come back in this session.
-hID = figure(10);
-ID_legend(hID,p)
 
 % Check if LTSA plot exists, is so, don't reset position
 % if ishghandle(201)   
@@ -393,6 +388,12 @@ end
 % loop over the number of bouts (sessions)
 boutMotion % run it once to set up first view. After that it will be 
 % run after key press only.
+
+% Display ID legend:
+% (note since it's not in the loop, if people close it,
+% it won't come back in this session.
+% put it at end so it can reference an existing figure for default colors
+ID_legend
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     

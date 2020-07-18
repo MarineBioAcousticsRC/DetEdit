@@ -17,10 +17,13 @@ if dPARAMS.ff2 % plot False detections in red
 end
 if dPARAMS.ff3 % plot ID'd detections in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
-        thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
-        hRLID = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(thisIDset),dPARAMS.rlID(thisIDset),'.',...
-            'MarkerSize',p.sizePoints,'UserData',dPARAMS.tID(thisIDset));
-        set(hRLID,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
+        thisID = dPARAMS.specIDs(iC2);
+        if dPARAMS.ID_Toggle(thisID) % only plot if toggled on
+            thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
+            hRLID = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(thisIDset),dPARAMS.rlID(thisIDset),'.',...
+                'MarkerSize',p.sizePoints,'UserData',dPARAMS.tID(thisIDset));
+            set(hRLID,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
+        end
     end
 end
 hold(dHANDLES.LTSAsubs(1),'off')
@@ -75,11 +78,14 @@ if ldt > 0
     end
     if dPARAMS.ff3 % plot ID'd in associated color
         for iC3 = 1:length(dPARAMS.specIDs) % set colors
-            thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC3);
-            hICI = plot(dHANDLES.LTSAsubs(3),dPARAMS.tID(thisIDset(2:end)),...
-                dPARAMS.dtID(thisIDset(2:end)),'.','MarkerSize',p.sizePoints,...
-                'UserData',dPARAMS.tID(thisIDset));
-            set(hICI,'Color',p.colorTab(dPARAMS.specIDs(iC3),:))
+            thisID = dPARAMS.specIDs(iC3);
+            if dPARAMS.ID_Toggle(thisID)
+                thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC3);
+                hICI = plot(dHANDLES.LTSAsubs(3),dPARAMS.tID(thisIDset(2:end)),...
+                    dPARAMS.dtID(thisIDset(2:end)),'.','MarkerSize',p.sizePoints,...
+                    'UserData',dPARAMS.tID(thisIDset));
+                set(hICI,'Color',p.colorTab(dPARAMS.specIDs(iC3),:))
+            end
         end
     end
     hold(dHANDLES.LTSAsubs(3),'off')

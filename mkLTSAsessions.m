@@ -63,7 +63,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make LTSA.mat file for each TPWS file found
 for iD = 1:length(fileMatchIdx)
-    
+    pwr = {};
+    pt = {};
     %% Find files and load data
     % Find if TPWS file exist
     matchingFile = fileList{fileMatchIdx(iD)};

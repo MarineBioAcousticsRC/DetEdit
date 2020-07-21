@@ -56,7 +56,7 @@ if dPARAMS.ff3 % ID'd in associated color
             dPARAMS.freq(dPARAMS.K3(thisIDset)),'.',...
             'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
         set(dHANDLES.RMSID53{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
-            'Visible',dPARAMS.ID_Toggle(iColor));
+            'Visible',dPARAMS.ID_Toggle{iColor});
     end
 end
 

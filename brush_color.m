@@ -123,7 +123,11 @@ if ~isempty(brushDate)
             end
             
             spLabels = ones(size(newIDtimes)).*specID;
-            newID = [newIDtimes,spLabels];
+            if size(zID,2)>2
+                % if there's extra info stored in zID, pad that with nans
+                nanPad = nan(size(newIDtimes,1),size(zID,2)-2);
+                newID = [newIDtimes,spLabels,nanPad];
+            else
             zID = [zID;newID];
         else
             bFlag = 0;

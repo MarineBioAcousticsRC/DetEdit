@@ -4,58 +4,46 @@ global dPARAMS dHANDLES
 
 if iColor == 99
     % toggle falses
-    dPARAMS.FD_Toggle = get(dHANDLES.h10handles.colorboxFD,'Value');
-    if dPARAMS.FD_Toggle
-        set(dHANDLES.RLFD201,'Visible',1)
-        set(dHANDLES.ICIFD201,'Visible',1)
-        set(dHANDLES.RLFD51,'Visible',1)
-        set(dHANDLES.RMSFD53,'Visible',1)
-        stateString = 'ON';
+    stateString = get(dHANDLES.h10handles.colorboxFD,'Value');
+    if stateString
+        dPARAMS.FD_Toggle = 'on';
     else
-        set(dHANDLES.RLFD201,'Visible',0)
-        set(dHANDLES.ICIFD201,'Visible',0)
-        set(dHANDLES.RLFD51,'Visible',0)
-        set(dHANDLES.RMSFD53,'Visible',0)
-        stateString = 'OFF';
+        dPARAMS.FD_Toggle = 'off';
     end
-    fprintf('Toggled False %s\n',stateString)
+    set(dHANDLES.RLFD201,'Visible',dPARAMS.FD_Toggle)
+    set(dHANDLES.ICIFD201,'Visible',dPARAMS.FD_Toggle)
+    set(dHANDLES.RLFD51,'Visible',dPARAMS.FD_Toggle)
+    set(dHANDLES.RMSFD53,'Visible',dPARAMS.FD_Toggle)
+    fprintf('Toggled False %s\n',dPARAMS.FD_Toggle)
 elseif iColor == 0
     % toggle unlabeled
-    dPARAMS.NoLabel_Toggle = get(dHANDLES.h10handles.colorboxUnlabeled,'Value');
-    if dPARAMS.NoLabel_Toggle
-        set(dHANDLES.RL201,'Visible',1)
-        set(dHANDLES.ICI201,'Visible',1)
-        set(dHANDLES.RL51,'Visible',1)
-        set(dHANDLES.RMS53,'Visible',1)
-        stateString = 'ON';
+    stateString = get(dHANDLES.h10handles.colorboxUnlabeled,'Value');
+    if stateString
+        dPARAMS.NoLabel_Toggle = 'on';
     else
-        set(dHANDLES.RL201,'Visible',0)
-        set(dHANDLES.ICI201,'Visible',0)
-        set(dHANDLES.RL51,'Visible',0)
-        set(dHANDLES.RMS53,'Visible',0)
-        stateString = 'OFF';
+        dPARAMS.NoLabel_Toggle = 'off';
     end
-    fprintf('Toggled Unlabeled %s\n',stateString)
+    set(dHANDLES.RL201,'Visible',dPARAMS.NoLabel_Toggle)
+    set(dHANDLES.ICI201,'Visible',dPARAMS.NoLabel_Toggle)
+    set(dHANDLES.RL51,'Visible',dPARAMS.NoLabel_Toggle)
+    set(dHANDLES.RMS53,'Visible',dPARAMS.NoLabel_Toggle)
+    
+    fprintf('Toggled Unlabeled %s\n',dPARAMS.NoLabel_Toggle)
 else
     % toggle ID
-    dPARAMS.ID_Toggle(iColor) = get(dHANDLES.h10handles.colorbox{iColor},'Value');
-    
+    stateString = get(dHANDLES.h10handles.colorbox{iColor},'Value');
     if iColor<=size(dHANDLES.RLID201,2)
         
-        if dPARAMS.ID_Toggle
-            set(dHANDLES.RLID201{iColor},'Visible',1)
-            set(dHANDLES.ICIID201{iColor},'Visible',1)
-            set(dHANDLES.RLID51{iColor},'Visible',1)
-            set(dHANDLES.RMSID53{iColor},'Visible',1)
-            stateString = 'ON';
+        if stateString
+            dPARAMS.ID_Toggle{iColor}  = 'on';
         else
-            set(dHANDLES.RLID201{iColor},'Visible',0)
-            set(dHANDLES.ICIID201{iColor},'Visible',0)
-            set(dHANDLES.RLID51{iColor},'Visible',0)
-            set(dHANDLES.RMSID53{iColor},'Visible',0)
-            stateString = 'OFF';
+            dPARAMS.ID_Toggle{iColor}  = 'off';
         end
+         set(dHANDLES.RLID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+        set(dHANDLES.ICIID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+        set(dHANDLES.RLID51{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+        set(dHANDLES.RMSID53{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         fprintf('Toggled %s %s\n',get(dHANDLES.h10handles.spLabel{iColor},'String'),...
-            stateString)
+            dPARAMS.ID_Toggle{iColor})
     end
 end

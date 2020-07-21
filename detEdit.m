@@ -329,9 +329,10 @@ if (size(zTD,2) == 2) % this seems to patch on extra columns
 end
 
 % initialize ID toggles to on
-dPARAMS.NoLabel_Toggle = 1;
-dPARAMS.FD_Toggle = 1;
-dPARAMS.ID_Toggle = ones(size(p.colorTab,1),1);
+dPARAMS.NoLabel_Toggle = 'on';
+dPARAMS.FD_Toggle = 'on';
+[idToggleInit{1:size(p.colorTab,1),1}] = deal('on');
+dPARAMS.ID_Toggle = idToggleInit;
 
 % Check if LTSA plot exists, is so, don't reset position
 % if ishghandle(201)   

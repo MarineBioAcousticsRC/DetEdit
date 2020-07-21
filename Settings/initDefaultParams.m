@@ -64,7 +64,10 @@ colorTab = [191, 191, 0; ... % type 1 green
             255,   214, 0; ... % type 7 yellow
             222,  125, 0; ... % type 8 orange
             255,  153, 199; ... % type 9 pink
-            153, 51,   0]./255; % type 10  brown
+            153, 51,   0;... % type 10  brown
+            230, 230,   230;...  % type 11 mid gray 
+            44, 223,   44]./255; % type 12 bright green
+
 colorTab = round(colorTab.*100)/100;      
 
 mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship',...

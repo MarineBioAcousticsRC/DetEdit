@@ -25,7 +25,7 @@ if dPARAMS.ff2 % plot False detections in red
     % disp([' false det plotted:',num2str(length(tfd))])
 end
 
-dHANDLES.RLID201 = cell(dPARAMS.specIDs,1);
+dHANDLES.RLID201 = cell(size(p.colorTab,1),1);
 if dPARAMS.ff3 % plot ID'd detections in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC2);
@@ -96,7 +96,7 @@ if ldt > 0
         % no need to double FD since only the blue points are brush captured
     end
     
-    dHANDLES.ICIID201 = [];
+    dHANDLES.ICIID201 = cell(size(p.colorTab,1),1);
     if dPARAMS.ff3 % plot ID'd in associated color
         for iC3 = 1:length(dPARAMS.specIDs) % set colors
             iColor = dPARAMS.specIDs(iC3);

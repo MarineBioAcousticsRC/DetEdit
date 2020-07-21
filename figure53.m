@@ -47,7 +47,8 @@ if dPARAMS.ff2 % false in red
         'r.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K2),...
         'Visible',dPARAMS.FD_Toggle);
 end
-dHANDLES.RMSID53 = {};
+
+dHANDLES.RMSID53 =  cell(size(p.colorTab,1),1);
 if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         iColor = dPARAMS.specIDs(iC2);

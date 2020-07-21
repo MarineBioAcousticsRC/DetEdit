@@ -32,14 +32,14 @@ elseif iColor == 0
 else
     % toggle ID
     stateString = get(dHANDLES.h10handles.colorbox{iColor},'Value');
-    if iColor<=size(dHANDLES.RLID201,2)
+    if iColor<=size(dHANDLES.h10handles.spLabel,2)
         
         if stateString
             dPARAMS.ID_Toggle{iColor}  = 'on';
         else
             dPARAMS.ID_Toggle{iColor}  = 'off';
         end
-         set(dHANDLES.RLID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+        set(dHANDLES.RLID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.ICIID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.RLID51{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.RMSID53{iColor},'Visible',dPARAMS.ID_Toggle{iColor})

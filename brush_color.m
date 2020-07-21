@@ -128,11 +128,23 @@ if ~isempty(brushDate)
                 nanPad = nan(size(newIDtimes,1),size(zID,2)-2);
                 newID = [newIDtimes,spLabels,nanPad];
             else
+                newID = [newIDtimes,spLabels];
+            end
             zID = [zID;newID];
         else
             bFlag = 0;
         end
     end
 end
+% 
+% % Remove any ID from FD
+% if ~isempty(zID) && ~strcmp(cc,'r')
+%     [~,zFDkeep2] = setdiff(zFD,zID(:,1));
+%     zFD = zFD(zFDkeep2,:);
+% elseif  ~isempty(zID) && strcmp(cc,'r')
+%     % take the FDs out of ID
+%     [~,zIDkeep2] = setdiff(zID(:,1),zFD);
+%     zID = zID(zIDkeep2,:);
+% end
 
 

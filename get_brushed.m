@@ -6,7 +6,7 @@ brushColor = [];
 
 % Find brushed axes
 hBrushAll = get(hFig,'Children');
-selLine = arrayfun(@(x) hBrushAll(x).Marker == '.', 1:length(hBrushAll), 'UniformOutput', false);
+ selLine = arrayfun(@(x) hBrushAll(x).Marker == '.', 1:length(hBrushAll), 'UniformOutput', false);
 if iscell(selLine)
     lenAx = cell2mat(cellfun(@length,selLine,'UniformOutput',false));
     selLine(lenAx > 1) = {false};

@@ -54,7 +54,7 @@ if dPARAMS.ff2 % false in red
         'UserData',dPARAMS.t(dPARAMS.K2),'Visible',dPARAMS.FD_Toggle);
 end
 
-dHANDLES.RLID51 = [];
+dHANDLES.RLID51 = cell(size(p.colorTab,1),1);
 if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         iColor = dPARAMS.specIDs(iC2);

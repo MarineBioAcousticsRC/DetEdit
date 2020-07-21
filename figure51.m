@@ -29,7 +29,10 @@ end
 % Plot  PP versus RMS Plot for this session
 hold(dHANDLES.h51, 'on')
 dHANDLES.h51.ColorOrderIndex = 1;
-plot(dHANDLES.h51,dPARAMS.transfRMS,dPARAMS.xmpp,'.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t)% true ones in blue
+dHANDLES.RL51 = plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.unlabeledIdx),...
+    dPARAMS.xmpp(dPARAMS.unlabeledIdx),'.','MarkerSize',p.sizePoints,...
+    'UserData',dPARAMS.t(dPARAMS.unlabeledIdx),'Visible',dPARAMS.NoLabel_Toggle);% true ones in blue
+
 
 if p.threshPP > 0 && isfield(dPARAMS,'plotaxes') % why doesn't plot axes just either exist or not??? messy.
     xtline = [p.threshRMS,p.threshRMS];
@@ -44,20 +47,24 @@ end
 plot(dHANDLES.h51,xtline,ytline,'r')
 
 
+dHANDLES.RLFD51 = [];
 if dPARAMS.ff2 % false in red
-    plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K2),dPARAMS.xmpp(dPARAMS.K2),...
-        'r.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K2))
+    dHANDLES.RLFD51 = plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K2),...
+        dPARAMS.xmpp(dPARAMS.K2),'r.','MarkerSize',p.sizePoints,...
+        'UserData',dPARAMS.t(dPARAMS.K2),'Visible',dPARAMS.FD_Toggle);
 end
+
+dHANDLES.RLID51 = [];
 if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
-        thisID = dPARAMS.specIDs(iC2);
-        if dPARAMS.ID_Toggle(thisID)
-            thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
-            hPP = plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K3(thisIDset)),...
-                dPARAMS.xmpp(dPARAMS.K3(thisIDset)),'.',...
-                'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
-            set(hPP,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
-        end
+        iColor = dPARAMS.specIDs(iC2);
+        thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
+        dHANDLES.RLID51{iColor} =  plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K3(thisIDset)),...
+            dPARAMS.xmpp(dPARAMS.K3(thisIDset)),'.',...
+            'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
+        set(dHANDLES.RLID51{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
+            'Visible',dPARAMS.ID_Toggle(iColor))
+        
     end
 end
 

@@ -82,6 +82,10 @@ if ~isempty(J) % if there are detection in this session
     if ~isempty(zID)
         [dPARAMS.tID,dPARAMS.K3,IDidx] = intersect(dPARAMS.t,zID(:,1));
         dPARAMS.rlID = dPARAMS.RL(dPARAMS.K3);
+        dPARAMS.unlabeledIdx = 1:length(dPARAMS.t);
+        dPARAMS.unlabeledIdx(dPARAMS.K3) = [];
+    else
+        dPARAMS.unlabeledIdx = 1:length(dPARAMS.t);
     end
     if ~isempty(dPARAMS.K3)
         dPARAMS.ff3 = 1;
@@ -120,6 +124,7 @@ else
     return
 end
 dPARAMS.dt = diff(dPARAMS.t)*24*60*60; % inter-detection interval (IDI) and convert from days to seconds
+dPARAMS.dtUnlabeled = diff(dPARAMS.t(dPARAMS.unlabeledIdx))*24*60*60;
 
 if dPARAMS.ff2 % calculate IDI for false and id'd detections
     dPARAMS.dtFD = dPARAMS.dt(dPARAMS.K2(1:end-1));
@@ -202,9 +207,11 @@ cspJLinear = 10.^(dPARAMS.cspJ/10);
 binWidth = (dPARAMS.ft(2)-dPARAMS.ft(1));%Fs/nfft;
 RMS = 10*log10(sum(cspJLinear(:,dPARAMS.fimint:dPARAMS.fimaxt).*binWidth,2))+ dPARAMS.tf; % maximum between flow-100kHz
 dPARAMS.xmpp = dPARAMS.RL' - dPARAMS.tf + dPARAMS.Ptfpp([im + dPARAMS.fimint - 1]);
+[xmsp,im] = max(xmsp0(:,dPARAMS.fimint:dPARAMS.fimaxt),[],2);
+dPARAMS.pxmsp = xmsp - p.slope*(dPARAMS.xmpp' - p.threshRL);
+
 
 dPARAMS.transfRMS = RMS - p.slope*(dPARAMS.xmpp' - p.threshRL);
-
 %%%-----%%%
 
 if ~p.loadMSP % plot threshold line now because no background data

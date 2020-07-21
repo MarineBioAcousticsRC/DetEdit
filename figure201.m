@@ -8,22 +8,32 @@ dHANDLES.LTSAsubs = subplot_layout; % Top panel, Figure 201: Received Level
 
 % set(dHANDLES.hbLTSA,'ActionPostCallback',@brushAction)
 
-plot(dHANDLES.LTSAsubs(1),dPARAMS.t,dPARAMS.RL,'.','MarkerSize',p.sizePoints,...
-    'UserData',dPARAMS.t)
+% only plot unlabeled stuff.
+if ~isempty(dPARAMS.unlabeledIdx)
+    dHANDLES.RL201 = plot(dHANDLES.LTSAsubs(1),dPARAMS.t(dPARAMS.unlabeledIdx),...
+        dPARAMS.RL(dPARAMS.unlabeledIdx),...
+        '.','MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.unlabeledIdx),...
+        'Visible',dPARAMS.NoLabel_Toggle);
+end
+
+dHANDLES.RLFD201 = [];
 hold(dHANDLES.LTSAsubs(1),'on')
 if dPARAMS.ff2 % plot False detections in red
-    plot(dHANDLES.LTSAsubs(1),dPARAMS.tfd,dPARAMS.rlFD,'r.','MarkerSize',p.sizePoints,'UserData',dPARAMS.tfd)
+    dHANDLES.RLFD201 = plot(dHANDLES.LTSAsubs(1),dPARAMS.tfd,dPARAMS.rlFD,...
+        'r.','MarkerSize',p.sizePoints,'UserData',dPARAMS.tfd);
+     set(dHANDLES.RLFD201,'Visible',dPARAMS.FD_Toggle)
     % disp([' false det plotted:',num2str(length(tfd))])
 end
+
+dHANDLES.hRLID201 = {};
 if dPARAMS.ff3 % plot ID'd detections in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
-        thisID = dPARAMS.specIDs(iC2);
-        if dPARAMS.ID_Toggle(thisID) % only plot if toggled on
-            thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
-            hRLID = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(thisIDset),dPARAMS.rlID(thisIDset),'.',...
-                'MarkerSize',p.sizePoints,'UserData',dPARAMS.tID(thisIDset));
-            set(hRLID,'Color',p.colorTab(dPARAMS.specIDs(iC2),:))
-        end
+        thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC2);
+        iColor = dPARAMS.specIDs(iC2);
+        dHANDLES.RLID201{iColor} = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(thisIDset),dPARAMS.rlID(thisIDset),'.',...
+            'MarkerSize',p.sizePoints,'UserData',dPARAMS.tID(thisIDset));
+        set(dHANDLES.RLID201{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
+            'Visible',dPARAMS.ID_Toggle(iColor))
     end
 end
 hold(dHANDLES.LTSAsubs(1),'off')
@@ -53,11 +63,16 @@ tdt2 = [];
 dt2 = [];
 ldt = length(dPARAMS.dt);
 if ldt > 0
-    tdt2 = reshape([dPARAMS.t(1:ldt),dPARAMS.t((1:ldt)+1)]',2*ldt,1);
-    dt2 = reshape([dPARAMS.dt,dPARAMS.dt]',2*ldt,1);
+    % only plot unlabeled stuff, make duplicates
+    nUnlabeled = length(dPARAMS.unlabeledIdx)-1;
+    tdt2 = reshape([dPARAMS.t(dPARAMS.unlabeledIdx(1:end-1)),...
+        dPARAMS.t(dPARAMS.unlabeledIdx(2:end))]',2*nUnlabeled,1);
+    dt2 = reshape([dPARAMS.dtUnlabeled,dPARAMS.dtUnlabeled]',2*(nUnlabeled),1);
     
-    hICI = plot(dHANDLES.LTSAsubs(3),tdt2,dt2,'.');
-    set(hICI,'MarkerSize',p.sizePoints,'MarkerFaceColor','b','LineStyle','none','UserData',tdt2)
+    
+    dHANDLES.ICI201 = plot(dHANDLES.LTSAsubs(3),tdt2,dt2,'.');
+    set(dHANDLES.ICI201,'MarkerSize',p.sizePoints,'MarkerFaceColor','b',...
+        'LineStyle','none','UserData',tdt2,'Visible',dPARAMS.NoLabel_Toggle)
     
     % Do setup for 1st axes
     axis(dHANDLES.LTSAsubs(3),[dPARAMS.PT(1) dPARAMS.PT(end) 0 p.dtHi])
@@ -71,21 +86,28 @@ if ldt > 0
     
     %%% plot FD, ID
     hold(dHANDLES.LTSAsubs(3),'on')
+    dHANDLES.ICIFD201 = [];
     if dPARAMS.ff2
-        plot(dHANDLES.LTSAsubs(3), dPARAMS.tfd(2:end), dPARAMS.dtFD,'.r',...
-            'MarkerSize',p.sizePoints,'UserData', dPARAMS.tfd(2:end))
+        %duplicate again
+        fdt2 = [dPARAMS.tfd(1:end-1);dPARAMS.tfd(2:end)];
+        fddt2 = [dPARAMS.dtFD;dPARAMS.dtFD];
+        dHANDLES.ICIFD201 = plot(dHANDLES.LTSAsubs(3),fdt2,fddt2,'.r',...
+            'MarkerSize',p.sizePoints,'UserData',fdt2,'Visible',dPARAMS.FD_Toggle);
         % no need to double FD since only the blue points are brush captured
     end
+    
+    dHANDLES.ICIID201 = [];
     if dPARAMS.ff3 % plot ID'd in associated color
         for iC3 = 1:length(dPARAMS.specIDs) % set colors
-            thisID = dPARAMS.specIDs(iC3);
-            if dPARAMS.ID_Toggle(thisID)
-                thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC3);
-                hICI = plot(dHANDLES.LTSAsubs(3),dPARAMS.tID(thisIDset(2:end)),...
-                    dPARAMS.dtID(thisIDset(2:end)),'.','MarkerSize',p.sizePoints,...
-                    'UserData',dPARAMS.tID(thisIDset));
-                set(hICI,'Color',p.colorTab(dPARAMS.specIDs(iC3),:))
-            end
+            iColor = dPARAMS.specIDs(iC3);
+            idt2 = [dPARAMS.tID(thisIDset(1:end-1));dPARAMS.tID(thisIDset(2:end))];
+            iddt2 = [dPARAMS.dtID(thisIDset(2:end));dPARAMS.dtID(thisIDset(2:end))];
+            
+            thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC3);
+            dHANDLES.ICIID201{iColor} = plot(dHANDLES.LTSAsubs(3),idt2,...
+                 iddt2,'.','MarkerSize',p.sizePoints,'UserData',idt2);
+            set(dHANDLES.ICIID201{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC3),:),...
+                'Visible',dPARAMS.ID_Toggle(iColor))
         end
     end
     hold(dHANDLES.LTSAsubs(3),'off')

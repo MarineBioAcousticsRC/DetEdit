@@ -14,7 +14,11 @@ mnum2secs = 24*60*60;
 Y2K = datenum([ 2000 0 0 0 0 0 ]);
 date_fmt = 'mm/dd/yy HH:MM:SS';
 
-rfStarts = hdr.ltsa.dnumStart(L) + Y2K;
+if hdr.ltsa.dnumStart(L)< Y2K
+    rfStarts = hdr.ltsa.dnumStart(L) + Y2K;
+else
+    rfStarts = hdr.ltsa.dnumStart(L);
+end
 diffRF_s = round(diff(rfStarts)*mnum2secs);
 nbin = sum(hdr.ltsa.nave(L));
 t1 = rfStarts(1);

@@ -72,8 +72,11 @@ colorTab = round(colorTab.*100)/100;
 
 mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship',...
     '','','','Stenella spp.'};
+minLabelConfidence = .9; % minimum classifciation confidence threshold for 
+% displaying signal labels
 
-% Parameters for modDet (if specified to compute)
+
+%% Parameters for modDet (if specified to compute)
 
 excludeID = 0; % exclude ID times from MTT files
 calcParams = 0; % yes - 1 | no - 0. Calculate Parameters peak-to-peak, 

@@ -78,10 +78,17 @@ if ~isempty(J) % if there are detection in this session
     dPARAMS.K3 = []; % holds Id'd indices
     dPARAMS.ff3 = 0; % becomes positive if you have ID's detections in this session
     dPARAMS.tID = []; % times of ID'd detections
+    dPARAMS.labelConf = []; % label confidence scores
     IDidx = [];
     if ~isempty(zID)
         [dPARAMS.tID,dPARAMS.K3,IDidx] = intersect(dPARAMS.t,zID(:,1));
         dPARAMS.rlID = dPARAMS.RL(dPARAMS.K3);
+        if size(zID,2)>2
+            % store label confidence if available, otherwise fill with na.
+            dPARAMS.labelConf = round(zID(IDidx,3)*1000)/1000;
+        else
+            dPARAMS.labelConf = nan(length(IDidx),1);
+        end
         dPARAMS.unlabeledIdx = 1:length(dPARAMS.t);
         dPARAMS.unlabeledIdx(dPARAMS.K3) = [];
     else
@@ -91,13 +98,17 @@ if ~isempty(J) % if there are detection in this session
         dPARAMS.ff3 = 1;
         spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
         dPARAMS.specIDs = unique(spCodeSet); % get unique ID codes
+        dPARAMS.labelConfIdx = (dPARAMS.labelConf>=p.minLabelConfidence |...
+            isnan(dPARAMS.labelConf));
+        disp([' Labels above confidence limit:',num2str(sum(dPARAMS.labelConfIdx))])
+
         if p.specploton % get mean spectra for each ID'd type
             dPARAMS.wavID = [];
             dPARAMS.specID = [];
             for iSpID = 1:length(dPARAMS.specIDs)
                 thisSet = spCodeSet == dPARAMS.specIDs(iSpID);
-                dPARAMS.wavID(iSpID,:) =  norm_wav(mean(dPARAMS.csnJ(dPARAMS.K3(thisSet,:),:),1));
-                dPARAMS.specID(iSpID,:) = mean(dPARAMS.cspJ(dPARAMS.K3(thisSet,:),:),1);
+                dPARAMS.wavID(iSpID,:) =  norm_wav(mean(dPARAMS.csnJ(dPARAMS.K3(thisSet(dPARAMS.labelConfIdx),:),:),1));
+                dPARAMS.specID(iSpID,:) = mean(dPARAMS.cspJ(dPARAMS.K3(thisSet(dPARAMS.labelConfIdx),:),:),1);
             end
         end
         disp([' ID detections:',num2str(length(dPARAMS.K3))])

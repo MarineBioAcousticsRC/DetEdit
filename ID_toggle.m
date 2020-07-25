@@ -1,7 +1,7 @@
 function ID_toggle(hObject,eventdata,iColor)
 
-global dPARAMS dHANDLES
-
+global dPARAMS dHANDLES p
+if isnumeric(iColor)
 if iColor == 99
     % toggle falses
     stateString = get(dHANDLES.h10handles.colorboxFD,'Value');
@@ -47,3 +47,14 @@ else
             dPARAMS.ID_Toggle{iColor})
     end
 end
+elseif strcmp(iColor,'editMinConf')
+    p.minLabelConfidence = str2num(get(dHANDLES.h10handles.labelConfEdTxt,'String'));
+    % adjustLabels
+    if isempty(p.minLabelConfidence)
+        p.minLabelConfidence = 0;
+    end
+        
+    fprintf('Update minimum confidence threshold to: %0.3f\n',p.minLabelConfidence')
+    boutMotion
+    
+end 

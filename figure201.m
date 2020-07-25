@@ -30,8 +30,10 @@ if dPARAMS.ff3 % plot ID'd detections in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC2);
         iColor = dPARAMS.specIDs(iC2);
-        dHANDLES.RLID201{iColor} = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(thisIDset),dPARAMS.rlID(thisIDset),'.',...
-            'MarkerSize',p.sizePoints,'UserData',dPARAMS.tID(thisIDset));
+        dHANDLES.RLID201{iColor} = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(thisIDset(dPARAMS.labelConfIdx)),...
+            dPARAMS.rlID(thisIDset(dPARAMS.labelConfIdx)),'.',...
+            'MarkerSize',p.sizePoints,'UserData',...
+            dPARAMS.tID(thisIDset(dPARAMS.labelConfIdx)));
         set(dHANDLES.RLID201{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
             'Visible',dPARAMS.ID_Toggle{iColor})
     end
@@ -64,11 +66,13 @@ dt2 = [];
 ldt = length(dPARAMS.dt);
 if ldt > 0
     % only plot unlabeled stuff, make duplicates
-    nUnlabeled = length(dPARAMS.unlabeledIdx)-1;
-    tdt2 = reshape([dPARAMS.t(dPARAMS.unlabeledIdx(1:end-1)),...
-        dPARAMS.t(dPARAMS.unlabeledIdx(2:end))]',2*nUnlabeled,1);
-    dt2 = reshape([dPARAMS.dtUnlabeled,dPARAMS.dtUnlabeled]',2*(nUnlabeled),1);
-    
+    if ~isempty(dPARAMS.unlabeledIdx)
+        nUnlabeled = length(dPARAMS.unlabeledIdx)-1;
+        tdt2 = reshape([dPARAMS.t(dPARAMS.unlabeledIdx(1:end-1)),...
+            dPARAMS.t(dPARAMS.unlabeledIdx(2:end))]',2*nUnlabeled,1);
+        dt2 = reshape([dPARAMS.dtUnlabeled,dPARAMS.dtUnlabeled]',2*(nUnlabeled),1);
+    end
+        
     
     dHANDLES.ICI201 = plot(dHANDLES.LTSAsubs(3),tdt2,dt2,'.');
     set(dHANDLES.ICI201,'MarkerSize',p.sizePoints,'MarkerFaceColor','b',...
@@ -100,9 +104,13 @@ if ldt > 0
     if dPARAMS.ff3 % plot ID'd in associated color
         for iC3 = 1:length(dPARAMS.specIDs) % set colors
             iColor = dPARAMS.specIDs(iC3);
-            thisIDset = find(dPARAMS.spCodeSet == dPARAMS.specIDs(iC3));
-            idt2 = [dPARAMS.tID(thisIDset(1:end-1));dPARAMS.tID(thisIDset(2:end))];
-            iddt2 = [dPARAMS.dtID(thisIDset(1:end-1));dPARAMS.dtID(thisIDset(1:end-1))];
+            % limit to only things that meet the min confidence cutoff.
+            thisIDsetTemp = find(dPARAMS.spCodeSet == dPARAMS.specIDs(iC3));
+            thisIDset = thisIDsetTemp(dPARAMS.labelConfIdx(thisIDsetTemp));
+            idt2 = [dPARAMS.tID(thisIDset(1:end-1));...
+                dPARAMS.tID(thisIDset(2:end))];
+            iddt2 = [dPARAMS.dtID(thisIDset(1:end-1));...
+                dPARAMS.dtID(thisIDset(1:end-1))];
             
             dHANDLES.ICIID201{iColor} = plot(dHANDLES.LTSAsubs(3),idt2,...
                  iddt2,'.','MarkerSize',p.sizePoints,'UserData',idt2);

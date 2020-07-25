@@ -88,6 +88,7 @@ switch analysis
         params.ltsaDir = ltsaDir;
         params.mySpID = mySpID;
         params.autoFalse = autoFalse;
+        params.minLabelConfidence = minLabelConfidence;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));

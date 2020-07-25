@@ -58,16 +58,16 @@ dHANDLES.RLID51 = cell(size(p.colorTab,1),1);
 if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         iColor = dPARAMS.specIDs(iC2);
-        thisIDset = dPARAMS.spCodeSet ==dPARAMS.specIDs(iC2);
-        dHANDLES.RLID51{iColor} =  plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K3(thisIDset)),...
-            dPARAMS.xmpp(dPARAMS.K3(thisIDset)),'.',...
-            'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset)));
+        thisIDset = dPARAMS.spCodeSet == dPARAMS.specIDs(iC2);
+        dHANDLES.RLID51{iColor} =  plot(dHANDLES.h51,dPARAMS.transfRMS(dPARAMS.K3(thisIDset(dPARAMS.labelConfIdx))),...
+            dPARAMS.xmpp(dPARAMS.K3(thisIDset(dPARAMS.labelConfIdx))),'.',...
+            'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(thisIDset(dPARAMS.labelConfIdx))));
         set(dHANDLES.RLID51{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
             'Visible',dPARAMS.ID_Toggle{iColor})
         
     end
 end
-
+ 
 hold(dHANDLES.h51, 'off')
 
 xlabel(dHANDLES.h51,'Transformed Received Level (dB_r_m_s re 1\muPa)')

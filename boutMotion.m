@@ -96,8 +96,8 @@ if ~isempty(J) % if there are detection in this session
     end
     if ~isempty(dPARAMS.K3)
         dPARAMS.ff3 = 1;
-        spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
-        dPARAMS.specIDs = unique(spCodeSet); % get unique ID codes
+        dPARAMS.spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
+        dPARAMS.specIDs = unique(dPARAMS.spCodeSet); % get unique ID codes
         dPARAMS.labelConfIdx = (dPARAMS.labelConf>=p.minLabelConfidence |...
             isnan(dPARAMS.labelConf));
         disp([' Labels above confidence limit:',num2str(sum(dPARAMS.labelConfIdx))])
@@ -105,10 +105,11 @@ if ~isempty(J) % if there are detection in this session
         if p.specploton % get mean spectra for each ID'd type
             dPARAMS.wavID = [];
             dPARAMS.specID = [];
+            goodIdx = find(dPARAMS.labelConfIdx);
             for iSpID = 1:length(dPARAMS.specIDs)
-                thisSet = spCodeSet == dPARAMS.specIDs(iSpID);
-                dPARAMS.wavID(iSpID,:) =  norm_wav(mean(dPARAMS.csnJ(dPARAMS.K3(thisSet(dPARAMS.labelConfIdx),:),:),1));
-                dPARAMS.specID(iSpID,:) = mean(dPARAMS.cspJ(dPARAMS.K3(thisSet(dPARAMS.labelConfIdx),:),:),1);
+                dPARAMS.thisIDset{iSpID} = intersect(find(dPARAMS.spCodeSet == dPARAMS.specIDs(iSpID)),goodIdx);
+                dPARAMS.wavID(iSpID,:) =  norm_wav(mean(dPARAMS.csnJ(dPARAMS.K3(dPARAMS.thisIDset{iSpID},:),:),1));
+                dPARAMS.specID(iSpID,:) = mean(dPARAMS.cspJ(dPARAMS.K3(dPARAMS.thisIDset{iSpID} ,:),:),1);
             end
         end
         disp([' ID detections:',num2str(length(dPARAMS.K3))])
@@ -173,16 +174,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Number detection per spectral bin in LTSA
 % make a spectra in figure 50
-dPARAMS.PT = dPARAMS.pt{1,dPARAMS.k};   % LTSA session time vector
+dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ;
+dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k); % start end times for plots
 dPARAMS.pwr1 = dPARAMS.pwr{1,dPARAMS.k};  % LTSA power vector
-nbinS = length(dPARAMS.PT);
+nbinS = length(dPARAMS.pwr1 );
 if (nbinS == 0)
     disp('No LTSA for this Session');
-    dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ;
-    dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k); % start end times for plots
     dPARAMS.pwr1(1:length(dPARAMS.f)) = ones; % make uniform LTSA
-else
-    dPARAMS.pwr1 = dPARAMS.pwr1((1000*dPARAMS.fiminLTSA/dPARAMS.df)+1:round(1000*dPARAMS.fimaxLTSA/dPARAMS.df)+1,:);
+% else
+%     dPARAMS.pwr1 = dPARAMS.pwr1((1000*dPARAMS.fiminLTSA/dPARAMS.df)+1:round(1000*dPARAMS.fimaxLTSA/dPARAMS.df)+1,:);
 end
 dPARAMS.durS = dPARAMS.PT(end) - dPARAMS.PT(1);
 
@@ -198,11 +198,11 @@ if dPARAMS.ff2   % average false click spec
     dPARAMS.SPEC2 = norm_spec_simple(dPARAMS.specFD,dPARAMS.fimint,dPARAMS.fimaxt);
 end
 if dPARAMS.ff3  % average id click spec
-    dPARAMS.spCodeSet = zID(IDidx,2); % get species codes for everything in this session
+    % dPARAMS.spCodeSet = zID(IDidx,2); % get species codes for everything in this session
     dPARAMS.specIDs = unique(dPARAMS.spCodeSet); % get unigue species codes
     dPARAMS.specID_norm = [];
     
-    for iSpec = 1:size(dPARAMS.specID,1)
+    for iSpec = 1:size(dPARAMS.specIDs,1)
         dPARAMS.specID_norm(iSpec,:) = norm_spec_simple(dPARAMS.specID(iSpec,:),...
             dPARAMS.fimint,dPARAMS.fimaxt);
     end

@@ -1,6 +1,6 @@
 function boutMotion
 
-global dPARAMS p fNameList zID zTD zFD
+global dPARAMS p fNameList zID zTD zFD dHANDLES
 
 
 disp([' BEGIN SESSION: ',num2str(dPARAMS.k)]);
@@ -89,8 +89,10 @@ if ~isempty(J) % if there are detection in this session
         else
             dPARAMS.labelConf = nan(length(IDidx),1);
         end
+        dPARAMS.labelConfIdx = (dPARAMS.labelConf>=p.minLabelConfidence |...
+            isnan(dPARAMS.labelConf));
         dPARAMS.unlabeledIdx = 1:length(dPARAMS.t);
-        dPARAMS.unlabeledIdx(dPARAMS.K3) = [];
+        dPARAMS.unlabeledIdx(dPARAMS.K3(dPARAMS.labelConfIdx)) = [];
     else
         dPARAMS.unlabeledIdx = 1:length(dPARAMS.t);
     end
@@ -98,8 +100,7 @@ if ~isempty(J) % if there are detection in this session
         dPARAMS.ff3 = 1;
         dPARAMS.spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
         dPARAMS.specIDs = unique(dPARAMS.spCodeSet); % get unique ID codes
-        dPARAMS.labelConfIdx = (dPARAMS.labelConf>=p.minLabelConfidence |...
-            isnan(dPARAMS.labelConf));
+
         disp([' Labels above confidence limit:',num2str(sum(dPARAMS.labelConfIdx))])
 
         if p.specploton % get mean spectra for each ID'd type
@@ -120,7 +121,11 @@ if ~isempty(J) % if there are detection in this session
     
     % Calculate indices of detections which are neither false nor ID'd
     JFD = J(dPARAMS.K2);
-    JID = J(dPARAMS.K3);
+    if isfield(dPARAMS,'labelConfIdx')
+        JID = J(dPARAMS.K3(dPARAMS.labelConfIdx));
+    else
+        JID = J(dPARAMS.K3);
+    end
     JFIM = union(JFD,JID);
     [Jtrue,iJ,~]= setxor(J,JFIM); % find all true detections
     dPARAMS.trueTimes = dPARAMS.clickTimes(Jtrue);% vector of true times in this session
@@ -277,3 +282,7 @@ figure53
 figure50
 figure52
 
+if isfield(dHANDLES,'hID')
+    % bring legend to top
+    figure(dHANDLES.hID)
+end

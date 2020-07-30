@@ -399,6 +399,8 @@ boutMotion % run it once to set up first view. After that it will be
 % it won't come back in this session.
 % put it at end so it can reference an existing figure for default colors
 ID_legend
+set(dHANDLES.hID,'name','Legend',...
+        'KeyPressFcn',@keyAction)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     

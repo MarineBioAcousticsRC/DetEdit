@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'GofMX_MC04'; % TPWS file name to match. 
+filePrefix = 'NFC_A_03_disk01a'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,13 +14,13 @@ sampleRate = 200; % replace with your sample rate
 sp = 'De'; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'E:\detEditexamples\Dolphin_Test_Set'; % identify folder containing TPWS files
+tpwsDir = 'F:\NFC_A_03\TPWS'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'E:\detEditexamples\LTSA'; % identify folder containing 
+ltsaDir = 'F:\NFC_A_03\LTSAs'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,7 +31,7 @@ ltsaDir = 'E:\detEditexamples\LTSA'; % identify folder containing
 %% Bout preferences
 paramsUser.threshRL = 120; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
-% paramsUser.minBout = 0;% minimum bout duration in seconds
+paramsUser.minBout = 0;% minimum bout duration in seconds
 % paramsUser.gth = .5;    % gap time in hrs between sessions
 % paramsUser.binDur = 5; % bin duration in minutes
 % paramsUser.dfManual = []; % LTSA step size in 10 [Hz] bins
@@ -46,7 +46,7 @@ paramsUser.rlHi = 165; % PP plot window high limit
 paramsUser.ltsaContrast = 116; % ltsa contrast
 paramsUser.ltsaBright = 55; % ltsa brightness
 % paramsUser.ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
-% paramsUser.ltsaMax = 3; % ltsa maximum duration per session
+paramsUser.ltsaMax = 6; % ltsa maximum duration per session
 paramsUser.dtHi = .6; % max yaxis value for ICI display in sec
 % paramsUser.minDur = []; % minimum window duration (if specified in minutes)
 

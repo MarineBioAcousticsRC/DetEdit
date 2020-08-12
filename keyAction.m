@@ -98,51 +98,61 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
         for inxfd = 1:zTD(dPARAMS.k,1)
             % update LTSA to show highlighted click
             hold(dHANDLES.LTSAsubs(1),'on')
-            testTimes = dPARAMS.xt(inxfd);
-            xH201a = plot(dHANDLES.LTSAsubs(1),testTimes,dPARAMS.xPP(inxfd),'o','MarkerEdgeColor',...
+            testTime = dPARAMS.xt(inxfd);
+            xH201a = plot(dHANDLES.LTSAsubs(1),testTime,dPARAMS.xPP(inxfd),'o','MarkerEdgeColor',...
                 p.colorPoints,'MarkerSize',p.sizeFPR,'LineWidth',2);
             hold(dHANDLES.LTSAsubs(1),'off')
             inxfdDT = inxfd(inxfd<length(dPARAMS.dt));
             hold(dHANDLES.LTSAsubs(3),'on')
-            xH201b = plot(dHANDLES.LTSAsubs(3),testTimes,dPARAMS.dt(inxfdDT),...
+            xH201b = plot(dHANDLES.LTSAsubs(3),testTime,dPARAMS.dt(inxfdDT),...
                 'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,'LineWidth',2);
             hold(dHANDLES.LTSAsubs(3),'off')
-            disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
+%             disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
             
-            % update spectra
-            hold(dHANDLES.h50,'on')  % add click to spec plot in BLACK
-            plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',2);
-            clickInBoutIdx = find(dPARAMS.trueTimes==testTimes);
-            testSnip = dPARAMS.csnJtrue(clickInBoutIdx,:);
-            testSpectrum = dPARAMS.cspJtrue(clickInBoutIdx,:);
+            % update spectra & waveform plots
+%             hold(dHANDLES.h50,'on')  
+%             plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',2);
+%             clickInBoutIdx = find(dPARAMS.trueTimes==testTime); % why only look for testTime in trueTimes and not all non-FD times in this session?
+%             testSnip = dPARAMS.csnJtrue(clickInBoutIdx,:);
+%             testSpectrum = dPARAMS.cspJtrue(clickInBoutIdx,:);
+             clickInBoutIdx = find(dPARAMS.t==testTime);
+             testSnip = dPARAMS.csnJ(clickInBoutIdx,:);
+            testSpectrum = dPARAMS.cspJ(clickInBoutIdx,:);
             
-            % Normalize spectrum
+            % Normalize test click spectrum & add to spec plot in BLACK
+            hold(dHANDLES.h50,'on')  
             tempSPEC = norm_spec_simple(testSpectrum,dPARAMS.fimint,dPARAMS.fimaxt);
-            xH0 = plot(dHANDLES.h50,dPARAMS.ft,tempSPEC,'Color',p.colorPoints,'Linewidth',4);
+            xH0 = plot(dHANDLES.h50,dPARAMS.ft,tempSPEC,'k','Linewidth',4);
             hold(dHANDLES.h50,'off')
             
-            % Update waveform
-            hold(dHANDLES.h52,'on') % add click to waveform plot in BLACK
-            xH2 = plot(dHANDLES.h52,norm_wav(testSnip)' + 1.5,'Color',p.colorPoints,...
-                'Linewidth',2);
+           % Add test click to waveform plot in BLACK
+            hold(dHANDLES.h52,'on') 
+            xH2 = plot(dHANDLES.h52,norm_wav(testSnip)' + 1.5,'k','Linewidth',2);
             hold(dHANDLES.h52,'off')
             
             % Update rms v pp
             hold(dHANDLES.h51,'on')
             % get click index relative to bout
-            xH1 = plot(dHANDLES.h51,dPARAMS.pxmsp(clickInBoutIdx),dPARAMS.xmpp(clickInBoutIdx),...
+%             xH1 = plot(dHANDLES.h51,dPARAMS.pxmsp(clickInBoutIdx),dPARAMS.xmpp(clickInBoutIdx),...
+%                 'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,...
+%                 'LineWidth',2);
+            xH1 = plot(dHANDLES.h51,dPARAMS.transfRMS(clickInBoutIdx),dPARAMS.xmpp(clickInBoutIdx),...
                 'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,...
                 'LineWidth',2);
             hold(dHANDLES.h51,'off')
             
             % Update rms v freq.
             hold(dHANDLES.h53,'on')
-            xH3 = plot(dHANDLES.h53,dPARAMS.pxmsp(clickInBoutIdx),dPARAMS.freq(clickInBoutIdx),...
+%             xH3 = plot(dHANDLES.h53,dPARAMS.pxmsp(clickInBoutIdx),dPARAMS.freq(clickInBoutIdx),...
+%                 'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,...
+%                 'LineWidth',2);
+            xH3 = plot(dHANDLES.h53,dPARAMS.transfRMS(clickInBoutIdx),dPARAMS.freq(clickInBoutIdx),...
                 'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,...
                 'LineWidth',2);
             hold(dHANDLES.h53,'off')
-            
-            % wait for key
+
+            % ask for user input, wait for key press
+            disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
             pause
             
             dPARAMS.cc = get(gcf,'CurrentCharacter');
@@ -154,7 +164,7 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             xH3.MarkerFaceColor = p.colorPoints;
             
             if (strcmp(dPARAMS.cc,'z'))
-                zTD(k,2) = zTD(k,2) + 1;
+                zTD(dPARAMS.k,2) = zTD(dPARAMS.k,2) + 1;
                 zFD = [zFD; xt(inxfd)]; % add to FD
             end
             

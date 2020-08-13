@@ -175,6 +175,8 @@ if exist('labels','var')
     % a label struct was fount in ID file. Add it to p. This will overwrite
     % whatever was in mySpID before.
     p.mySpID = labels;
+elseif exist('legend','var')
+     p.mySpID = legend;
 elseif exist('mySpID','var')
     p.mySpID = mySpID;
 end
@@ -229,17 +231,41 @@ if ~isempty(zFD)
 end
 
 [~,trueClickIDx] = setdiff(dPARAMS.clickTimes, zFD);
-ixfd = (1: p.c4fd : length(trueClickIDx));  % selected to test for False Det
+% select clicks for each label to test for False Det
+labs = unique(zID(:,2));
+ixfd = {};
+for i = 1:length(labs)
+    thisLabClickTimes = zID(zID(:,2)==labs(i),1);
+    [C iCT iLabCT] = intersect(dPARAMS.clickTimes,thisLabClickTimes);
+    nClick = size(iCT,1);
+    if round(nClick*0.1) >= p.c4fd % 
+        ixfd{i} = sort(datasample(iCT,round(nClick*0.1),1,'Replace',false));     
+    elseif round(nClick*0.1) < p.c4fd && nClick > p.c4fd % or if that's not enough, test p.c4fd clicks
+        ixfd{i} = sort(datasample(iCT,p.c4fd,1,'Replace',false)); 
+    elseif round(nClick*0.1) < p.c4fd && nClick < p.c4fd % if there aren't enough to reach p.c4fd, test all clicks
+        ixfd{i} = iCT;
+    end
+end
+
 dPARAMS.testClickIdx = trueClickIDx(ixfd);
 
 A6 = exist(fNameList.TD,'file');
 if (A6 ~= 2)
-    zTD = -1.*ones(dPARAMS.nb,4);
+    zTD = struct('Session',[]);
+    for i = 1:length(labs)
+        thisLabField = sprintf('Label_%d', i);
+        zTD.(thisLabField) = [];
+        for j = 1:dPARAMS.nb
+            zTD.Session(j) = j;
+            zTD.(thisLabField)(j) = -1.*ones(1,4);
+        end
+    end
+%     zTD = -1.*ones(dPARAMS.nb,4);
     save(fNameList.TD,'zTD');    % create new TD
     disp(' Make new TD file');
 else
     load(fNameList.TD)
-    if (length(zTD(:,1)) ~= dPARAMS.nb)
+    if (length(zTD.Session) ~= dPARAMS.nb)
         disp([' Problem with TD file:',fNameList.TD]);
         return
     end

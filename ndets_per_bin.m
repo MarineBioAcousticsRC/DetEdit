@@ -1,7 +1,7 @@
 function [KB,binCX,binT,binC] = ndets_per_bin(t,xt,y,dt,minNdet,nd,binDur)
 % Calculate the number detection per bin
 % moved into subroutine kf 9/30/2016
-
+global p
 dur = t(end) - t(1);    % session duration
 % sort detections into time bins, get max RL for time bin
 %binDur = 5;     % bin duration [minutes] use 5 for density est
@@ -11,7 +11,7 @@ dtTH = 1 ;  % [seconds] 1
 bin = 1;
 kb = 1;
 RL = zeros(nbin,1);
-C = zeros(nbin,1);  CX = zeros(nbin,1);
+C = zeros(nbin,1);  CX = {};
 T = zeros(nbin,1);
 Ndt = zeros(nbin,1);
 mdt = zeros(nbin,1);
@@ -23,10 +23,18 @@ while kb <= nd
     t1 = datenum([tv(1:4) (tbin+1)*binDur 00]); % upper bound
     I = [];  IX = [];   % index for times in time bin
     I = find(t >= t0 & t < t1);  % find times in bin
-    IX = find(xt >= t0 & xt < t1);  % find test times in bin
+    KBX = [];
     if ~isempty(I)
         C(bin) = length(I); % the number of detections in time bin
-        CX(bin) = length(IX); % the number of test detect in time bin
+        for i = 1:length(p.mySpID)
+            IX = find(xt{i} >= t0 & xt{i} < t1);  % find test times in bin
+            CX{bin,i} = length(IX); % the number of test detect in time bin
+            if (length(IX)>=minNdet)
+                KBX(i) = 1;
+            else
+                KBX(i) = 0;
+            end
+        end
         RL(bin) = max(y(I));    % max RL in time bin
         T(bin) = t0;        % time for time bin
         if I > 1
@@ -49,11 +57,13 @@ while kb <= nd
         end
     end
 end
-KB = [];  KBX = [];
+KB = [];  
 KB = find(C >= minNdet);
-KBX = find(CX >= minNdet);
-
 binT = T(KB) + datenum([0 0 0 0 binDur/2 0]);
 binRL = RL(KB);
 binC = C(KB);
-binCX = CX(KBX);
+if any(KBX)
+    binCX = CX{KBX>0};
+else
+    binCX = [];
+end

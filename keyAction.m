@@ -86,8 +86,10 @@ elseif strcmp(dPARAMS.cc,'t') %assign ALL as true
 
     
 elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for random False Detect
-    if ~isempty(dPARAMS.XFD)
-        zTD(dPARAMS.k,2) = 0;
+    lab = input('Enter label to test: ');
+    thisLabField = sprintf('Label_%d', lab);
+    if ~isempty(dPARAMS.XFD{lab})
+        zTD(dPARAMS.k).(thisLabField)(2) = 0;
         % entering test mode, temporarily disable other callbacks to avoid
         % confusion with keys enered here
         set(dHANDLES.LTSAfig, 'KeyPressFcn',[])
@@ -95,16 +97,18 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
         set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',[])
         set(dHANDLES.spectrafig, 'KeyPressFcn',[])
         set(dHANDLES.wavefig, 'KeyPressFcn',[])
-        for inxfd = 1:zTD(dPARAMS.k,1)
+        for inxfd = 1:zTD(dPARAMS.k).(thisLabField)(1)
+            disp([num2str(zTD(dPARAMS.k).(thisLabField)(1)),' Test clicks for ',thisLabField]);
             % update LTSA to show highlighted click
             hold(dHANDLES.LTSAsubs(1),'on')
-            testTime = dPARAMS.xt(inxfd);
-            xH201a = plot(dHANDLES.LTSAsubs(1),testTime,dPARAMS.xPP(inxfd),'o','MarkerEdgeColor',...
+            testTime = dPARAMS.xt{1,lab}(inxfd);
+            xH201a = plot(dHANDLES.LTSAsubs(1),testTime,dPARAMS.xPP{1,lab}(inxfd),'o','MarkerEdgeColor',...
                 p.colorPoints,'MarkerSize',p.sizeFPR,'LineWidth',2);
             hold(dHANDLES.LTSAsubs(1),'off')
-            inxfdDT = inxfd(inxfd<length(dPARAMS.dt));
+            %inxfdDT = inxfd(inxfd<length(dPARAMS.dt)); % how does this get at the right dt index?
+            clickInBoutIdx = find(dPARAMS.t==testTime);
             hold(dHANDLES.LTSAsubs(3),'on')
-            xH201b = plot(dHANDLES.LTSAsubs(3),testTime,dPARAMS.dt(inxfdDT),...
+            xH201b = plot(dHANDLES.LTSAsubs(3),testTime,dPARAMS.dt(clickInBoutIdx),...
                 'o','MarkerEdgeColor',p.colorPoints,'MarkerSize',p.sizeFPR,'LineWidth',2);
             hold(dHANDLES.LTSAsubs(3),'off')
 %             disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
@@ -114,9 +118,8 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
 %             plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',2);
 %             clickInBoutIdx = find(dPARAMS.trueTimes==testTime); % why only look for testTime in trueTimes and not all non-FD times in this session?
 %             testSnip = dPARAMS.csnJtrue(clickInBoutIdx,:);
-%             testSpectrum = dPARAMS.cspJtrue(clickInBoutIdx,:);
-             clickInBoutIdx = find(dPARAMS.t==testTime);
-             testSnip = dPARAMS.csnJ(clickInBoutIdx,:);
+%             testSpectrum = dPARAMS.cspJtrue(clickInBoutIdx,:);            
+            testSnip = dPARAMS.csnJ(clickInBoutIdx,:);
             testSpectrum = dPARAMS.cspJ(clickInBoutIdx,:);
             
             % Normalize test click spectrum & add to spec plot in BLACK
@@ -152,7 +155,7 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             hold(dHANDLES.h53,'off')
 
             % ask for user input, wait for key press
-            disp(['Showing #: ',num2str(inxfd),' click. Press ''z'' to reject']);
+            disp(['Showing click ',num2str(inxfd),' of ',num2str(zTD(dPARAMS.k).(thisLabField)(1)),'. Press ''z'' to reject']);
             pause
             
             dPARAMS.cc = get(gcf,'CurrentCharacter');
@@ -164,14 +167,14 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             xH3.MarkerFaceColor = p.colorPoints;
             
             if (strcmp(dPARAMS.cc,'z'))
-                zTD(dPARAMS.k,2) = zTD(dPARAMS.k,2) + 1;
-                zFD = [zFD; xt(inxfd)]; % add to FD
+                zTD(dPARAMS.k).(thisLabField)(2) = zTD(dPARAMS.k).(thisLabField)(2) + 1;
+                zFD = [zFD; testTime]; % add to FD
             end
             
             delete([xH0,xH1,xH2,xH3]) % can we just overwrite and delete after loop?
         end
-        disp([' Tested: ',num2str(zTD(dPARAMS.k,1)),' False: ',...
-            num2str(zTD(dPARAMS.k,2))]);
+        disp([' Tested: ',num2str(zTD(dPARAMS.k).(thisLabField)(1)),' False: ',...
+            num2str(zTD(dPARAMS.k).(thisLabField)(2))]);
         
     end
     dPARAMS.k = dPARAMS.k+1;
@@ -181,10 +184,11 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
     set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',@keyAction)
     set(dHANDLES.spectrafig, 'KeyPressFcn',@keyAction)
     set(dHANDLES.wavefig, 'KeyPressFcn',@keyAction)
-elseif (strcmp(dPARAMS.cc,'w') && (zTD(k,2) > 0))  % test 5 min window
+    
+elseif (strcmp(dPARAMS.cc,'w') && (zTD(dPARAMS.k,2) > 0))  % test 5 min window
     % Test 5 min window
-    zTD = test_false_bins(k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
-    k = k+1;
+    zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
+%     k = k+1;
     
 elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
     % detect if data have been brushed, otherwise use whole set.

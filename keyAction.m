@@ -86,9 +86,9 @@ elseif strcmp(dPARAMS.cc,'t') %assign ALL as true
 
     
 elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for random False Detect
-    lab = input('Enter label to test: ');
-    thisLabField = sprintf('Label_%d', lab);
-    if ~isempty(dPARAMS.XFD{lab})
+    dPARAMS.lab = input('Enter label to test: ');
+    thisLabField = sprintf('Label_%d', dPARAMS.lab);
+    if ~isempty(dPARAMS.XFD{dPARAMS.lab})
         zTD(dPARAMS.k).(thisLabField)(2) = 0;
         % entering test mode, temporarily disable other callbacks to avoid
         % confusion with keys enered here
@@ -101,8 +101,8 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             disp([num2str(zTD(dPARAMS.k).(thisLabField)(1)),' Test clicks for ',thisLabField]);
             % update LTSA to show highlighted click
             hold(dHANDLES.LTSAsubs(1),'on')
-            testTime = dPARAMS.xt{1,lab}(inxfd);
-            xH201a = plot(dHANDLES.LTSAsubs(1),testTime,dPARAMS.xPP{1,lab}(inxfd),'o','MarkerEdgeColor',...
+            testTime = dPARAMS.xt{1,dPARAMS.lab}(inxfd);
+            xH201a = plot(dHANDLES.LTSAsubs(1),testTime,dPARAMS.xPP{1,dPARAMS.lab}(inxfd),'o','MarkerEdgeColor',...
                 p.colorPoints,'MarkerSize',p.sizeFPR,'LineWidth',2);
             hold(dHANDLES.LTSAsubs(1),'off')
             %inxfdDT = inxfd(inxfd<length(dPARAMS.dt)); % how does this get at the right dt index?
@@ -185,10 +185,12 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
     set(dHANDLES.spectrafig, 'KeyPressFcn',@keyAction)
     set(dHANDLES.wavefig, 'KeyPressFcn',@keyAction)
     
-elseif (strcmp(dPARAMS.cc,'w') && (zTD(dPARAMS.k,2) > 0))  % test 5 min window
+elseif strcmp(dPARAMS.cc,'w') %&& (zTD(dPARAMS.k,2) > 0))  % test 5 min window
     % Test 5 min window
-    zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
+    %zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
+    zTD = test_false_bins(zTD);
 %     k = k+1;
+    %dPARAMS.k = dPARAMS.k+1;
     
 elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
     % detect if data have been brushed, otherwise use whole set.

@@ -38,7 +38,8 @@ paramsUser.minBout = 0;% minimum bout duration in seconds
 % paramsUser.specploton = 1; %(1 = yes | 0 = no ) spectra parameters plot
 % paramsUser.minNdet = 1; % minimum detections per session.
 % paramsUser.maxDetLoad = 4e5; % ([] - all) max detections to read from disk ( recommended for large files)
- paramsUser.c4fd = 1000; % Min # detections to test to estimate false detection rate
+paramsUser.c4fd = 1000; % Min # detections to test to estimate false detection rate
+paramsUser.nTestBins = 1000;
 
 %% Panel LTSA and time series
 paramsUser.rlLow = 115; % PP plot window low limit

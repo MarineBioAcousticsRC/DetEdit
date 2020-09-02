@@ -46,11 +46,10 @@ save(fNameList.TD,'zTD')
 
 % Test for XFD and strcmp('x or z or w') - if no test points skip
 % x = true, z = false, w = window
-if (isempty(dPARAMS.XFD) && (strcmp(dPARAMS.cc,'x') || ...
-        strcmp(dPARAMS.cc,'z') || strcmp(dPARAMS.cc,'w')))
-    disp(' NO Test Detections, so skip')
+if ((strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') || ...
+        strcmp(dPARAMS.cc,'w')) && isempty(dPARAMS.XFD{1,dPARAMS.lab}))
+    fprintf('NO test clicks for label %d, skipping session\nBEGIN SESSION: %d\n',dPARAMS.lab,dPARAMS.k+1)
     dPARAMS.k = dPARAMS.k + 1;
-    return
 end
 
 if ~isempty(J) % if there are detection in this session
@@ -171,7 +170,7 @@ disp(['END SESSION: ',num2str(dPARAMS.k),' Start: ',datestr(dPARAMS.sb(dPARAMS.k
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculate number of detections per bin
-[KB,binCX,binT,binC] = ndets_per_bin(dPARAMS.t,dPARAMS.xt,dPARAMS.RL,dPARAMS.dt,p.minNdet,dPARAMS.nd,p.binDur);
+[KB,binT,binC] = ndets_per_bin(dPARAMS.t,dPARAMS.xt,dPARAMS.RL,dPARAMS.dt,p.minNdet,dPARAMS.nd,p.binDur);
 % filter empty and low number bins
 if isempty(KB) % not sure what this case does?
     disp(['No bins with at least ',num2str(p.minNdet),' detections'])
@@ -181,18 +180,22 @@ if isempty(KB) % not sure what this case does?
     dPARAMS.k = dPARAMS.k + 1;  % go to next
     return
 end
-for i = 1:length(p.mySpID)
-    thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
-    if (strcmp(dPARAMS.cc,'w') && (zTD(dPARAMS.k).(thisLabField)(1) == 0))
-        disp(['Session: ',num2str(dPARAMS.k),' # Test Detect Bins: ',...
-            num2str(length(binCX)),' but NO False for ',thisLabField]);
-        zTD(dPARAMS.k).(thisLabField)(3) = length(binCX);
-        zTD(dPARAMS.k).(thisLabField)(4) = 0;
-        save(fNameList.TD,'zTD');
-        dPARAMS.k = dPARAMS.k + 1;
-        return
+%for i = 1:length(p.mySpID)  
+
+if strcmp(dPARAMS.cc,'w')
+    thisLabField = sprintf('Label_%d', dPARAMS.lab);
+%     zTD(dPARAMS.k).(thisLabField)(3) = length(dPARAMS.binCX);
+%     zTD(dPARAMS.k).(thisLabField)(4) = 0;
+    if (zTD(dPARAMS.k).(thisLabField)(1) == 0)
+        disp(['Session: ',num2str(dPARAMS.k),', # Test Detect Bins: ',...
+            num2str(length(dPARAMS.binCX{dPARAMS.k,dPARAMS.lab})),', but NO test clicks for label ',num2str(dPARAMS.lab)]);
+%         dPARAMS.k = dPARAMS.k + 1;
+    dPARAMS.k = dPARAMS.k+1;
     end
+    %return
 end
+save(fNameList.TD,'zTD');
+%end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -269,6 +269,16 @@ else
     end
 end
 
+%% Set up False Bin Test
+
+% divide entire TPWS into bins
+dur = MTT(end) - MTT(1);    
+dPARAMS.nbin = ceil(dur*24*60/p.binDur);
+binTimes = MTT(1):p.binDur/(24*60):MTT(end);
+
+% randomly select test bins across TPWS
+ixtb = sort(datasample(binTimes,p.nTestBins,1,'Replace',false)); 
+
 
 %% Compute Spectra Plot Parameters
 % max and min for LTSA frequency

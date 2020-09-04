@@ -1,5 +1,5 @@
 function FDR_FOR_tests_RC
-global dHANDLES dPARAMS p zTD zID
+global dHANDLES dPARAMS p zTD
 
 % dPARAMS.lab = input('Enter label to test: ');
 % thisLabField = sprintf('Label_%d', dPARAMS.lab);
@@ -16,7 +16,6 @@ if any(btidx)
     
     for i = 1:length(BT) % for each test bin
         FN = [];
-        FNunID = [];
         
         % demarcate bin on time series plots
         hold(dHANDLES.LTSAsubs(1),'on')
@@ -33,11 +32,14 @@ if any(btidx)
         hold(dHANDLES.LTSAsubs(3),'off')
         
         % identify indices of labeled clicks in this bin
-        cidx = find(zID(:,1)>= BT(i) & zID(:,1) < BT(i)+p.binDur/(24*60));
+        %cidx = find(zID(:,1)>= BT(i) & zID(:,1) < BT(i)+p.binDur/(24*60));
+        cidx = find(dPARAMS.tID(dPARAMS.labelConfIdx) >= BT(i) & ...
+            dPARAMS.tID(dPARAMS.labelConfIdx) < (BT(i)+p.binDur/(24*60)));
         
         if ~isempty(cidx)
             % identify unique labels in this bin
-            labs = unique(zID(cidx,2));
+            %labs = unique(zID(cidx,2));
+            labs = unique(dPARAMS.spCodeSet(dPARAMS.labelConfIdx(cidx)));
             
             for j = 1:length(labs) % for each label in this bin
                 
@@ -45,17 +47,24 @@ if any(btidx)
                 zTD{dPARAMS.k,labs(j)+1}(3) = zTD{dPARAMS.k,labs(j)+1}(3)+1;
                 
                 % which clicks have this label?
-                lidx = find(zID(cidx,2)==labs(j));
+%                 lidx = find(zID(cidx,2)==labs(j));
+                lidx = find(dPARAMS.spCodeSet(dPARAMS.labelConfIdx(cidx))==labs(j));
                 
                 % find clicks with this label in session vars
-                [~, kInd, ~] = intersect(dPARAMS.t,zID(cidx(lidx),1));
+%                 [~, kInd, ~] = intersect(dPARAMS.t,zID(cidx(lidx),1));
+                [~, kInd, ~] = intersect(dPARAMS.t,dPARAMS.tID(dPARAMS.labelConfIdx(cidx(lidx))));
                 
                 % average clicks with this label and plot them
                 % calculate mean spectrum
                 specs = dPARAMS.cspJ(kInd,:);
-                specMax = max(specs,[],2);
-                specNorm = mean(specs./specMax,1);
-                % calculate mean ICI dist
+                mspec = mean(specs,1);
+                minSpec = min(mspec,[],2);
+                Spec = mspec - repmat(minSpec,1,size(mspec,2));
+                mxSpec = max(Spec,[],2);
+                Spec = Spec./repmat(mxSpec,1,size(mspec,2));
+                meanSpec = 20*log10(nanmean(10.^Spec./20,1));
+                meanMin = meanSpec-min(meanSpec);
+                specNorm = meanMin./max(meanMin);
                 ICI = histcounts(diff(dPARAMS.t(kInd)*60*60*24),0:.01:1);
                 % calculate mean waveform
                 meanWav = norm_wav(mean(dPARAMS.csnJ(kInd,:),1));
@@ -98,7 +107,8 @@ if any(btidx)
         
         % identify indices of unlabeled clicks in this bin
         m = find(dPARAMS.t(:,1)>= BT(i) & dPARAMS.t(:,1) < BT(i)+p.binDur/(24*60));
-        [noLab, ia] = setdiff(dPARAMS.t(m),zID(cidx,1));
+%         [noLab, ia] = setdiff(dPARAMS.t(m),zID(cidx,1));
+        [noLab, ia] = setdiff(dPARAMS.t(m),dPARAMS.tID(dPARAMS.labelConfIdx(cidx)));
         
         if ~isempty(noLab)
             % average unlabeled clicks
@@ -165,7 +175,7 @@ if any(btidx)
     end
     
 else
-    disp('No test bins in this session, moving to next session\n');
+    disp('No test bins in this session, moving to next session');
     dPARAMS.k = dPARAMS.k + 1;
 end
 

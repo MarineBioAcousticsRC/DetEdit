@@ -87,9 +87,9 @@ elseif strcmp(dPARAMS.cc,'t') %assign ALL as true
     
 elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for random False Detect
     dPARAMS.lab = input('Enter label to test: ');
-    thisLabField = sprintf('Label_%d', dPARAMS.lab);
+%     thisLabField = sprintf('Label_%d', dPARAMS.lab);
     if ~isempty(dPARAMS.XFD{dPARAMS.lab})
-        zTD(dPARAMS.k).(thisLabField)(2) = 0;
+        zTD{dPARAMS.k,dPARAMS.lab+1}(2) = 0;
         % entering test mode, temporarily disable other callbacks to avoid
         % confusion with keys enered here
         set(dHANDLES.LTSAfig, 'KeyPressFcn',[])
@@ -97,8 +97,8 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
         set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',[])
         set(dHANDLES.spectrafig, 'KeyPressFcn',[])
         set(dHANDLES.wavefig, 'KeyPressFcn',[])
-        for inxfd = 1:zTD(dPARAMS.k).(thisLabField)(1)
-            disp([num2str(zTD(dPARAMS.k).(thisLabField)(1)),' Test clicks for ',thisLabField]);
+        for inxfd = 1:zTD{dPARAMS.k,dPARAMS.lab+1}(1)
+            disp([num2str(zTD{dPARAMS.k,dPARAMS.lab+1}(1)),' Test clicks for label ',dPARAMS.lab]);
             % update LTSA to show highlighted click
             hold(dHANDLES.LTSAsubs(1),'on')
             testTime = dPARAMS.xt{1,dPARAMS.lab}(inxfd);
@@ -155,7 +155,7 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             hold(dHANDLES.h53,'off')
 
             % ask for user input, wait for key press
-            disp(['Showing click ',num2str(inxfd),' of ',num2str(zTD(dPARAMS.k).(thisLabField)(1)),'. Press ''z'' to reject']);
+            disp(['Showing click ',num2str(inxfd),' of ',num2str(zTD{dPARAMS.k,dPARAMS.lab+1}(1)),'. Press ''z'' to reject']);
             pause
             
             dPARAMS.cc = get(gcf,'CurrentCharacter');
@@ -167,14 +167,14 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
             xH3.MarkerFaceColor = p.colorPoints;
             
             if (strcmp(dPARAMS.cc,'z'))
-                zTD(dPARAMS.k).(thisLabField)(2) = zTD(dPARAMS.k).(thisLabField)(2) + 1;
+                zTD{dPARAMS.k,dPARAMS.lab+1}(2) = zTD{dPARAMS.k,dPARAMS.lab+1}(2) + 1;
                 zFD = [zFD; testTime]; % add to FD
             end
             
             delete([xH0,xH1,xH2,xH3]) % can we just overwrite and delete after loop?
         end
-        disp([' Tested: ',num2str(zTD(dPARAMS.k).(thisLabField)(1)),' False: ',...
-            num2str(zTD(dPARAMS.k).(thisLabField)(2))]);
+        disp([' Tested: ',num2str(zTD{dPARAMS.k,dPARAMS.lab+1}(1)),' False: ',...
+            num2str(zTD{dPARAMS.k,dPARAMS.lab+1}(2))]);
         
     end
     dPARAMS.k = dPARAMS.k+1;
@@ -188,7 +188,8 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
 elseif strcmp(dPARAMS.cc,'w') %&& (zTD(dPARAMS.k,2) > 0))  % test 5 min window
     % Test 5 min window
     %zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
-    zTD = test_false_bins(zTD);
+    %zTD = test_false_bins(zTD);
+   FDR_FOR_tests_RC;
 %     k = k+1;
     %dPARAMS.k = dPARAMS.k+1;
     
@@ -249,7 +250,7 @@ else
         end
         zFD = uzFD;
         save(fNameList.FD,'zFD');
-        tfinal = find(zTD(:,1) > 0);
+        tfinal = find(zTD{:,1} > 0);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         disp(' ')
         disp(['Number of Starting Detections = ',num2str(length(dPARAMS.clickTimes)+2)])
@@ -258,7 +259,7 @@ else
         disp(' ')
         disp(['Number of False Detections = ',num2str(length(zFD)-1)])
         disp(' ')
-        disp(['Number of Test Detections & False Detect = ',num2str(sum(zTD(tfinal,:)))])
+        disp(['Number of Test Detections & False Detect = ',num2str(sum(zTD{tfinal,:}))])
         disp(' ')
         disp(['Done with file ',fNameList.TPWS])
         commandwindow

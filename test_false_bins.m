@@ -4,15 +4,15 @@ function zTD = test_false_bins(zTD)
 global dHANDLES dPARAMS p
 
 dPARAMS.lab = input('Enter label to test: ');
-thisLabField = sprintf('Label_%d', dPARAMS.lab);
+% thisLabField = sprintf('Label_%d', dPARAMS.lab);
 
-if zTD(dPARAMS.k).(thisLabField)(1) == 0
-    disp(['No test clicks for ',thisLabField, ' in this session']);
+if zTD{dPARAMS.k,dPARAMS.lab+1}(1) == 0
+    disp(['No test clicks for label ',dPARAMS.lab, ' in this session']);
     dPARAMS.k = dPARAMS.k+1;
     return
 end
-if zTD(dPARAMS.k).(thisLabField)(2) == -1
-    disp(['WARNING: False click test not yet completed for ',thisLabField,', cannot carry out false bin test']);
+if zTD{dPARAMS.k,dPARAMS.lab+1}(2) == -1
+    disp(['WARNING: False click test not yet completed for label ',dPARAMS.lab,', cannot carry out false bin test']);
     dPARAMS.k = dPARAMS.k+1;
     return
 end
@@ -20,14 +20,14 @@ end
 % (Might be nice to highlight the clicks in question on fig 51 also?)
 % Plot all test clicks in session
 hold(dHANDLES.LTSAsubs(1),'on')
-for inxfd = 1 : zTD(dPARAMS.k).(thisLabField)(1)
+for inxfd = 1 : zTD{dPARAMS.k,dPARAMS.lab+1}(1)
     testTime = dPARAMS.xt{1,dPARAMS.lab}(inxfd);
     xH201a = plot(dHANDLES.LTSAsubs(1),testTime,dPARAMS.xPP{1,dPARAMS.lab}(inxfd),...
         'ro','MarkerSize',10,'UserData',dPARAMS.xt{1,dPARAMS.lab}(inxfd));
 end
 hold(dHANDLES.LTSAsubs(1),'off')
 hold(dHANDLES.LTSAsubs(3),'on')
-for inxfd = 1 : zTD(dPARAMS.k).(thisLabField)(1)
+for inxfd = 1 : zTD{dPARAMS.k,dPARAMS.lab+1}(1)
     testTime = dPARAMS.xt{1,dPARAMS.lab}(inxfd);
     clickInBoutIdx = find(dPARAMS.t==testTime);
     
@@ -54,8 +54,8 @@ while ~(pzTD >= 0 && pzTD <= length(dPARAMS.binCX))
     pzTD = input(prompt);
 end
 
-zTD(dPARAMS.k).(thisLabField)(4) = pzTD;
-zTD(dPARAMS.k).(thisLabField)(3) = testBins;
+zTD{dPARAMS.k,dPARAMS.lab+1}(4) = pzTD;
+zTD{dPARAMS.k,dPARAMS.lab+1}(3) = testBins;
 dPARAMS.k = dPARAMS.k+1;
 
 

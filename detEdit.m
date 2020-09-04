@@ -246,24 +246,18 @@ end
 
 A6 = exist(fNameList.TD,'file');
 if (A6 ~= 2)
-    zTD = struct('Session',[]);
-    for i = 1:length(p.mySpID)
-        thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
-        for j = 1:dPARAMS.nb
-            zTD(j).Session = j;
-            zTD(j).(thisLabField) = -1.*ones(1,4);
-            %             l = find(dPARAMS.clickTimes(trueClickIDx(ixfd{i}))>=dPARAMS.sb(j));
-            %             m = find(dPARAMS.clickTimes(trueClickIDx(ixfd{i}))<dPARAMS.eb(j));
-            %             testClicksInBout = intersect(l,m);
-            %             zTD(j).(thisLabField)(1) = length(testClicksInBout);
+    zTD = {}
+    for j = 1:dPARAMS.nb
+        for i = 1:length(p.mySpID)
+            zTD{j,1} = j;
+            zTD{j,i+1} = -1.*ones(1,6);
         end
     end
-    %     zTD = -1.*ones(dPARAMS.nb,4);
     save(fNameList.TD,'zTD');    % create new TD
     disp(' Make new TD file');
 else
     load(fNameList.TD)
-    if (length(zTD) ~= dPARAMS.nb) || length(fieldnames(zTD)) < length(p.mySpID)+1
+    if (size(zTD,1) ~= dPARAMS.nb) || size(zTD,2) < length(p.mySpID)+1
         disp([' Problem with TD file:',fNameList.TD]);
         return
     end
@@ -272,13 +266,21 @@ end
 %% Set up False Bin Test
 
 % divide entire TPWS into bins
-dur = MTT(end) - MTT(1);    
-dPARAMS.nbin = ceil(dur*24*60/p.binDur);
-binTimes = MTT(1):p.binDur/(24*60):MTT(end);
+dur = dPARAMS.eb(end) - dPARAMS.sb(1);    
+% dPARAMS.binTimes = (dPARAMS.sb(1):p.binDur/(24*60):dPARAMS.eb(end))';
+dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';
 
-% randomly select test bins across TPWS
-ixtb = sort(datasample(binTimes,p.nTestBins,1,'Replace',false)); 
+% identify which bins contain clicks
+[N,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
+goodBins = find(N>0);
 
+% randomly select test bins across TPWS from those bins which contain clicks
+if p.nTestBins < size(goodBins,2)
+    dPARAMS.ixtb = sort(datasample(goodBins,p.nTestBins,2,'Replace',false));
+else
+    disp('WARNING: Not enough bins to meet user setting for False Bin Test, using all available bins');
+    dPARAMS.ixtb = 1:size(goodBins,2);
+end
 
 %% Compute Spectra Plot Parameters
 % max and min for LTSA frequency

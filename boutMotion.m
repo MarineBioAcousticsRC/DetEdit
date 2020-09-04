@@ -34,20 +34,22 @@ end
 % zTD(dPARAMS.k,1) = length(dPARAMS.XFD);
 
 for i = 1:length(p.mySpID)
-    thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
+    %thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
     %             l = find(dPARAMS.clickTimes(dPARAMS.testClickIdx{i})>=dPARAMS.sb(j));
     %             m = find(dPARAMS.clickTimes(dPARAMS.testClickIdx{i})<dPARAMS.eb(j));
     %             testClicksInBout = intersect(l,m);
     dPARAMS.XFD{i} = find(dPARAMS.clickTimes(dPARAMS.testClickIdx{i})>=dPARAMS.sb(dPARAMS.k) & ...
         dPARAMS.clickTimes(dPARAMS.testClickIdx{i})<dPARAMS.eb(dPARAMS.k));
-    zTD(dPARAMS.k).(thisLabField)(1) = length(dPARAMS.XFD{i});
+    zTD{dPARAMS.k,i+1}(1) = length(dPARAMS.XFD{i});
 end
 save(fNameList.TD,'zTD')
 
 % Test for XFD and strcmp('x or z or w') - if no test points skip
 % x = true, z = false, w = window
-if ((strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') || ...
-        strcmp(dPARAMS.cc,'w')) && isempty(dPARAMS.XFD{1,dPARAMS.lab}))
+% if ((strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') || ...
+%         strcmp(dPARAMS.cc,'w')) && isempty(dPARAMS.XFD{1,dPARAMS.lab}))
+if ((strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z')) ...
+        && isempty(dPARAMS.XFD{1,dPARAMS.lab}))
     fprintf('NO test clicks for label %d, skipping session\nBEGIN SESSION: %d\n',dPARAMS.lab,dPARAMS.k+1)
     dPARAMS.k = dPARAMS.k + 1;
 end
@@ -56,11 +58,11 @@ if ~isempty(J) % if there are detection in this session
     dPARAMS.t = dPARAMS.clickTimes(J); % detection times in this session
     disp([' Detection times:',num2str(length(dPARAMS.t))]);
     for i = 1:length(p.mySpID)
-        thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
+        %thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
         if (~isempty(dPARAMS.XFD{i}))
             dPARAMS.xt{i} = dPARAMS.clickTimes(dPARAMS.testClickIdx{i}(dPARAMS.XFD{i}));  %times to test for False Detection
             dPARAMS.xPP{i} = dPARAMS.clickLevels(dPARAMS.testClickIdx{i}(dPARAMS.XFD{i}));   %amplitude for test False Detection
-            disp([thisLabField,' Test False Detection times:',num2str(zTD(dPARAMS.k).(thisLabField)(1))]),
+            disp(['Label ',num2str(i),' Test False Detection times:',num2str(zTD{dPARAMS.k,i+1}(1))]),
         else
             dPARAMS.xt{i} = [];
             dPARAMS.xPP{i} = [];
@@ -182,19 +184,19 @@ if isempty(KB) % not sure what this case does?
 end
 %for i = 1:length(p.mySpID)  
 
-if strcmp(dPARAMS.cc,'w')
-    thisLabField = sprintf('Label_%d', dPARAMS.lab);
-%     zTD(dPARAMS.k).(thisLabField)(3) = length(dPARAMS.binCX);
-%     zTD(dPARAMS.k).(thisLabField)(4) = 0;
-    if (zTD(dPARAMS.k).(thisLabField)(1) == 0)
-        disp(['Session: ',num2str(dPARAMS.k),', # Test Detect Bins: ',...
-            num2str(length(dPARAMS.binCX{dPARAMS.k,dPARAMS.lab})),', but NO test clicks for label ',num2str(dPARAMS.lab)]);
-%         dPARAMS.k = dPARAMS.k + 1;
-    dPARAMS.k = dPARAMS.k+1;
-    end
-    %return
-end
-save(fNameList.TD,'zTD');
+% if strcmp(dPARAMS.cc,'w')
+% %     thisLabField = sprintf('Label_%d', dPARAMS.lab);
+% %     zTD{dPARAMS.k,dPARAMS.lab+1}(3) = length(dPARAMS.binCX);
+% %     zTD{dPARAMS.k,dPARAMS.lab+1}(4) = 0;
+%     if (zTD{dPARAMS.k,dPARAMS.lab+1}(1) == 0)
+%         disp(['Session: ',num2str(dPARAMS.k),', # Test Detect Bins: ',...
+%             num2str(length(dPARAMS.binCX{dPARAMS.k,dPARAMS.lab})),', but NO test clicks for label ',num2str(dPARAMS.lab)]);
+% %         dPARAMS.k = dPARAMS.k + 1;
+%     dPARAMS.k = dPARAMS.k+1;
+%     end
+%     %return
+% end
+% save(fNameList.TD,'zTD');
 %end
 
 

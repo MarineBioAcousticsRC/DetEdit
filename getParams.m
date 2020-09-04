@@ -80,7 +80,7 @@ switch analysis
         params.binDur = binDur;
         params.rawFileDur = rawFileDur;
         params.c4fd = c4fd; 
-        params.nTestBins = nTestBins;
+        params.nTestBins = [];
         params.specploton = specploton;
         params.minNdet = minNdet; 
         params.maxDetLoad = maxDetLoad;

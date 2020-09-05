@@ -32,14 +32,15 @@ if any(btidx)
         hold(dHANDLES.LTSAsubs(3),'off')
         
         % identify indices of labeled clicks in this bin
-        %cidx = find(zID(:,1)>= BT(i) & zID(:,1) < BT(i)+p.binDur/(24*60));
-        cidx = find(dPARAMS.tID(dPARAMS.labelConfIdx) >= BT(i) & ...
-            dPARAMS.tID(dPARAMS.labelConfIdx) < (BT(i)+p.binDur/(24*60)));
+        tID = dPARAMS.tID(dPARAMS.labelConfIdx);
+        spCodeSet = dPARAMS.spCodeSet(dPARAMS.labelConfIdx);
+        cidx = find(tID >= BT(i) & tID < (BT(i)+p.binDur/(24*60)));
+        tIDbin = tID(cidx);
+        spCodeSetbin = spCodeSet(cidx);
         
         if ~isempty(cidx)
             % identify unique labels in this bin
-            %labs = unique(zID(cidx,2));
-            labs = unique(dPARAMS.spCodeSet(dPARAMS.labelConfIdx(cidx)));
+            labs = unique(spCodeSetbin);
             
             for j = 1:length(labs) % for each label in this bin
                 
@@ -47,12 +48,10 @@ if any(btidx)
                 zTD{dPARAMS.k,labs(j)+1}(3) = zTD{dPARAMS.k,labs(j)+1}(3)+1;
                 
                 % which clicks have this label?
-%                 lidx = find(zID(cidx,2)==labs(j));
-                lidx = find(dPARAMS.spCodeSet(dPARAMS.labelConfIdx(cidx))==labs(j));
+                lidx = find(spCodeSetbin==labs(j));
                 
                 % find clicks with this label in session vars
-%                 [~, kInd, ~] = intersect(dPARAMS.t,zID(cidx(lidx),1));
-                [~, kInd, ~] = intersect(dPARAMS.t,dPARAMS.tID(dPARAMS.labelConfIdx(cidx(lidx))));
+                [~, kInd, ~] = intersect(dPARAMS.t,tIDbin(lidx));
                 
                 % average clicks with this label and plot them
                 % calculate mean spectrum
@@ -65,6 +64,7 @@ if any(btidx)
                 meanSpec = 20*log10(nanmean(10.^Spec./20,1));
                 meanMin = meanSpec-min(meanSpec);
                 specNorm = meanMin./max(meanMin);
+                % calculate ICI dist
                 ICI = histcounts(diff(dPARAMS.t(kInd)*60*60*24),0:.01:1);
                 % calculate mean waveform
                 meanWav = norm_wav(mean(dPARAMS.csnJ(kInd,:),1));
@@ -82,7 +82,7 @@ if any(btidx)
                 xticks([0 0.25 0.5 0.75 1]);
                 xlabel('ICI (s)');
                 ylabel('Counts');
-                title(['Label ',num2str(labs(j)),': ',p.mySpID(labs(j)).Name]);
+                title(['Bin ',num2str(i),', Label ',num2str(labs(j)),': ',p.mySpID(labs(j)).Name]);
                 subplot(1,3,3)
                 plot(meanWav);
                 xlabel('Sample Number');
@@ -95,8 +95,9 @@ if any(btidx)
                     zTD{dPARAMS.k,labs(j)+1}(4) = zTD{dPARAMS.k,labs(j)+1}(4)+1;
                     
                     % check if also a false negative for another label
-                    a = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ')
-                    if a > 0
+                    a = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
+                    % count as FN only if this label doesn't already exist in this bin
+                    if a > 0 && ismember(a,labs)
                         zTD{dPARAMS.k,a+1}(5) = zTD{dPARAMS.k,a+1}(5)+1;
                         zTD{dPARAMS.k,a+1}(6) = zTD{dPARAMS.k,a+1}(6)+1;
                         FN = [FN,a];
@@ -107,16 +108,21 @@ if any(btidx)
         
         % identify indices of unlabeled clicks in this bin
         m = find(dPARAMS.t(:,1)>= BT(i) & dPARAMS.t(:,1) < BT(i)+p.binDur/(24*60));
-%         [noLab, ia] = setdiff(dPARAMS.t(m),zID(cidx,1));
-        [noLab, ia] = setdiff(dPARAMS.t(m),dPARAMS.tID(dPARAMS.labelConfIdx(cidx)));
+        [noLab, ia] = setdiff(dPARAMS.t(m),tIDbin);
         
         if ~isempty(noLab)
             % average unlabeled clicks
             % calculate mean spectrum
             specs = dPARAMS.cspJ(m(ia),:);
-            specMax = max(specs,[],2);
-            specNorm = mean(specs./specMax,1);
-            % calculate mean ICI dist
+            mspec = mean(specs,1);
+            minSpec = min(mspec,[],2);
+            Spec = mspec - repmat(minSpec,1,size(mspec,2));
+            mxSpec = max(Spec,[],2);
+            Spec = Spec./repmat(mxSpec,1,size(mspec,2));
+            meanSpec = 20*log10(nanmean(10.^Spec./20,1));
+            meanMin = meanSpec-min(meanSpec);
+            specNorm = meanMin./max(meanMin);            
+            % calculate ICI dist
             ICI = histcounts(diff(dPARAMS.t(m(ia))*60*60*24),0:.01:1);
             % calculate mean waveform
             meanWav = norm_wav(mean(dPARAMS.csnJ(m(ia),:),1));
@@ -134,16 +140,16 @@ if any(btidx)
             xticks([0 0.25 0.5 0.75 1]);
             xlabel('ICI (s)');
             ylabel('Counts');
-            set(gca,'fontSize',14);
-            title('Unlabeled Clicks');
+            title(['Bin ',num2str(i),': Unlabeled Clicks']);
             subplot(1,3,3)
             plot(meanWav);
             xlabel('Sample Number');
             ylabel('Normalized Amplitude');
             
             % check if false negative for any label
-            b = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ')
-            if b > 0
+            b = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
+            % count as FN only if this label doesn't already exist in this bin
+            if b > 0 && ~ismember(b,labs) 
                 zTD{dPARAMS.k,b+1}(5) = zTD{dPARAMS.k,b+1}(5)+1;
                 zTD{dPARAMS.k,b+1}(6) = zTD{dPARAMS.k,b+1}(6)+1;
                 FN = [FN,b];
@@ -160,7 +166,7 @@ if any(btidx)
         else
             q = 1:size(zTD,2)-1
         end
-        r = setdiff(q,FN); % don't double count bin if FN has already been identified
+        r = setdiff(q,FN); % don't double count bin if FN has already been identified for some label(s)
         
         for l = 1:length(r)
             zTD{dPARAMS.k,r(l)+1}(5) = zTD{dPARAMS.k,r(l)+1}(5)+1;

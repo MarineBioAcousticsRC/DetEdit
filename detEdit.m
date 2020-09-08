@@ -270,9 +270,9 @@ dur = dPARAMS.eb(end) - dPARAMS.sb(1);
 % dPARAMS.binTimes = (dPARAMS.sb(1):p.binDur/(24*60):dPARAMS.eb(end))';
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';
 
-% identify which bins contain clicks
+% identify which bins contain at least 5 clicks
 [N,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
-goodBins = find(N>0);
+goodBins = find(N>5);
 
 % randomly select test bins across TPWS from those bins which contain clicks
 if p.nTestBins < size(goodBins,2)

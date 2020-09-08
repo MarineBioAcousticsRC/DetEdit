@@ -1,9 +1,6 @@
 function FDR_FOR_tests_RC
 global dHANDLES dPARAMS p zTD
 
-% dPARAMS.lab = input('Enter label to test: ');
-% thisLabField = sprintf('Label_%d', dPARAMS.lab);
-
 % check for test bins in this session
 btidx = dPARAMS.binTimes(dPARAMS.ixtb) >= dPARAMS.sb(dPARAMS.k) & ...
     dPARAMS.binTimes(dPARAMS.ixtb) < dPARAMS.eb(dPARAMS.k);
@@ -16,7 +13,10 @@ if any(btidx)
     
     for i = 1:length(BT) % for each test bin
         FN = [];
-        
+        labs = [];
+        z = [];
+        a = [];
+        b = [];
         % demarcate bin on time series plots
         hold(dHANDLES.LTSAsubs(1),'on')
         xH201a = plot(dHANDLES.LTSAsubs(1),repmat(BT(i),61,1),110:1:170,...
@@ -43,64 +43,77 @@ if any(btidx)
             labs = unique(spCodeSetbin);
             
             for j = 1:length(labs) % for each label in this bin
-                
-                % add to running tally of FDR test bins for this label
-                zTD{dPARAMS.k,labs(j)+1}(3) = zTD{dPARAMS.k,labs(j)+1}(3)+1;
-                
+                z = [];
+                a = [];
                 % which clicks have this label?
                 lidx = find(spCodeSetbin==labs(j));
                 
-                % find clicks with this label in session vars
-                [~, kInd, ~] = intersect(dPARAMS.t,tIDbin(lidx));
-                
-                % average clicks with this label and plot them
-                % calculate mean spectrum
-                specs = dPARAMS.cspJ(kInd,:);
-                mspec = mean(specs,1);
-                minSpec = min(mspec,[],2);
-                Spec = mspec - repmat(minSpec,1,size(mspec,2));
-                mxSpec = max(Spec,[],2);
-                Spec = Spec./repmat(mxSpec,1,size(mspec,2));
-                meanSpec = 20*log10(nanmean(10.^Spec./20,1));
-                meanMin = meanSpec-min(meanSpec);
-                specNorm = meanMin./max(meanMin);
-                % calculate ICI dist
-                ICI = histcounts(diff(dPARAMS.t(kInd)*60*60*24),0:.01:1);
-                % calculate mean waveform
-                meanWav = norm_wav(mean(dPARAMS.csnJ(kInd,:),1));
-                
-                % plot
-                figure(99);clf
-                subplot(1,3,1)
-                plot(dPARAMS.fmsp,specNorm);
-                xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
-                xlabel('Frequency (kHz)');
-                ylabel('Normalized Amplitude');
-                subplot(1,3,2)
-                histogram('BinEdges',0:.01:1,'BinCounts',ICI);
-                grid on
-                xticks([0 0.25 0.5 0.75 1]);
-                xlabel('ICI (s)');
-                ylabel('Counts');
-                title(['Bin ',num2str(i),', Label ',num2str(labs(j)),': ',p.mySpID(labs(j)).Name]);
-                subplot(1,3,3)
-                plot(meanWav);
-                xlabel('Sample Number');
-                ylabel('Normalized Amplitude');
-                
-                % ask for user input
-                z = input('Are these clicks correctly labeled? Enter 1 for yes, 0 for no: ');
-                
-                if z==0 % record false positives for this label
-                    zTD{dPARAMS.k,labs(j)+1}(4) = zTD{dPARAMS.k,labs(j)+1}(4)+1;
+                if length(lidx) > 5 %don't evaluate labels with very few clicks
+                    % add to running tally of FDR test bins for this label
+                    zTD{dPARAMS.k,labs(j)+1}(3) = zTD{dPARAMS.k,labs(j)+1}(3)+1;
+
+                    % find clicks with this label in session vars
+                    [~, kInd, ~] = intersect(dPARAMS.t,tIDbin(lidx));
                     
-                    % check if also a false negative for another label
-                    a = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
-                    % count as FN only if this label doesn't already exist in this bin
-                    if a > 0 && ismember(a,labs)
-                        zTD{dPARAMS.k,a+1}(5) = zTD{dPARAMS.k,a+1}(5)+1;
-                        zTD{dPARAMS.k,a+1}(6) = zTD{dPARAMS.k,a+1}(6)+1;
-                        FN = [FN,a];
+                    % average clicks with this label and plot them
+                    % calculate mean spectrum
+                    specs = dPARAMS.cspJ(kInd,:);
+                    mspec = mean(specs,1);
+                    minSpec = min(mspec,[],2);
+                    Spec = mspec - repmat(minSpec,1,size(mspec,2));
+                    mxSpec = max(Spec,[],2);
+                    Spec = Spec./repmat(mxSpec,1,size(mspec,2));
+                    meanSpec = 20*log10(nanmean(10.^Spec./20,1));
+                    meanMin = meanSpec-min(meanSpec);
+                    specNorm = meanMin./max(meanMin);
+                    % calculate ICI dist
+                    ICI = histcounts(diff(dPARAMS.t(kInd)*60*60*24),0:.01:1);
+                    % calculate mean waveform
+                    meanWav = norm_wav(mean(dPARAMS.csnJ(kInd,:),1));
+                    
+                    % plot
+                    figure(99);clf
+                    subplot(1,3,1)
+                    plot(dPARAMS.fmsp,specNorm);
+                    xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
+                    xlabel('Frequency (kHz)');
+                    ylabel('Normalized Amplitude');
+                    subplot(1,3,2)
+                    histogram('BinEdges',0:.01:1,'BinCounts',ICI);
+                    grid on
+                    xticks([0 0.25 0.5 0.75 1]);
+                    xlabel('ICI (s)');
+                    ylabel('Counts');
+                    title(['Bin ',num2str(i),', Label ',num2str(labs(j)),': ',p.mySpID(labs(j)).Name]);
+                    subplot(1,3,3)
+                    plot(meanWav);
+                    xlabel('Sample Number');
+                    ylabel('Normalized Amplitude');
+                    
+                    while isempty(z)
+                        % ask for user input
+                        z = input('Are these clicks correctly labeled? Enter 1 for yes, 0 for no: ');
+                        
+                        if z~=1 && z~=0
+                            fprintf('WARNING: Entry not allowed\n');
+                            z = [];
+                        elseif z==0 % record false positives for this label
+                            zTD{dPARAMS.k,labs(j)+1}(4) = zTD{dPARAMS.k,labs(j)+1}(4)+1;
+                            
+                            while isempty(a)
+                                % check if also a false negative for another label
+                                a = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
+                                if ~ismember(a,1:size(zTD,2)-1) && a~=0
+                                    fprintf('WARNING: Entry not allowed\n');
+                                    a = [];
+                                    % count as FN only if this label doesn't already exist in this bin
+                                elseif a > 0 && ~ismember(a,labs)
+                                    zTD{dPARAMS.k,a+1}(5) = zTD{dPARAMS.k,a+1}(5)+1;
+                                    zTD{dPARAMS.k,a+1}(6) = zTD{dPARAMS.k,a+1}(6)+1;
+                                    FN = [FN,a];
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -110,7 +123,7 @@ if any(btidx)
         m = find(dPARAMS.t(:,1)>= BT(i) & dPARAMS.t(:,1) < BT(i)+p.binDur/(24*60));
         [noLab, ia] = setdiff(dPARAMS.t(m),tIDbin);
         
-        if ~isempty(noLab)
+        if ~isempty(noLab) && length(noLab) > 5
             % average unlabeled clicks
             % calculate mean spectrum
             specs = dPARAMS.cspJ(m(ia),:);
@@ -146,13 +159,18 @@ if any(btidx)
             xlabel('Sample Number');
             ylabel('Normalized Amplitude');
             
-            % check if false negative for any label
-            b = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
-            % count as FN only if this label doesn't already exist in this bin
-            if b > 0 && ~ismember(b,labs) 
-                zTD{dPARAMS.k,b+1}(5) = zTD{dPARAMS.k,b+1}(5)+1;
-                zTD{dPARAMS.k,b+1}(6) = zTD{dPARAMS.k,b+1}(6)+1;
-                FN = [FN,b];
+            while isempty(b)
+                % check if false negative for any label
+                b = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
+                if ~ismember(b,1:size(zTD,2)-1) && b~=0
+                    fprintf('WARNING: Entry not allowed\n');
+                    b = [];
+                    % count as FN only if this label doesn't already exist in this bin
+                elseif b > 0 && ~ismember(b,labs) && ~ismember(b,FN)
+                    zTD{dPARAMS.k,b+1}(5) = zTD{dPARAMS.k,b+1}(5)+1;
+                    zTD{dPARAMS.k,b+1}(6) = zTD{dPARAMS.k,b+1}(6)+1;
+                    FN = [FN,b];
+                end
             end
         end
         
@@ -164,7 +182,7 @@ if any(btidx)
         if ~isempty(labs)
             q = setdiff(1:size(zTD,2)-1,labs);
         else
-            q = 1:size(zTD,2)-1
+            q = 1:size(zTD,2)-1;
         end
         r = setdiff(q,FN); % don't double count bin if FN has already been identified for some label(s)
         
@@ -179,7 +197,8 @@ if any(btidx)
         xH201d.XData = [];xH201d.YData = [];
         
     end
-    
+    % advance to next bout
+    dPARAMS.k = dPARAMS.k + 1;
 else
     disp('No test bins in this session, moving to next session');
     dPARAMS.k = dPARAMS.k + 1;

@@ -1,6 +1,6 @@
 function boutMotion
 
-global dPARAMS p fNameList zID zTD zFD dHANDLES
+global dPARAMS p fNameList zID zTD zFD dHANDLES cMat
 
 
 disp([' BEGIN SESSION: ',num2str(dPARAMS.k)]);
@@ -42,7 +42,7 @@ for i = 1:length(p.mySpID)
         dPARAMS.clickTimes(dPARAMS.testClickIdx{i})<dPARAMS.eb(dPARAMS.k));
     zTD{dPARAMS.k,i+1}(1) = length(dPARAMS.XFD{i});
 end
-save(fNameList.TD,'zTD')
+save(fNameList.TD,'zTD','p','cMat')
 
 % Test for XFD and strcmp('x or z or w') - if no test points skip
 % x = true, z = false, w = window

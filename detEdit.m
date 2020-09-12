@@ -16,7 +16,7 @@ function detEdit(userFunc)
 %
 % detEdit
 clear global
-global dPARAMS p dHANDLES fNameList zID zFD zTD
+global dPARAMS p dHANDLES fNameList zID zFD zTD cMat
 
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
@@ -246,14 +246,19 @@ end
 
 A6 = exist(fNameList.TD,'file');
 if (A6 ~= 2)
-    zTD = {}
+    zTD = {};
+    cMat = {};
     for j = 1:dPARAMS.nb
         for i = 1:length(p.mySpID)
             zTD{j,1} = j;
             zTD{j,i+1} = -1.*ones(1,6);
+            for k = 1:length(p.mySpID)
+               cMat{i,k} = zeros(1,2); 
+            end
         end
     end
-    save(fNameList.TD,'zTD');    % create new TD
+
+    save(fNameList.TD,'zTD','p','cMat');    % create new TD
     disp(' Make new TD file');
 else
     load(fNameList.TD)

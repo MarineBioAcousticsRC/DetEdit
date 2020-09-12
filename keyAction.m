@@ -1,6 +1,6 @@
 function keyAction(varargin)
 
-global zID zFD zTD fNameList p dPARAMS dHANDLES
+global zID zFD zTD fNameList p dPARAMS dHANDLES cMat
 
 disp('Key action detected')
 dPARAMS.cc = get(gcf,'CurrentCharacter');
@@ -284,7 +284,7 @@ if ~isempty(zID) && sum(zID(:,2)==0)>0
 end
 save(fNameList.FD,'zFD')
 save(fNameList.ID,'zID','-append')
-save(fNameList.TD,'zTD','p')
+save(fNameList.TD,'zTD','cMat','p')
 
 % don't end if you used paintbrush on last record
 if (dPARAMS.k > dPARAMS.nb) && dPARAMS.bFlag

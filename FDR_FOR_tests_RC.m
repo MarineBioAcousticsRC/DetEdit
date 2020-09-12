@@ -1,5 +1,5 @@
 function FDR_FOR_tests_RC
-global dHANDLES dPARAMS p zTD
+global dHANDLES dPARAMS p zTD cMat
 
 % check for test bins in this session
 btidx = dPARAMS.binTimes(dPARAMS.ixtb) >= dPARAMS.sb(dPARAMS.k) & ...
@@ -48,7 +48,7 @@ if any(btidx)
                 % which clicks have this label?
                 lidx = find(spCodeSetbin==labs(j));
                 
-                if length(lidx) > 5 %don't evaluate labels with very few clicks
+                if length(lidx) > 25 %don't evaluate labels with very few clicks
                     % add to running tally of FDR test bins for this label
                     zTD{dPARAMS.k,labs(j)+1}(3) = zTD{dPARAMS.k,labs(j)+1}(3)+1;
 
@@ -94,23 +94,34 @@ if any(btidx)
                         % ask for user input
                         z = input('Are these clicks correctly labeled? Enter 1 for yes, 0 for no: ');
                         
-                        if z~=1 && z~=0
+                        if ~isempty(z) && z~=1 && z~=0
                             fprintf('WARNING: Entry not allowed\n');
                             z = [];
-                        elseif z==0 % record false positives for this label
+                        elseif ~isempty(z) && z==1 % record true positives for this label
+                            for k = 1:length(p.mySpID)
+                                cMat{labs(j),k}(1) = cMat{labs(j),k}(1)+1;
+                            end
+                            cMat{labs(j),labs(j)}(2) = cMat{labs(j),labs(j)}(2)+1;
+                        elseif ~isempty(z) && z==0 % record false positives for this label
                             zTD{dPARAMS.k,labs(j)+1}(4) = zTD{dPARAMS.k,labs(j)+1}(4)+1;
                             
                             while isempty(a)
                                 % check if also a false negative for another label
                                 a = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
-                                if ~ismember(a,1:size(zTD,2)-1) && a~=0
+                                
+                                if ~isempty(a) && ~ismember(a,1:size(zTD,2)-1) && a~=0
                                     fprintf('WARNING: Entry not allowed\n');
                                     a = [];
                                     % count as FN only if this label doesn't already exist in this bin
-                                elseif a > 0 && ~ismember(a,labs)
+                                elseif ~isempty(a) && a > 0 && ~ismember(a,labs)
                                     zTD{dPARAMS.k,a+1}(5) = zTD{dPARAMS.k,a+1}(5)+1;
                                     zTD{dPARAMS.k,a+1}(6) = zTD{dPARAMS.k,a+1}(6)+1;
                                     FN = [FN,a];
+                                    
+                                    for k = 1:length(p.mySpID)
+                                        cMat{a,k}(1) = cMat{a,k}(1)+1;
+                                    end
+                                    cMat{a,labs(j)}(2) = cMat{a,labs(j)}(2)+1;
                                 end
                             end
                         end
@@ -162,14 +173,18 @@ if any(btidx)
             while isempty(b)
                 % check if false negative for any label
                 b = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
-                if ~ismember(b,1:size(zTD,2)-1) && b~=0
+                if ~isempty(b) && ~ismember(b,1:size(zTD,2)-1) && b~=0
                     fprintf('WARNING: Entry not allowed\n');
                     b = [];
                     % count as FN only if this label doesn't already exist in this bin
-                elseif b > 0 && ~ismember(b,labs) && ~ismember(b,FN)
+                elseif ~isempty(b) && b > 0 && ~ismember(b,labs) && ~ismember(b,FN)
                     zTD{dPARAMS.k,b+1}(5) = zTD{dPARAMS.k,b+1}(5)+1;
                     zTD{dPARAMS.k,b+1}(6) = zTD{dPARAMS.k,b+1}(6)+1;
                     FN = [FN,b];
+                    
+                    for k = 1:length(p.mySpID)
+                        cMat{b,k}(1) = cMat{b,k}(1)+1;
+                    end
                 end
             end
         end
@@ -197,11 +212,23 @@ if any(btidx)
         xH201d.XData = [];xH201d.YData = [];
         
     end
-    % advance to next bout
-    dPARAMS.k = dPARAMS.k + 1;
+    % advance to next bout (if there is one)
+    if dPARAMS.k < dPARAMS.nb
+        dPARAMS.k = dPARAMS.k + 1;
+    else
+        disp('End of file');
+    end
+    
 else
-    disp('No test bins in this session, moving to next session');
-    dPARAMS.k = dPARAMS.k + 1;
+    for i = 2:size(zTD,2)
+        zTD{dPARAMS.k,i}(3:6) = 0;
+    end
+    if dPARAMS.k < dPARAMS.nb
+        disp('No test bins in this session, moving to next session');
+        dPARAMS.k = dPARAMS.k + 1;
+    else
+        disp('End of file');
+    end
 end
 
 end

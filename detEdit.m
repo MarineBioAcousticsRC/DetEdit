@@ -261,7 +261,7 @@ if (A6 ~= 2)
     save(fNameList.TD,'zTD','p','cMat');    % create new TD
     disp(' Make new TD file');
 else
-    load(fNameList.TD)
+    load(fNameList.TD,'zTD','cMat')
     if (size(zTD,1) ~= dPARAMS.nb) || size(zTD,2) < length(p.mySpID)+1
         disp([' Problem with TD file:',fNameList.TD]);
         return
@@ -270,22 +270,48 @@ end
 
 %% Set up False Bin Test
 
-% divide entire TPWS into bins
-dur = dPARAMS.eb(end) - dPARAMS.sb(1);    
+% divide entire TPWS into bins aligned with cluster_bins
+%dur = dPARAMS.eb(end) - dPARAMS.sb(1);    
 % dPARAMS.binTimes = (dPARAMS.sb(1):p.binDur/(24*60):dPARAMS.eb(end))';
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';
+dPARAMS.ixtb = {};
 
-% identify which bins contain at least 5 clicks
-[N,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
-goodBins = find(N>5);
-
-% randomly select test bins across TPWS from those bins which contain clicks
-if p.nTestBins < size(goodBins,2)
-    dPARAMS.ixtb = sort(datasample(goodBins,p.nTestBins,2,'Replace',false));
-else
-    disp('WARNING: Not enough bins to meet user setting for False Bin Test, using all available bins');
-    dPARAMS.ixtb = 1:size(goodBins,2);
+for i = 1:length(p.mySpID) % for each label
+    % divy labeled clicks into bins
+    thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
+    [N,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
+    clickBins = find(N>0);
+    
+    % randomly select test bins across TPWS from those bins which contain clicks
+    if p.nTestBins < size(clickBins,2)
+        dPARAMS.ixtb = sort(datasample(clickBins,p.nTestBins,2,'Replace',false));
+    else
+        %disp('WARNING: Not enough bins to meet user setting for False Bin Test, using all available bins');
+        dPARAMS.ixtb = 1:size(clickBins,2);
+    end
 end
+%% Set up Label Certainty Evaluation 
+
+% divide entire TPWS into bins aligned with cluster_bins
+dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';
+dPARAMS.ixtb = {};
+
+for i = 1:length(p.mySpID) %for each label
+    % divvy labeled clicks into bins
+    thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
+    [N,~] = histcounts(thisLabTimes,dPARAMS.binTimes);
+    goodBins = find(N>0);
+    
+    % randomly select test bins across TPWS
+    if p.nTestBins < size(goodBins,2)
+        dPARAMS.ixtb{1,i} = sort(datasample(goodBins,p.nTestBins,2,'Replace',false));
+    else
+        %fprintf(['WARNING: Not enough bins for label ' num2str(p.mySpID(i).zID_Label),' to meet user setting for Label Certainty Evaluation, using all available bins\n']);
+        dPARAMS.ixtb{1,i} = goodBins;
+    end
+    
+end
+
 
 %% Compute Spectra Plot Parameters
 % max and min for LTSA frequency

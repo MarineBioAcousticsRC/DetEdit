@@ -193,6 +193,9 @@ elseif strcmp(dPARAMS.cc,'w') %&& (zTD(dPARAMS.k,2) > 0))  % test 5 min window
 %     k = k+1;
     %dPARAMS.k = dPARAMS.k+1;
     
+elseif strcmp(dPARAMS.cc,'c')% enter label certainty evaluation
+    LabCertainty_Eval;
+    
 elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
     % detect if data have been brushed, otherwise use whole set.
     [brushDate, ~, ~] = get_brushed(gca);

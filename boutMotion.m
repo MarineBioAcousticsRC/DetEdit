@@ -62,7 +62,7 @@ if ~isempty(J) % if there are detection in this session
         if (~isempty(dPARAMS.XFD{i}))
             dPARAMS.xt{i} = dPARAMS.clickTimes(dPARAMS.testClickIdx{i}(dPARAMS.XFD{i}));  %times to test for False Detection
             dPARAMS.xPP{i} = dPARAMS.clickLevels(dPARAMS.testClickIdx{i}(dPARAMS.XFD{i}));   %amplitude for test False Detection
-            disp(['Label ',num2str(i),' Test False Detection times:',num2str(zTD{dPARAMS.k,i+1}(1))]),
+            %disp(['Label ',num2str(i),' Test False Detection times:',num2str(zTD{dPARAMS.k,i+1}(1))]),
         else
             dPARAMS.xt{i} = [];
             dPARAMS.xPP{i} = [];
@@ -306,7 +306,7 @@ figure53
 figure50
 figure52
 
-if isfield(dHANDLES,'hID')
-    % bring legend to top
-    figure(dHANDLES.hID)
+% if isfield(dHANDLES,'hID')
+%     % bring legend to top
+%     figure(dHANDLES.hID)
 end

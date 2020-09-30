@@ -5,22 +5,22 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'WAT_BC_01_disk01a'; % TPWS file name to match. 
+filePrefix = 'WAT_OC_02_disk07e'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
 iterationNum = '1'; % iteration number
 sampleRate = 200; % replace with your sample rate
-sp = 'De'; % species code 
+sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'G:\WAT_BC_01\WAT_BC_01_TPWS'; % identify folder containing TPWS files
+tpwsDir = 'G:\WAT_OC_02\WAT_OC_02_TPWS'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'G:\WAT_BC_01\WAT_BC_01_LTSA'; % identify folder containing 
+ltsaDir = 'G:\WAT_OC_02\WAT_OC_02_LTSA'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,7 +39,7 @@ paramsUser.minBout = 0;% minimum bout duration in seconds
 % paramsUser.minNdet = 1; % minimum detections per session.
 % paramsUser.maxDetLoad = 4e5; % ([] - all) max detections to read from disk ( recommended for large files)
 paramsUser.c4fd = 1000; % Min # detections to test to estimate false detection rate
-paramsUser.nTestBins = 1000;
+paramsUser.nTestBins = 100;
 
 %% Panel LTSA and time series
 paramsUser.rlLow = 115; % PP plot window low limit

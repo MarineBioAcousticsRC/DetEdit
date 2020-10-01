@@ -189,7 +189,7 @@ elseif strcmp(dPARAMS.cc,'w') %&& (zTD(dPARAMS.k,2) > 0))  % test 5 min window
     % Test 5 min window
     %zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
     %zTD = test_false_bins(zTD);
-   FDR_FOR_tests_RC;
+   bin_FP_FN_tests;
 %     k = k+1;
     %dPARAMS.k = dPARAMS.k+1;
     

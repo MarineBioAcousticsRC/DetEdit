@@ -16,7 +16,7 @@ function detEdit(userFunc)
 %
 % detEdit
 clear global
-global dPARAMS p dHANDLES fNameList zID zFD zTD cMat
+global dPARAMS p dHANDLES fNameList zID zFD zTD fpfnTD cMat
 
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
@@ -248,47 +248,59 @@ A6 = exist(fNameList.TD,'file');
 if (A6 ~= 2)
     zTD = {};
     cMat = {};
+    fpfnTD = {};
     for j = 1:dPARAMS.nb
         for i = 1:length(p.mySpID)
             zTD{j,1} = j;
             zTD{j,i+1} = -1.*ones(1,6);
+            fpfnTD{1,i} = {};
             for k = 1:length(p.mySpID)
                cMat{i,k} = zeros(1,2); 
             end
         end
     end
 
-    save(fNameList.TD,'zTD','p','cMat');    % create new TD
+    save(fNameList.TD,'zTD','cMat','fpfnTD');    % create new TD
     disp(' Make new TD file');
 else
-    load(fNameList.TD,'zTD','cMat')
-    if (size(zTD,1) ~= dPARAMS.nb) || size(zTD,2) < length(p.mySpID)+1
-        disp([' Problem with TD file:',fNameList.TD]);
+    load(fNameList.TD)
+    if (~exist('zTD') || ~exist('cMat') || ~exist('fpfnTD')) || (size(zTD,1) ~= dPARAMS.nb) || size(zTD,2) < length(p.mySpID)+1
+        disp([' Problem with existing TD file: ',fNameList.TD]);
         return
     end
 end
 
-%% Set up False Bin Test
+%% Set up False Positive & False Negative Bin Tests
 
-% divide entire TPWS into bins aligned with cluster_bins
-%dur = dPARAMS.eb(end) - dPARAMS.sb(1);    
-% dPARAMS.binTimes = (dPARAMS.sb(1):p.binDur/(24*60):dPARAMS.eb(end))';
+% divide entire TPWS into bins aligned with cluster_bins 
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';
-dPARAMS.ixtb = {};
+dPARAMS.ftb = {};
+
+% divy all clicks into bins
+[Ntot,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
+binsWithClicks = find(Ntot>0);
 
 for i = 1:length(p.mySpID) % for each label
-    % divy labeled clicks into bins
+    ftb = [];
+    % divy clicks with this label into bins
     thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
-    [N,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
-    clickBins = find(N>0);
+    [N,~] = histcounts(thisLabTimes,dPARAMS.binTimes);
+    thisClickBins = find(N>0);
+    notThisClickBins = setdiff(binsWithClicks,thisClickBins);
     
-    % randomly select test bins across TPWS from those bins which contain clicks
-    if p.nTestBins < size(clickBins,2)
-        dPARAMS.ixtb = sort(datasample(clickBins,p.nTestBins,2,'Replace',false));
+    % randomly select test bins across TPWS from those bins which DO and DO
+    % NOT contain clicks with this label
+    if p.nTestBins < size(thisClickBins,2)
+        ftb = sort(datasample(thisClickBins,p.nTestBins,2,'Replace',false));
     else
-        %disp('WARNING: Not enough bins to meet user setting for False Bin Test, using all available bins');
-        dPARAMS.ixtb = 1:size(clickBins,2);
+        ftb = thisClickBins;
     end
+        if p.nTestBins < size(notThisClickBins,2)
+        ftb = [ftb,datasample(notThisClickBins,p.nTestBins,2,'Replace',false)];
+    else
+        ftb = [ftb,notThisClickBins];
+        end
+    dPARAMS.ftb{1,i} = sort(ftb);
 end
 %% Set up Label Certainty Evaluation 
 

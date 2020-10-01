@@ -21,11 +21,11 @@ if any(btidx)
     BT = dPARAMS.binTimes(dPARAMS.ftb{1,dPARAMS.lab}(btidx)); %start times of test bins
     
     for i = 1:length(BT) % for each test bin
-        %         FN = [];
-        %         labs = [];
-        %         z = [];
-        %         a = [];
-        %         b = [];
+        %FN = [];
+        labs = [];
+        z = [];
+        a = [];
+        b = [];
         % demarcate bin on time series plots
         hold(dHANDLES.LTSAsubs(1),'on')
         xH201a = plot(dHANDLES.LTSAsubs(1),repmat(BT(i),61,1),110:1:170,...
@@ -59,8 +59,7 @@ if any(btidx)
                 ICI = [];
                 meanWav = [];
                 conf = [];
-                z = [];
-                a = [];
+                
                 % which clicks have this label?
                 lidx = find(spCodeSetbin==dPARAMS.lab);
                 % in case more than one spectrum in this bin received this label,
@@ -135,7 +134,7 @@ if any(btidx)
                                 % count as FN only if this label doesn't already exist in this bin
                             elseif ~isempty(a) && a > 0 && ~ismember(a,labs)
                                 fpfnTD{1,a} = [fpfnTD{1,a};BT(i),0,0,-1,-1];
-                                FN = [FN,a];
+                                %FN = [FN,a];
                                 for k = 1:length(p.mySpID)
                                     cMat{a,k}(1) = cMat{a,k}(1)+1;
                                 end
@@ -164,8 +163,7 @@ if any(btidx)
                     % find clicks with this label in session vars
                     [~, kInd, ~] = intersect(dPARAMS.t,tIDbin(lidx));
                     
-                    % average clicks with this label and plot them
-                    % calculate mean spectrum
+                    % calculate click params
                     specs = dPARAMS.cspJ(kInd,:);
                     mspec = mean(specs,1);
                     minSpec = min(mspec,[],2);
@@ -187,10 +185,12 @@ if any(btidx)
                 % unlabeled clicks in this bin
                 m = find(dPARAMS.t(:,1)>= BT(i) & dPARAMS.t(:,1) < BT(i)+p.binDur/(24*60));
                 [noLab, ia] = setdiff(dPARAMS.t(m),tIDbin);
-                 if ~isempty(noLab)
-                     labs = [labs;0];
-                    % average unlabeled clicks
-                    % calculate mean spectrum
+                if ~isempty(noLab)
+                    labs = [labs;0];
+                    conf = [conf;NA];
+                    numClicks = [numClicks;length(noLab)];
+                    
+                    % calculate unlabeled click params
                     specs = dPARAMS.cspJ(m(ia),:);
                     mspec = mean(specs,1);
                     minSpec = min(mspec,[],2);
@@ -207,40 +207,60 @@ if any(btidx)
                     % calculate mean waveform
                     wav = norm_wav(mean(dPARAMS.csnJ(m(ia),:),1));
                     meanWav = [meanWav;wav];
-                 end
-                 
-                 % plot all labels in this bin
-                 figure(99);clf
-                 subplot(1,3,1)
-                 hold on
-                 for q = 1:size(specNorm,1)
-                 plot(dPARAMS.fmsp,specNorm(q,:));
-                 end
-                 hold off
-                 xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
-                 xlabel('Frequency (kHz)');
-                 ylabel('Normalized Amplitude');
-                 legend(string(labs),'Location','southeast');
-                 subplot(1,3,2)
-                 hold on
-                 for q = 1:size(ICI,1)
-                 bar(0:.01:1,ICI(q,:),'FaceAlpha',0.75);
-                 end
-                 hold off
-                 grid on
-                 xticks([0 0.25 0.5 0.75 1]);
-                 xlabel('ICI (s)');
-                 ylabel('Counts');
-                 title(['Bin ',num2str(i),', Labels ',num2str(labs),': ',p.mySpID(labs).Name]);
-                 subplot(1,3,3)
-                 hold on
-                 for q = 1:size(meanWav,1)
-                 plot(meanWav(q,:) + ones(size(meanWav,2),1)'.*rand(1,min(size(meanWav,2))));
-                 end
-                 hold off
-                 xlabel('Sample Number');
-                 ylabel('Normalized Amplitude');
-
+                end
+                
+                % plot all labels in this bin
+                figure(99);clf
+                subplot(1,3,1)
+                hold on
+                for q = 1:size(specNorm,1)
+                    plot(dPARAMS.fmsp,specNorm(q,:));
+                end
+                hold off
+                xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
+                xlabel('Frequency (kHz)');
+                ylabel('Normalized Amplitude');
+                legend(string(labs),'Location','southeast');
+                subplot(1,3,2)
+                hold on
+                for q = 1:size(ICI,1)
+                    bar(0:.01:1,ICI(q,:),'FaceAlpha',0.75);
+                end
+                hold off
+                grid on
+                xticks([0 0.25 0.5 0.75 1]);
+                xlabel('ICI (s)');
+                ylabel('Counts');
+                title(['Bin ',num2str(i),', Labels ',num2str(labs),': ',p.mySpID(labs).Name]);
+                subplot(1,3,3)
+                hold on
+                for q = 1:size(meanWav,1)
+                    plot(meanWav(q,:) + ones(size(meanWav,2),1)'.*rand(1,min(size(meanWav,2))));
+                end
+                hold off
+                xlabel('Sample Number');
+                ylabel('Normalized Amplitude');
+                
+                while isempty(b)
+                    % check for false negative(s)
+                    b = input(['Enter label # which should have been classified as ',dPARAMS.lab,', or 99 if none: ']);
+                    if ~isempty(b) && ~ismember(b,labs) && b~=99
+                        fprintf('WARNING: Entry not allowed\n');
+                        b = [];
+                    elseif ~isempty(b) && ismember(b,labs) %&& ~ismember(b,FN)
+                        x = find(labs==b);
+                        fpfnTD{1,dPARAMS.lab} = [fpfnTD{1,dPARAMS.lab};BT(i),0,1,conf(x),numClicks(x)];
+                        %FN = [FN,b];
+                        for k = 1:length(p.mySpID)
+                            cMat{dPARAMS.lab,k}(1) = cMat{dPARAMS.lab,k}(1)+1;
+                        end
+                        if b==0
+                            cMat{dPARAMS.lab,end}(2) = cMat{dPARAMS.lab,end}(2)+1;
+                        else
+                            cMat{dPARAMS.lab,b}(2) = cMat{dPARAMS.lab,b}(2)+1;
+                        end
+                    end
+                end
             end  %%%%%%%%%%%%%
         end
         
@@ -349,33 +369,34 @@ if any(btidx)
             disp('End of file');
             dPARAMS.k = 1;
         end
-        
-        else
-            % advance to next bout with test bins for this label (if there is one)
-            if dPARAMS.k < dPARAMS.nb
-                fprintf(['No test bins for label ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' in this session, moving to next session with test bins for this label\n']);
-                next_tbidx = find(dPARAMS.binTimes(dPARAMS.ftb{1,dPARAMS.lab}) >= dPARAMS.eb(dPARAMS.k),1,'first');
-                next_tbTime = dPARAMS.binTimes(dPARAMS.ftb{1,dPARAMS.lab}(next_tbidx));
-                if ~isempty(next_tbTime)
-                    next_sessionIdx = find(dPARAMS.sb-datenum([0,0,0,0,p.binDur,0])<=next_tbTime,1,'last');
-                    dPARAMS.k = next_sessionIdx;
-                else
-                    fprintf(['No more test bins for label ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' before end of file\n']);
-                    dPARAMS.k = 1;
-                end
-            elseif dPARAMS.k == dPARAMS.nb
-                disp('End of file');
-                dPARAMS.k = 1;
-            end
-            %     for i = 2:size(zTD,2)
-            %         zTD{dPARAMS.k,i}(3:6) = 0;
-            %     end
-            %     if dPARAMS.k < dPARAMS.nb
-            %         disp('No test bins in this session, moving to next session');
-            %         dPARAMS.k = dPARAMS.k + 1;
-            %     else
-            %         disp('End of file');
-            %     end
     end
     
+else
+    % advance to next bout with test bins for this label (if there is one)
+    if dPARAMS.k < dPARAMS.nb
+        fprintf(['No test bins for label ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' in this session, moving to next session with test bins for this label\n']);
+        next_tbidx = find(dPARAMS.binTimes(dPARAMS.ftb{1,dPARAMS.lab}) >= dPARAMS.eb(dPARAMS.k),1,'first');
+        next_tbTime = dPARAMS.binTimes(dPARAMS.ftb{1,dPARAMS.lab}(next_tbidx));
+        if ~isempty(next_tbTime)
+            next_sessionIdx = find(dPARAMS.sb-datenum([0,0,0,0,p.binDur,0])<=next_tbTime,1,'last');
+            dPARAMS.k = next_sessionIdx;
+        else
+            fprintf(['No more test bins for label ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' before end of file\n']);
+            dPARAMS.k = 1;
+        end
+    elseif dPARAMS.k == dPARAMS.nb
+        disp('End of file');
+        dPARAMS.k = 1;
+    end
+    %     for i = 2:size(zTD,2)
+    %         zTD{dPARAMS.k,i}(3:6) = 0;
+    %     end
+    %     if dPARAMS.k < dPARAMS.nb
+    %         disp('No test bins in this session, moving to next session');
+    %         dPARAMS.k = dPARAMS.k + 1;
+    %     else
+    %         disp('End of file');
+    %     end
+    
+end
 end

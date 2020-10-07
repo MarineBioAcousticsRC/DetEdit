@@ -6,14 +6,17 @@ dPARAMS.lab = [];
 A6 = exist(strrep(fNameList.TPWS,'TPWS1','labCert'));
 if (A6 ~= 2)
     labelCertainty = {};
+    RL = {};
     for i = 1:length(p.mySpID)
         labelCertainty{1,i} = [];
+        RL{1,i} = [];
+        RL{2,i} = [];
     end
-    save(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','p');    % create new labCert file
+    save(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','RL','p');    % create new labCert file
     disp(' Making new labCert file');
 else
     disp(' Loading labCert file');
-    load(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty')
+    load(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','RL')
 end
 
 while isempty(dPARAMS.lab)
@@ -40,7 +43,7 @@ if any(tbidx)
     end
     
     for i = 1:length(BT) % for each test bin
-        z = [];      
+        z = [];
         % identify indices, times, & labels of labeled clicks in this bin
         cidx = find(dPARAMS.tID >= BT(i) & dPARAMS.tID < (BT(i)+p.binDur/(24*60)));
         if ~isempty(cidx)
@@ -82,6 +85,8 @@ if any(tbidx)
             
             % find clicks with this label in session vars
             [~, kInd, ~] = intersect(dPARAMS.t,tIDbin(spCodeSetbin==dPARAMS.lab));
+            maxRL = max(dPARAMS.RL(kInd));
+            meanRL = mean(dPARAMS.RL(kInd));
             
             % average clicks with this label and plot them
             % calculate mean spectrum
@@ -133,6 +138,8 @@ if any(tbidx)
             end
             labelCertainty{1,dPARAMS.lab} = [labelCertainty{1,dPARAMS.lab}(:,:);...
                 [BT(i),conf,length(kInd),z]];
+            RL{1,dPARAMS.lab} = [RL{1,dPARAMS.lab}(:,:); maxRL];
+            RL{2,dPARAMS.lab} = [RL{2,dPARAMS.lab}(:,:); meanRL];
             
             % remove bin indicators from time series plots
             xH201a.XData = [];xH201a.YData = [];
@@ -145,8 +152,12 @@ if any(tbidx)
     % remove redundancies, sort and save labelCertainty
     [~,uniqueID] = unique(labelCertainty{1,dPARAMS.lab}(:,1));
     labelCertainty{1,dPARAMS.lab} = labelCertainty{1,dPARAMS.lab}(uniqueID,:);
-    labelCertainty{1,dPARAMS.lab} = sortrows(labelCertainty{1,dPARAMS.lab});
-    save(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','p');
+    [labelCertainty{1,dPARAMS.lab}, sortInd] = sortrows(labelCertainty{1,dPARAMS.lab});
+    RL{1,dPARAMS.lab} = RL{1,dPARAMS.lab}(uniqueID);
+    RL{1,dPARAMS.lab} = RL{1,dPARAMS.lab}(sortInd);
+    RL{2,dPARAMS.lab} = RL{2,dPARAMS.lab}(uniqueID);
+    RL{2,dPARAMS.lab} = RL{2,dPARAMS.lab}(sortInd);
+    save(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','RL','p');
     
     % advance to next bout with test bins for this label (if there is one)
     if dPARAMS.k < dPARAMS.nb
@@ -170,8 +181,12 @@ else
         % remove redundancies, sort and save labelCertainty
         [~,uniqueID] = unique(labelCertainty{1,dPARAMS.lab}(:,1));
         labelCertainty{1,dPARAMS.lab} = labelCertainty{1,dPARAMS.lab}(uniqueID,:);
-        labelCertainty{1,dPARAMS.lab} = sortrows(labelCertainty{1,dPARAMS.lab});
-        save(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','p');
+        [labelCertainty{1,dPARAMS.lab},sortInd] = sortrows(labelCertainty{1,dPARAMS.lab});
+        RL{1,dPARAMS.lab} = RL{1,dPARAMS.lab}(uniqueID);
+        RL{1,dPARAMS.lab} = RL{1,dPARAMS.lab}(sortInd);
+        RL{2,dPARAMS.lab} = RL{2,dPARAMS.lab}(uniqueID);
+        RL{2,dPARAMS.lab} = RL{2,dPARAMS.lab}(sortInd);
+        save(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','RL','p');
     end
     
     % advance to next bout with test bins for this label (if there is one)

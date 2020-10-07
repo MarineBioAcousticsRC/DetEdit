@@ -253,7 +253,7 @@ if (A6 ~= 2)
         for i = 1:length(p.mySpID)
             zTD{j,1} = j;
             zTD{j,i+1} = -1.*ones(1,6);
-            fpfnTD{1,i} = {};
+            fpfnTD{1,i} = [];
             for k = 1:length(p.mySpID)+1
                cMat{i,k} = zeros(1,2); 
             end

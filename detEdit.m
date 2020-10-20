@@ -312,7 +312,7 @@ for i = 1:length(p.mySpID) %for each label
     % divvy labeled clicks into bins
     thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
     [N,~] = histcounts(thisLabTimes,dPARAMS.binTimes);
-    goodBins = find(N>0);
+    goodBins = find(N>5);
     
     % randomly select test bins across TPWS
     if p.nTestBins < size(goodBins,2)

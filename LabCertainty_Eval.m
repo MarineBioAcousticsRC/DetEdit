@@ -167,11 +167,11 @@ if any(tbidx)
             next_sessionIdx = find(dPARAMS.sb-datenum([0,0,0,0,p.binDur,0])<=next_tbTime,1,'last');
             dPARAMS.k = next_sessionIdx;
         else
-            fprintf(['No more test bins for label ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' before end of file\n']);
+            fprintf(['NO MORE TEST BINS FOR LABEL ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' BEFORE END OF FILE\n']);
             dPARAMS.k = 1;
         end
     elseif dPARAMS.k == dPARAMS.nb
-        disp('End of file');
+        disp('END OF FILE');
         dPARAMS.k = 1;
     end
     
@@ -198,11 +198,11 @@ else
             next_sessionIdx = find(dPARAMS.sb-datenum([0,0,0,0,p.binDur,0])<=next_tbTime,1,'last');
             dPARAMS.k = next_sessionIdx;
         else
-            fprintf(['No more test bins for label ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' before end of file\n']);
+            fprintf(['NO MORE TEST BINS FOR LABEL ',num2str(p.mySpID(dPARAMS.lab).zID_Label),' BEFORE END OF FILE\n']);
             dPARAMS.k = 1;
         end
     elseif dPARAMS.k == dPARAMS.nb
-        disp('End of file');
+        disp('END OF FILE');
         dPARAMS.k = 1;
     end
     

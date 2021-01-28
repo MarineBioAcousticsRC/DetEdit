@@ -114,6 +114,7 @@ if any(tbidx)
             xticklabels({'','20','','40','','60','','80'});
             xlabel('Frequency (kHz)');
             ylabel('Normalized Amplitude');
+            text(50,0.95,sprintf('%d Clicks', length(kInd)));
             subplot(1,3,2)
             histogram('BinEdges',0:.01:1,'BinCounts',ICI);
             grid on

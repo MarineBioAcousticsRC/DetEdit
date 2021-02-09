@@ -73,7 +73,7 @@ elseif strcmp(sp,'Pm')
     spParams.N = 512;
 
 %%% Beaked whales
-elseif strcmp(sp,'Bw')
+elseif strcmp(sp,'Bw') || strcmp(sp,'BeakedWhale')
     spParams.speName = 'BeakedWhale';
     
     % Bout parameters

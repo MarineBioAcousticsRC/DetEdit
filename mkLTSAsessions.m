@@ -166,6 +166,8 @@ for iD = 1:length(fileMatchIdx)
     end
     
     %%% Main Loop
+    pt = [];
+    pwr = [];
     % Loop over the number of bouts (sessions)
     k = 1;
     while (k <= nb)

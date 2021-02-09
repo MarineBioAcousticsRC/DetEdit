@@ -51,9 +51,9 @@ end
 %% Check if TPWS file exists
 % Concatenate parts of file name
 if isempty(p.speName)
-    detfn = [p.filePrefix,'.*','TPWS',p.iterationNum,'.mat'];
+    detfn = [p.filePrefix,'_','TPWS',p.iterationNum,'.mat'];
 else
-    detfn = [p.filePrefix,'.*',p.speName,'.*TPWS',p.iterationNum,'.mat'];
+    detfn = [p.filePrefix,'_',p.speName,'_TPWS',p.iterationNum,'.mat'];
 end
 % Get a list of all the files in the start directory
 fileList = cellstr(ls(p.tpwsDir));

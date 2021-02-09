@@ -5,27 +5,27 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'GOM_MP_09'; % TPWS file name to match. 
+filePrefix = 'Filename'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
 iterationNum = '1'; % iteration number
 sampleRate = 200; % replace with your sample rate
-sp = 'De'; % species code 
+sp = ''; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'L:\GOM_MP_09\GOM_MP_09_TPWS\Issues'; % identify folder containing TPWS files
+tpwsDir = 'E:\MyTPWSfolder'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
 % REQUIRED to run mkLTSAsessions.m:
-ltsaDir = 'L:\GOM_MP_09\GOM_MP_09_LTSA'; % identify folder containing ltsa files (.ltsa)
+ltsaDir = 'E:\MyLTSAfolder'; % identify folder containing ltsa files (.ltsa)
 
 % REQUIRED to run summaryParams.m:
-% effortTimes = 'E:\Effort.xls'; % specify excel file with effort times
-% referenceTime = '2010-04-01'; %reference time format 'yyyy-MM-dd'
+effortTimes = 'E:\Effort.xls'; % specify excel file with effort times
+referenceTime = '2010-04-01'; %reference time format 'yyyy-MM-dd'
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Setting preferences to override defaults parameters for the interface
@@ -33,7 +33,7 @@ ltsaDir = 'L:\GOM_MP_09\GOM_MP_09_LTSA'; % identify folder containing ltsa files
 % initDefaultParams.m and initSpParams.m)
 
 %% Bout preferences
-paramsUser.threshRL = 125; % minimum RL threshold in dB peak-to-peak
+% paramsUser.threshRL = 0; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 % paramsUser.minBout = 0;% minimum bout duration in seconds
 % paramsUser.gth = .5;    % gap time in hrs between sessions
@@ -45,17 +45,17 @@ paramsUser.threshRL = 125; % minimum RL threshold in dB peak-to-peak
 % paramsUser.c4fd = 1; % Detections step size to estimate false detection rate
 
 %% Panel LTSA and time series
-% paramsUser.rlLow = 115; % PP plot window low limit
-% paramsUser.rlHi = 165; % PP plot window high limit
-% paramsUser.ltsaContrast = 116; % ltsa contrast
-% paramsUser.ltsaBright = 55; % ltsa brightness
+% paramsUser.rlLow = 110; % PP plot window low limit
+% paramsUser.rlHi = 170; % PP plot window high limit
+% paramsUser.ltsaContrast = 250; % ltsa contrast
+% paramsUser.ltsaBright = 100; % ltsa brightness
 % paramsUser.ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
 % paramsUser.ltsaMax = 6; % ltsa maximum duration per session
-% paramsUser.dtHi = .6; % max yaxis value for ICI display in sec
+% paramsUser.dtHi = .5; % max yaxis value for ICI display in sec
 % paramsUser.minDur = []; % minimum window duration (if specified in minutes)
 
 %% Panel Frequency spectra
-paramsUser.fLow = 1; % Minimum frequency of interest
+% paramsUser.fLow = 0; % Minimum frequency of interest
 % paramsUser.fHi = sampleRate/2; % Maximum frequency of interest
 
 %% Panel RL rms vs. RL pp | Peak freq.

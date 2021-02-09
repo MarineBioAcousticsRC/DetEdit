@@ -77,15 +77,15 @@ for iD = 1:length(fileMatchIdx)
         return
     end
     
-%     %%% special case for GOM files (rewording file names)
-%     % ltsa file for GOM are named with GofMX and without underscore, and tf
-%     % as well.
-%     % E.g. GOM_DT_09 -> ltsa is GofMX_DT09
-%     if strfind(detfn.name,'GOM')
-%         unscores = strfind(p.filePrefix,'_');
-%         p.filePrefix(unscores(2)) = '';
-%         p.filePrefix = regexprep(p.filePrefix,'GOM','GofMX');
-%     end
+    %%% special case for GOM files (rewording file names)
+    % ltsa file for GOM are named with GofMX and without underscore, and tf
+    % as well.
+    % E.g. GOM_DT_09 -> ltsa is GofMX_DT09
+    if strfind(detfn.name,'GOM')
+        unscores = strfind(p.filePrefix,'_');
+        p.filePrefix(unscores(2)) = '';
+        p.filePrefix = regexprep(p.filePrefix,'GOM','GofMX');
+    end
     
     % Load detections
     load(fNameList.TPWS)
@@ -126,14 +126,14 @@ for iD = 1:length(fileMatchIdx)
     if isempty(sTime)
         if nltsas > 0
             sTime = zeros(nltsas,1); eTime = zeros(nltsas,1);
-            disp('Reading ltsa headers, please be patient ...')
+            disp('reading ltsa headers, please be patient ...')
             for k = 1:nltsas
                 hdrStore{k} = ioReadLTSAHeader(fullfile(p.ltsaDir,fnames(k,:)));
                 sTime(k) = hdrStore{k}.ltsa.start.dnum + doff;  % start time of ltsa files
                 eTime(k) = hdrStore{k}.ltsa.end.dnum + doff;    % end time of ltsa files
                 rfTime{k} = hdrStore{k}.ltsa.dnumStart + doff; % all rawfiles times for all ltsas
             end
-            disp('Done reading ltsa headers')
+            disp('done reading ltsa headers')
         else
             disp(['No LTSAs found to match wildcard: ', fullfile(p.ltsaDir,[p.filePrefix,'*'])])
             return

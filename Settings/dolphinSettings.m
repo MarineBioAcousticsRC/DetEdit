@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'WAT_OC_02_disk01a'; % TPWS file name to match. 
+filePrefix = 'WAT_BC_01_disk08c'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,13 +14,13 @@ sampleRate = 200; % replace with your sample rate
 sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'G:\WAT_OC_02\WAT_OC_02_TPWS'; % identify folder containing TPWS files
+tpwsDir = 'G:\WAT_BC_01\TPWS'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'G:\WAT_OC_02\WAT_OC_02_LTSA'; % identify folder containing 
+ltsaDir = 'I:\WAT_BC_01\WAT_BC_01_LTSA'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,7 +48,7 @@ paramsUser.ltsaContrast = 116; % ltsa contrast
 paramsUser.ltsaBright = 55; % ltsa brightness
 % paramsUser.ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
 paramsUser.ltsaMax = 6; % ltsa maximum duration per session
-paramsUser.dtHi = .6; % max yaxis value for ICI display in sec
+paramsUser.dtHi = 1; % max yaxis value for ICI display in sec
 % paramsUser.minDur = []; % minimum window duration (if specified in minutes)
 
 %% Panel Frequency spectra

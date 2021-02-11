@@ -86,7 +86,9 @@ if any(tbidx)
             % find clicks with this label in session vars
             [~, kInd, ~] = intersect(dPARAMS.t,tIDbin(spCodeSetbin==dPARAMS.lab));
             maxRL = max(dPARAMS.RL(kInd));
-            meanRL = mean(dPARAMS.RL(kInd));
+            %meanRL = mean(dPARAMS.RL(kInd)); % mean RL should be calculated in linear space
+            linRLs = 10.^(dPARAMS.RL(kInd)./20);
+            meanRL = 20*log10(mean(linRLs));
             
             % average clicks with this label and plot them
             % calculate mean spectrum

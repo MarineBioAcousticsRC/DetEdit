@@ -55,32 +55,21 @@ threshHiFreq = 0; % default for ^ command, high freq cutoff for clicks
 autoFalse = false; % Apply automatic false thresholds to entire file. 
  
 % Colors to use for classification - ID signal types
-colorTab = [204, 204, 255; ... % Blainville's, lilac
-            255, 0, 0;... % Boats, red
-            255, 128, 0; ... % CT11, orange
-            102, 255, 178; ... % CT2+CT9, seafoam
-            0, 153, 0; ... % CT3+CT7, crayola green
-            0, 128, 255; ... % CT4/6+CT10, medium blue
-            51, 255, 51; ... % CT5, bright green
-            102, 178, 255; ... % CT8, periwinkle
-            0, 255, 255; ... % Cuvier's, cyan
-            255, 204, 153; ... % Gervais, tan
-            245, 194, 66;... % GoM Gervais, mustard yellow
-            255, 0, 0;... % HFA, red
-            153, 51, 255; ... % Kogia, purple
-            255, 0, 0;... % MFA, red
-            255, 0, 0;... % MultiFreq_Sonar, red
-            204, 255, 153; ... % Rissos, lime green
-            255, 0, 0;... % Snapping Shrimp, red
-            255, 0, 255; ... % Sowerby's, magenta
-            102, 51, 0; ... % Sperm whale, brown
-            249, 177, 211]./255; % True's, light pink
+colorTab = [191, 191, 0; ... % type 1 green
+            191, 0, 191; ... % type 2 purple
+            0, 127, 0; ... % type 3 dark-green
+            0, 191, 191; ... % type 4 light-blue
+            20, 43, 140; ... % type 5 dark-blue
+            218, 179, 255; ... % type 6 pale-purple
+            255,   214, 0; ... % type 7 yellow
+            222,  125, 0; ... % type 8 orange
+            255,  153, 199; ... % type 9 pink
+            153, 51,   0]./255; % type 10  brown
 colorTab = round(colorTab.*100)/100;      
 
-mySpID = {'Blainvilles','Boats','CT11','CT2+CT9','CT3+CT7','CT4/6+CT10',...
-    'CT5','CT8','Cuviers','Gervais','GoM_Gervais','HFA','Kogia','MFA',...
-    'MultiFreq_Sonar','Rissos','Snapping_Shrimp','Sowerbys','Sperm_Whale',...
-    'Trues'};
+mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship',...
+    '','','','Stenella spp.'};
+
 minLabelConfidence = 0; % minimum classifciation confidence threshold for 
 % displaying signal labels
 

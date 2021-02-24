@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'WAT_BC_01_disk08c'; % TPWS file name to match. 
+filePrefix = 'USWTR02B_disk16'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,13 +14,13 @@ sampleRate = 200; % replace with your sample rate
 sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'G:\WAT_BC_01\TPWS'; % identify folder containing TPWS files
+tpwsDir = 'J:\USWTR02B\TPWS'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'I:\WAT_BC_01\WAT_BC_01_LTSA'; % identify folder containing 
+ltsaDir = 'J:\USWTR02B\LTSAs'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,7 +29,7 @@ ltsaDir = 'I:\WAT_BC_01\WAT_BC_01_LTSA'; % identify folder containing
 % initDefaultParams.m and initSpParams.m)
 
 %% Bout preferences
-paramsUser.threshRL = 120; % minimum RL threshold in dB peak-to-peak
+paramsUser.threshRL = 118; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 paramsUser.minBout = 0;% minimum bout duration in seconds
 % paramsUser.gth = .5;    % gap time in hrs between sessions
@@ -68,3 +68,33 @@ paramsUser.fLow = 1; % Minimum frequency of interest
 % paramsUser.excludeID = 1; % yes - 1 | no - 0. Exclude ID times from MTT files 
 % paramsUser.calcParams = 1;% yes - 1 | no - 0. Calculate Parameters peak-to-peak, 
 % inter-detection-interval and peak frequency
+
+%% Other settings
+
+% Colors to use for classification - ID signal types
+paramsUser.colorTab = [204, 204, 255; ... % Blainville's, lilac
+            255, 0, 0;... % Boats, red
+            255, 128, 0; ... % CT11, orange
+            102, 255, 178; ... % CT2+CT9, seafoam
+            0, 153, 0; ... % CT3+CT7, crayola green
+            0, 128, 255; ... % CT4/6+CT10, medium blue
+            51, 255, 51; ... % CT5, bright green
+            102, 178, 255; ... % CT8, periwinkle
+            0, 255, 255; ... % Cuvier's, cyan
+            255, 204, 153; ... % Gervais, tan
+            245, 194, 66;... % GoM Gervais, mustard yellow
+            255, 0, 0;... % HFA, red
+            153, 51, 255; ... % Kogia, purple
+            255, 0, 0;... % MFA, red
+            255, 0, 0;... % MultiFreq_Sonar, red
+            204, 255, 153; ... % Rissos, lime green
+            255, 0, 0;... % Snapping Shrimp, red
+            255, 0, 255; ... % Sowerby's, magenta
+            102, 51, 0; ... % Sperm whale, brown
+            249, 177, 211]./255; % True's, light pink
+paramsUser.colorTab = round(colorTab.*100)/100;      
+
+paramsUser.mySpID = {'Blainvilles','Boats','CT11','CT2+CT9','CT3+CT7','CT4/6+CT10',...
+    'CT5','CT8','Cuviers','Gervais','GoM_Gervais','HFA','Kogia','MFA',...
+    'MultiFreq_Sonar','Rissos','Snapping_Shrimp','Sowerbys','Sperm_Whale',...
+    'Trues'};

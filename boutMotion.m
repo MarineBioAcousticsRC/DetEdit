@@ -1,13 +1,13 @@
 function boutMotion
 
-global dPARAMS p fNameList zID zTD zFD dHANDLES cMat
+global dPARAMS p fNameList zID zTD zFD dHANDLES %fpfnTD cMat
 
 
 disp([' BEGIN SESSION: ',num2str(dPARAMS.k)]);
 % load in FD, ID and TD each session in case these have been modified
 load(fNameList.FD); % brings in zFD
 load(fNameList.ID); % brings in zID
-load(fNameList.TD); % brings in zTD
+% load(fNameList.TD); % brings in zTD
 
 
 
@@ -42,7 +42,7 @@ for i = 1:length(p.mySpID)
         dPARAMS.clickTimes(dPARAMS.testClickIdx{i})<dPARAMS.eb(dPARAMS.k));
     zTD{dPARAMS.k,i+1}(1) = length(dPARAMS.XFD{i});
 end
-save(fNameList.TD,'zTD','p','cMat')
+% save(fNameList.TD,'zTD','p','cMat')
 
 % Test for XFD and strcmp('x or z or w') - if no test points skip
 % x = true, z = false, w = window

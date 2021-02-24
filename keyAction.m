@@ -186,12 +186,13 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
     set(dHANDLES.wavefig, 'KeyPressFcn',@keyAction)
     
 elseif strcmp(dPARAMS.cc,'w') %&& (zTD(dPARAMS.k,2) > 0))  % test 5 min window
-    % Test 5 min window
-    %zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
-    %zTD = test_false_bins(zTD);
+%     % Test 5 min window
+%     %zTD = test_false_bins(dPARAMS.k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
+%     %zTD = test_false_bins(zTD);
    bin_FP_FN_tests;
-%     k = k+1;
-    %dPARAMS.k = dPARAMS.k+1;
+%    FDR_FOR_tests_RC;
+% %     k = k+1;
+%     %dPARAMS.k = dPARAMS.k+1;
     
 elseif strcmp(dPARAMS.cc,'c')% enter label certainty evaluation
     LabCertainty_Eval;
@@ -287,7 +288,7 @@ if ~isempty(zID) && sum(zID(:,2)==0)>0
 end
 save(fNameList.FD,'zFD')
 save(fNameList.ID,'zID','-append')
-save(fNameList.TD,'zTD','cMat','p')
+save(fNameList.TD,'fpfnTD','cMat','p')
 
 % don't end if you used paintbrush on last record
 if (dPARAMS.k > dPARAMS.nb) && dPARAMS.bFlag

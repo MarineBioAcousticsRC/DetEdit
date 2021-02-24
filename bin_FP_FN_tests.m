@@ -1,7 +1,7 @@
 function bin_FP_FN_tests
 global dHANDLES dPARAMS p fpfnTD cMat
 
-dPARAMS.lab = []; % as which label to test
+dPARAMS.lab = []; % ask which label to test
 while isempty(dPARAMS.lab)
     dPARAMS.lab = input('Enter label to test: ');
     if ~isempty(dPARAMS.lab) & ~ismember(dPARAMS.lab,1:length(p.mySpID))

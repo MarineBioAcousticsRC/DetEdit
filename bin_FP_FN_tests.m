@@ -121,7 +121,7 @@ if any(btidx)
                         z = [];
                     elseif ~isempty(z) && z==1 % record true positives for this label
                         fpfnTD{1,dPARAMS.lab}(end,3) = 1;
-                        for k = 1:length(p.mySpID)
+                        for k = 1:length(p.mySpID)+1
                             cMat{dPARAMS.lab,k}(1) = cMat{dPARAMS.lab,k}(1)+1;
                         end
                         cMat{dPARAMS.lab,dPARAMS.lab}(2) = cMat{dPARAMS.lab,dPARAMS.lab}(2)+1;
@@ -133,14 +133,14 @@ if any(btidx)
                             % check if also a false negative for another label
                             a = input('Enter label # these click should have been assigned to, or enter 0 if uncertain: ');
                             
-                            if ~isempty(a) && ~ismember(a,1:size(zTD,2)-1) && a~=0
+                            if ~isempty(a) && ~ismember(a,1:length(p.mySpID)) && a~=0
                                 fprintf('WARNING: Entry not allowed\n');
                                 a = [];
                                 % count as FN only if this label doesn't already exist in this bin
                             elseif ~isempty(a) && a > 0 && ~ismember(a,labs)
-                                fpfnTD{1,a} = [fpfnTD{1,a};BT(i),0,0,-1,-1];
+                                fpfnTD{1,a} = [fpfnTD{1,a};BT(i),0,1,-1,length(lidx)];
                                 %FN = [FN,a];
-                                for k = 1:length(p.mySpID)
+                                for k = 1:length(p.mySpID)+1
                                     cMat{a,k}(1) = cMat{a,k}(1)+1;
                                 end
                                 cMat{a,dPARAMS.lab}(2) = cMat{a,dPARAMS.lab}(2)+1;
@@ -253,8 +253,9 @@ if any(btidx)
                     elseif ~isempty(b) && ismember(b,labs) %&& ~ismember(b,FN)
                         x = find(labs==b);
                         fpfnTD{1,dPARAMS.lab} = [fpfnTD{1,dPARAMS.lab};BT(i),0,1,conf(x),numClicks(x)];
+                        fpfnTD{1,b} = [fpfnTD{1,b};BT(i),1,0,conf(x),numClicks(x)];
                         %FN = [FN,b];
-                        for k = 1:length(p.mySpID)
+                        for k = 1:length(p.mySpID)+1
                             cMat{dPARAMS.lab,k}(1) = cMat{dPARAMS.lab,k}(1)+1;
                         end
                         if b==0
@@ -273,7 +274,7 @@ if any(btidx)
             if ~isempty(noLab)
                 labs = [labs;0];
                 conf = [conf;NA];
-                numClicks = [numClicks;length(noLab)];
+                numClicks = length(noLab);
                 
                 % calculate unlabeled click params
                 specs = dPARAMS.cspJ(m(ia),:);
@@ -326,22 +327,17 @@ if any(btidx)
             ylabel('Normalized Amplitude');
             while isempty(b)
                 % check for false negative(s)
-                b = input(['Enter label # which should have been classified as ',dPARAMS.lab,', or 99 if none: ']);
-                if ~isempty(b) && ~ismember(b,labs) && b~=99
+                b = input(['Should these clicks have been labeled as ',dPARAMS.lab,'? Enter 1 for yes, 0 for no: ']);
+                if ~isempty(b) && b~=1 && b~=0
                     fprintf('WARNING: Entry not allowed\n');
                     b = [];
-                elseif ~isempty(b) && ismember(b,labs) %&& ~ismember(b,FN)
-                    x = find(labs==b);
-                    fpfnTD{1,dPARAMS.lab} = [fpfnTD{1,dPARAMS.lab};BT(i),0,1,conf(x),numClicks(x)];
+                elseif ~isempty(b) && b==1 %&& ~ismember(b,FN)
+                    fpfnTD{1,dPARAMS.lab} = [fpfnTD{1,dPARAMS.lab};BT(i),0,1,-1,numClicks];
                     %FN = [FN,b];
-                    for k = 1:length(p.mySpID)
+                    for k = 1:length(p.mySpID)+1
                         cMat{dPARAMS.lab,k}(1) = cMat{dPARAMS.lab,k}(1)+1;
                     end
-                    if b==0
-                        cMat{dPARAMS.lab,end}(2) = cMat{dPARAMS.lab,end}(2)+1;
-                    else
-                        cMat{dPARAMS.lab,b}(2) = cMat{dPARAMS.lab,b}(2)+1;
-                    end
+                    cMat{dPARAMS.lab,end}(2) = cMat{dPARAMS.lab,end}(2)+1;
                 end
             end
         end

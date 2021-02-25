@@ -1,6 +1,6 @@
 function keyAction(varargin)
 
-global zID zFD zTD fNameList p dPARAMS dHANDLES cMat
+global zID zFD zTD fNameList p dPARAMS dHANDLES fpfnTD cMat
 
 disp('Key action detected')
 dPARAMS.cc = get(gcf,'CurrentCharacter');

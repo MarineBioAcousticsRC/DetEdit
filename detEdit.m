@@ -218,35 +218,62 @@ else
 end
 
 %% Set up Tests for False Detections
-% The false positive estimate tool picks every Nth click to test. If you
-% have false positives in zFD, you can pick out only the true ones to
-% determine which click indices to look at (that happens just below),
-% but if the user then adds or removes anything from zFD, the indices won't
-% adjust. Provide a warning to tell the user there might be an issue.
-if ~isempty(zFD)
-    disp(strcat('WARNING: This dataset contains false-flagged detections.  ', ...
-        'Remove them using modDet prior to estimating false positive rate.'))
-end
+% % The false positive estimate tool picks every Nth click to test. If you
+% % have false positives in zFD, you can pick out only the true ones to
+% % determine which click indices to look at (that happens just below),
+% % but if the user then adds or removes anything from zFD, the indices won't
+% % adjust. Provide a warning to tell the user there might be an issue.
+% if ~isempty(zFD)
+%     disp(strcat('WARNING: This dataset contains false-flagged detections.  ', ...
+%         'Remove them using modDet prior to estimating false positive rate.'))
+% end
+% 
+% [~,trueClickIDx] = setdiff(dPARAMS.clickTimes, zFD);
+% % select clicks for each label to test for False Det
+% ixfd = {};
+% dPARAMS.testClickIdx = {};
+% for i = 1:length(p.mySpID)
+%     thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
+%     [C iCT iLabT] = intersect(dPARAMS.clickTimes(trueClickIDx),thisLabTimes);
+%     nClick = size(iCT,1);
+%     if nClick >= p.c4fd % test p.c4fd clicks
+%         ixfd{i} = sort(datasample(iCT,p.c4fd,1,'Replace',false)); 
+%     elseif nClick < p.c4fd % if there aren't enough to reach p.c4fd, test all clicks
+%         ixfd{i} = iCT;
+%     end
+%     dPARAMS.testClickIdx{i} = trueClickIDx(ixfd{i});
+% end
+% 
+% A6 = exist(fNameList.TD,'file');
+% if (A6 ~= 2)
+%     zTD = {};
+%     cMat = {};
+%     fpfnTD = {};
+%     for j = 1:dPARAMS.nb
+%         for i = 1:length(p.mySpID)
+%             zTD{j,1} = j;
+%             zTD{j,i+1} = -1.*ones(1,6);
+%             fpfnTD{1,i} = [];
+%             for k = 1:length(p.mySpID)+1
+%                cMat{i,k} = zeros(1,2); 
+%             end
+%         end
+%     end
+% 
+%     save(fNameList.TD,'zTD','cMat','fpfnTD');    % create new TD
+%     disp(' Make new TD file');
+% else
+%     load(fNameList.TD)
+%     if (~exist('zTD') || ~exist('cMat') || ~exist('fpfnTD')) || (size(zTD,1) ~= dPARAMS.nb) || size(zTD,2) < length(p.mySpID)+1
+%         disp([' Problem with existing TD file: ',fNameList.TD]);
+%         return
+%     end
+% end
 
-[~,trueClickIDx] = setdiff(dPARAMS.clickTimes, zFD);
-% select clicks for each label to test for False Det
-ixfd = {};
-dPARAMS.testClickIdx = {};
-for i = 1:length(p.mySpID)
-    thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
-    [C iCT iLabT] = intersect(dPARAMS.clickTimes(trueClickIDx),thisLabTimes);
-    nClick = size(iCT,1);
-    if nClick >= p.c4fd % test p.c4fd clicks
-        ixfd{i} = sort(datasample(iCT,p.c4fd,1,'Replace',false)); 
-    elseif nClick < p.c4fd % if there aren't enough to reach p.c4fd, test all clicks
-        ixfd{i} = iCT;
-    end
-    dPARAMS.testClickIdx{i} = trueClickIDx(ixfd{i});
-end
+%% Set up False Positive & False Negative Bin Tests
 
 A6 = exist(fNameList.TD,'file');
 if (A6 ~= 2)
-    zTD = {};
     cMat = {};
     fpfnTD = {};
     for j = 1:dPARAMS.nb
@@ -269,8 +296,6 @@ else
         return
     end
 end
-
-%% Set up False Positive & False Negative Bin Tests
 
 % divide entire TPWS into bins aligned with cluster_bins 
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';

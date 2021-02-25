@@ -192,7 +192,7 @@ if any(btidx)
                 [noLab, ia] = setdiff(dPARAMS.t(m),tIDbin);
                 if ~isempty(noLab)
                     labs = [labs;0];
-                    conf = [conf;NA];
+                    conf = [conf;NaN];
                     numClicks = [numClicks;length(noLab)];
                     
                     % calculate unlabeled click params
@@ -228,14 +228,14 @@ if any(btidx)
                 subplot(1,3,2)
                 hold on
                 for q = 1:size(ICI,1)
-                    bar(0:.01:1,ICI(q,:),'FaceAlpha',0.75);
+                    bar(.01:.01:1,ICI(q,:),'FaceAlpha',0.5);
                 end
                 hold off
                 grid on
                 xticks([0 0.25 0.5 0.75 1]);
                 xlabel('ICI (s)');
                 ylabel('Counts');
-                title(['Bin ',num2str(i),', Labels ',num2str(labs),': ',p.mySpID(labs).Name]);
+                %title(['Bin ',num2str(i),', Labels ',num2str(labs),': ',p.mySpID(labs).Name]);
                 subplot(1,3,3)
                 hold on
                 for q = 1:size(meanWav,1)
@@ -273,7 +273,7 @@ if any(btidx)
             [noLab, ia] = setdiff(dPARAMS.t(m),tIDbin);
             if ~isempty(noLab)
                 labs = [labs;0];
-                conf = [conf;NA];
+                conf = [conf;NaN];
                 numClicks = length(noLab);
                 
                 % calculate unlabeled click params

@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'USWTR02B_disk16'; % TPWS file name to match. 
+filePrefix = 'WAT_BC_02_disk02a'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,13 +14,13 @@ sampleRate = 200; % replace with your sample rate
 sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'J:\USWTR02B\TPWS'; % identify folder containing TPWS files
+tpwsDir = 'G:\WAT_BC_02\TPWS'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'J:\USWTR02B\LTSAs'; % identify folder containing 
+ltsaDir = 'G:\WAT_BC_02\LTSAs'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,7 +92,7 @@ paramsUser.colorTab = [204, 204, 255; ... % Blainville's, lilac
             255, 0, 255; ... % Sowerby's, magenta
             102, 51, 0; ... % Sperm whale, brown
             249, 177, 211]./255; % True's, light pink
-paramsUser.colorTab = round(colorTab.*100)/100;      
+paramsUser.colorTab = round(paramsUser.colorTab.*100)/100;      
 
 paramsUser.mySpID = {'Blainvilles','Boats','CT11','CT2+CT9','CT3+CT7','CT4/6+CT10',...
     'CT5','CT8','Cuviers','Gervais','GoM_Gervais','HFA','Kogia','MFA',...

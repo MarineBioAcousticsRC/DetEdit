@@ -16,8 +16,7 @@ function detEdit(userFunc)
 %
 % detEdit
 clear global
-global dPARAMS p dHANDLES fNameList zID zFD zTD fpfnTD cMat
-
+global dPARAMS p dHANDLES fNameList zID zFD zTD
 %% Load Settings preferences
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
@@ -223,26 +222,26 @@ end
 % % determine which click indices to look at (that happens just below),
 % % but if the user then adds or removes anything from zFD, the indices won't
 % % adjust. Provide a warning to tell the user there might be an issue.
-% if ~isempty(zFD)
-%     disp(strcat('WARNING: This dataset contains false-flagged detections.  ', ...
-%         'Remove them using modDet prior to estimating false positive rate.'))
-% end
-% 
-% [~,trueClickIDx] = setdiff(dPARAMS.clickTimes, zFD);
-% % select clicks for each label to test for False Det
-% ixfd = {};
-% dPARAMS.testClickIdx = {};
-% for i = 1:length(p.mySpID)
-%     thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
-%     [C iCT iLabT] = intersect(dPARAMS.clickTimes(trueClickIDx),thisLabTimes);
-%     nClick = size(iCT,1);
-%     if nClick >= p.c4fd % test p.c4fd clicks
-%         ixfd{i} = sort(datasample(iCT,p.c4fd,1,'Replace',false)); 
-%     elseif nClick < p.c4fd % if there aren't enough to reach p.c4fd, test all clicks
-%         ixfd{i} = iCT;
-%     end
-%     dPARAMS.testClickIdx{i} = trueClickIDx(ixfd{i});
-% end
+if ~isempty(zFD)
+    disp(strcat('WARNING: This dataset contains false-flagged detections.  ', ...
+        'Remove them using modDet prior to estimating false positive rate.'))
+end
+
+[~,trueClickIDx] = setdiff(dPARAMS.clickTimes, zFD);
+% select clicks for each label to test for False Det
+ixfd = {};
+dPARAMS.testClickIdx = {};
+for i = 1:length(p.mySpID)
+    thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
+    [C iCT iLabT] = intersect(dPARAMS.clickTimes(trueClickIDx),thisLabTimes);
+    nClick = size(iCT,1);
+    if nClick >= p.c4fd % test p.c4fd clicks
+        ixfd{i} = sort(datasample(iCT,p.c4fd,1,'Replace',false)); 
+    elseif nClick < p.c4fd % if there aren't enough to reach p.c4fd, test all clicks
+        ixfd{i} = iCT;
+    end
+    dPARAMS.testClickIdx{i} = trueClickIDx(ixfd{i});
+end
 % 
 % A6 = exist(fNameList.TD,'file');
 % if (A6 ~= 2)
@@ -296,6 +295,7 @@ else
         return
     end
 end
+global cMat fpfnTD
 
 % divide entire TPWS into bins aligned with cluster_bins 
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';

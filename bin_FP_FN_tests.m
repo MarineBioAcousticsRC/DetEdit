@@ -1,4 +1,8 @@
+%% WARNING: re-running this test for a given label on a given bout will 
+% mess up the confusion matrix!
+
 function bin_FP_FN_tests
+
 global dHANDLES dPARAMS p fpfnTD cMat
 
 dPARAMS.lab = []; % ask which label to test
@@ -19,6 +23,13 @@ if any(btidx)
     %         zTD{dPARAMS.k,i}(3:6) = 0;
     %     end
     BT = dPARAMS.binTimes(dPARAMS.ftb{1,dPARAMS.lab}(btidx)); %start times of test bins
+    
+    % if data for any of these bins already exists in fpfnTD, remove it
+    if ~isempty(fpfnTD{1,dPARAMS.lab})
+        prevEntries = ismember(fpfnTD{1,dPARAMS.lab}(:,1),BT);
+        fpfnTD{1,dPARAMS.lab}(prevEntries,:) = [];
+    end
+     %%%%%%% NO WAY TO ALSO REMOVE FROM cMat %%%%%%%%
     
     for i = 1:length(BT) % for each test bin
         %FN = [];
@@ -93,7 +104,7 @@ if any(btidx)
                 % plot
                 figure(99);clf
                 subplot(1,3,1)
-                plot(dPARAMS.fmsp,specNorm);
+                plot(dPARAMS.fmsp,specNorm,'LineWidth',1.5);
                 grid on
                 xticks(10:10:90)
                 xticklabels({'','20','','40','','60','','80'});
@@ -221,9 +232,9 @@ if any(btidx)
                 for q = 1:size(specNorm,1)
                     if labs(q)==0
                         g = [0 0.4470 0.7410];
-                        plot(dPARAMS.fmsp,specNorm(q,:),'Color',g);
+                        plot(dPARAMS.fmsp,specNorm(q,:),'Color',g,'LineWidth',1.5);
                     else
-                        plot(dPARAMS.fmsp,specNorm(q,:),'Color',p.colorTab(labs(q),:));
+                        plot(dPARAMS.fmsp,specNorm(q,:),'Color',p.colorTab(labs(q),:),'LineWidth',2);
                     end
                 end
                 hold off
@@ -236,9 +247,9 @@ if any(btidx)
                 for q = 1:size(ICI,1)
                     if labs(q)==0
                         g = [0 0.4470 0.7410];
-                        bar(.01:.01:1,ICI(q,:),'FaceColor',g,'EdgeColor',g,'FaceAlpha',0.25);
+                        bar(.01:.01:1,ICI(q,:),'FaceColor',g,'EdgeColor',g,'FaceAlpha',0.5,'EdgeAlpha',0.5);
                     else
-                        bar(.01:.01:1,ICI(q,:),'FaceColor',p.colorTab(labs(q),:),'EdgeColor',p.colorTab(labs(q),:),'FaceAlpha',0.25);
+                        bar(.01:.01:1,ICI(q,:),'FaceColor',p.colorTab(labs(q),:),'EdgeColor',p.colorTab(labs(q),:),'FaceAlpha',0.5,'EdgeAlpha',0.5);
                     end          
                 end
                 hold off
@@ -315,7 +326,7 @@ if any(btidx)
             figure(99);clf
             subplot(1,3,1)
             hold on
-            plot(dPARAMS.fmsp,specNorm);
+            plot(dPARAMS.fmsp,specNorm,'LineWidth',1.5);
             hold off
             xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
             xlabel('Frequency (kHz)');
@@ -329,7 +340,7 @@ if any(btidx)
             xticks([0 0.25 0.5 0.75 1]);
             xlabel('ICI (s)');
             ylabel('Counts');
-            title(['Bin ',num2str(i),', Labels ',num2str(labs),': ',p.mySpID(labs).Name]);
+            title(['Bin ',num2str(i),', Unlabeled Clicks']);
             subplot(1,3,3)
             hold on
             plot(meanWav);

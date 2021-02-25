@@ -101,7 +101,8 @@ if any(btidx)
                 xlabel('Frequency (kHz)');
                 ylabel('Normalized Amplitude');
                 subplot(1,3,2)
-                histogram('BinEdges',0:.01:1,'BinCounts',ICI);
+                %histogram('BinEdges',0:.01:1,'BinCounts',ICI);
+                bar(.01:.01:1,ICI);
                 grid on
                 xticks([0 0.25 0.5 0.75 1]);
                 xlabel('ICI (s)');
@@ -218,7 +219,12 @@ if any(btidx)
                 subplot(1,3,1)
                 hold on
                 for q = 1:size(specNorm,1)
-                    plot(dPARAMS.fmsp,specNorm(q,:));
+                    if labs(q)==0
+                        g = [0 0.4470 0.7410];
+                        plot(dPARAMS.fmsp,specNorm(q,:),'Color',g);
+                    else
+                        plot(dPARAMS.fmsp,specNorm(q,:),'Color',p.colorTab(labs(q),:));
+                    end
                 end
                 hold off
                 xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
@@ -228,25 +234,38 @@ if any(btidx)
                 subplot(1,3,2)
                 hold on
                 for q = 1:size(ICI,1)
-                    bar(.01:.01:1,ICI(q,:),'FaceAlpha',0.5);
+                    if labs(q)==0
+                        g = [0 0.4470 0.7410];
+                        bar(.01:.01:1,ICI(q,:),'FaceColor',g,'EdgeColor',g,'FaceAlpha',0.25);
+                    else
+                        bar(.01:.01:1,ICI(q,:),'FaceColor',p.colorTab(labs(q),:),'EdgeColor',p.colorTab(labs(q),:),'FaceAlpha',0.25);
+                    end          
                 end
                 hold off
                 grid on
+                xlim([0 1]);
                 xticks([0 0.25 0.5 0.75 1]);
                 xlabel('ICI (s)');
                 ylabel('Counts');
                 %title(['Bin ',num2str(i),', Labels ',num2str(labs),': ',p.mySpID(labs).Name]);
                 subplot(1,3,3)
                 hold on
+                randVals = rand(1,size(meanWav,1));
                 for q = 1:size(meanWav,1)
-                    plot(meanWav(q,:) + ones(size(meanWav,2),1)'.*rand(1,min(size(meanWav,2))));
+                    if labs(q)==0
+                        g = [0 0.4470 0.7410];
+                        plot(meanWav(q,:) + ones(size(meanWav,2),1)'.*randVals(q),'Color',g);
+                    else
+                        plot(meanWav(q,:) + ones(size(meanWav,2),1)'.*randVals(q),'Color',p.colorTab(labs(q),:));
+                    end
                 end
                 hold off
                 xlabel('Sample Number');
                 ylabel('Normalized Amplitude');
+                
                 while isempty(b)
                     % check for false negative(s)
-                    b = input(['Enter label # which should have been classified as ',dPARAMS.lab,', or 99 if none: ']);
+                    b = input(['Enter label # which should have been labeled as ',num2str(dPARAMS.lab),', or 99 if none: ']);
                     if ~isempty(b) && ~ismember(b,labs) && b~=99
                         fprintf('WARNING: Entry not allowed\n');
                         b = [];
@@ -285,22 +304,18 @@ if any(btidx)
                 Spec = Spec./repmat(mxSpec,1,size(mspec,2));
                 meanSpec = 20*log10(nanmean(10.^Spec./20,1));
                 meanMin = meanSpec-min(meanSpec);
-                spNorm = meanMin./max(meanMin);
-                specNorm = [specNorm;spNorm];
+                specNorm = meanMin./max(meanMin);
                 % calculate ICI dist
-                ici = histcounts(diff(dPARAMS.t(m(ia))*60*60*24),0:.01:1);
-                ICI = [ICI;ici];
+                ICI = histcounts(diff(dPARAMS.t(m(ia))*60*60*24),0:.01:1);
                 % calculate mean waveform
-                wav = norm_wav(mean(dPARAMS.csnJ(m(ia),:),1));
-                meanWav = [meanWav;wav];
+                meanWav = norm_wav(mean(dPARAMS.csnJ(m(ia),:),1));
+
             end
-            % plot all labeled & unlabeled clicks in this bin
+            % plot all unlabeled clicks in this bin
             figure(99);clf
             subplot(1,3,1)
             hold on
-            for q = 1:size(specNorm,1)
-                plot(dPARAMS.fmsp,specNorm(q,:));
-            end
+            plot(dPARAMS.fmsp,specNorm);
             hold off
             xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
             xlabel('Frequency (kHz)');
@@ -308,9 +323,7 @@ if any(btidx)
             legend(string(labs),'Location','southeast');
             subplot(1,3,2)
             hold on
-            for q = 1:size(ICI,1)
-                bar(0:.01:1,ICI(q,:),'FaceAlpha',0.75);
-            end
+            bar(.01:.01:1,ICI,'FaceAlpha',0.75);
             hold off
             grid on
             xticks([0 0.25 0.5 0.75 1]);
@@ -319,12 +332,11 @@ if any(btidx)
             title(['Bin ',num2str(i),', Labels ',num2str(labs),': ',p.mySpID(labs).Name]);
             subplot(1,3,3)
             hold on
-            for q = 1:size(meanWav,1)
-                plot(meanWav(q,:) + ones(size(meanWav,2),1)'.*rand(1,min(size(meanWav,2))));
-            end
+            plot(meanWav);
             hold off
             xlabel('Sample Number');
             ylabel('Normalized Amplitude');
+            
             while isempty(b)
                 % check for false negative(s)
                 b = input(['Should these clicks have been labeled as ',dPARAMS.lab,'? Enter 1 for yes, 0 for no: ']);

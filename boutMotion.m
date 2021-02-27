@@ -7,7 +7,7 @@ disp([' BEGIN SESSION: ',num2str(dPARAMS.k)]);
 % load in FD, ID and TD each session in case these have been modified
 load(fNameList.FD); % brings in zFD
 load(fNameList.ID); % brings in zID
-% load(fNameList.TD); % brings in zTD
+load(fNameList.TD); % brings in zTD
 
 
 

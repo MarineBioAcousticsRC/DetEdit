@@ -1,6 +1,6 @@
 function boutMotion
 
-global dPARAMS p fNameList zID zTD zFD dHANDLES %fpfnTD cMat
+global dPARAMS p fNameList zID zTD zFD dHANDLES fpfnTD cMat
 
 
 disp([' BEGIN SESSION: ',num2str(dPARAMS.k)]);

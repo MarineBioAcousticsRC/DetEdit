@@ -288,7 +288,7 @@ if ~isempty(zID) && sum(zID(:,2)==0)>0
 end
 save(fNameList.FD,'zFD')
 save(fNameList.ID,'zID','-append')
-save(fNameList.TD,'fpfnTD','cMat','p')
+save(fNameList.TD,'fpfnTD','cMat','p','zTD')
 
 % don't end if you used paintbrush on last record
 if (dPARAMS.k > dPARAMS.nb) && dPARAMS.bFlag

@@ -32,6 +32,7 @@ ltsaDir = 'J:\USWTR02B\LTSAs'; % identify folder containing
 % paramsUser.threshRL = 115; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 paramsUser.minBout = 0;% minimum bout duration in seconds
+
 % paramsUser.gth = .5;    % gap time in hrs between sessions
 % paramsUser.binDur = 5; % bin duration in minutes
 % paramsUser.dfManual = []; % LTSA step size in 10 [Hz] bins
@@ -73,7 +74,12 @@ paramsUser.rmsHi = 40;
 % inter-detection-interval and peak frequency
 
 %% Other settings
+<<<<<<< Updated upstream
 
+=======
+paramsUser.nTestBins = 25; %number of bins for fpfn tests 
+paramsUser.minClicks = 5; %minimum number of clicks to include a bin for testing, can set to 0 if not needed 
+>>>>>>> Stashed changes
 % Colors to use for classification - ID signal types
 colorTab = [204, 204, 255; ... % Blainville's, lilac
             255, 128, 0; ... % Cuvier's, orange

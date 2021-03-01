@@ -72,6 +72,7 @@ mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship',...
 
 minLabelConfidence = 0; % minimum classifciation confidence threshold for 
 % displaying signal labels
+minClicks = 0; %minimum number of clicks in a calculated bin to include bin in fpfn tests 
 
 
 %% Parameters for modDet (if specified to compute)

@@ -90,6 +90,7 @@ switch analysis
         params.mySpID = mySpID;
         params.autoFalse = autoFalse;
         params.minLabelConfidence = minLabelConfidence;
+        params.minClicks = minClicks;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));

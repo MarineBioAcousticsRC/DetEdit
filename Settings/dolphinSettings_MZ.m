@@ -75,7 +75,7 @@ paramsUser.rmsHi = 40;
 
 %% Other settings
 paramsUser.nTestBins = 25; %number of bins for fpfn tests 
-paramsUser.minClicks = 5; %minimum number of clicks to include a bin for testing, can set to 0 if not needed 
+paramsUser.minClicks = 10; %minimum number of clicks to include a bin for testing, can set to 0 if not needed 
 % Colors to use for classification - ID signal types
 colorTab = [204, 204, 255; ... % Blainville's, lilac
             255, 128, 0; ... % Cuvier's, orange

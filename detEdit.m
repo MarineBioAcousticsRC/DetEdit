@@ -303,7 +303,7 @@ dPARAMS.ftb = {};
 
 % divy all clicks into bins
 [Ntot,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
-binsWithClicks = find(Ntot>0);
+binsWithClicks = find(Ntot>p.minClicks);
 
 for i = 1:length(p.mySpID) % for each label
     ftb = [];

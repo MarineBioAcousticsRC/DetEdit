@@ -74,12 +74,8 @@ paramsUser.rmsHi = 40;
 % inter-detection-interval and peak frequency
 
 %% Other settings
-<<<<<<< Updated upstream
-
-=======
 paramsUser.nTestBins = 25; %number of bins for fpfn tests 
 paramsUser.minClicks = 5; %minimum number of clicks to include a bin for testing, can set to 0 if not needed 
->>>>>>> Stashed changes
 % Colors to use for classification - ID signal types
 colorTab = [204, 204, 255; ... % Blainville's, lilac
             255, 128, 0; ... % Cuvier's, orange
@@ -104,6 +100,6 @@ colorTab = [204, 204, 255; ... % Blainville's, lilac
 %             255, 0, 0;... % , red
 paramsUser.colorTab = round(colorTab.*100)/100;      
 
-paramsUser.mySpID = {'Blainvilles','Cuviers','FKW','LF1','SFPW1','SFPW2','Sten1_2',...
-    'Sten3','bott_MHW','kogia','noise_sperm'};
+paramsUser.mySpID = struct('Name',{'Blainvilles','Cuviers','FKW','LF1','SFPW1','SFPW2','Sten1_2',...
+    'Sten3','bott_MHW','kogia','noise_sperm'},'zID_Label',{1,2,3,4,5,6,7,8,9,10,11});
 

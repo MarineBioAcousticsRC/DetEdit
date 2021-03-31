@@ -27,9 +27,42 @@ if any(btidx)
     % if data for any of these bins already exists in fpfnTD, remove it
     if ~isempty(fpfnTD{1,dPARAMS.lab})
         prevEntries = ismember(fpfnTD{1,dPARAMS.lab}(:,1),BT);
+        %in case these bins were fp, figure out where the corresponding fn bin was and
+        %remove those entries too
+        prevEntryCase = find(prevEntries == 1);
+        if ~isempty(prevEntryCase)
+            for iF = 1:size(prevEntryCase)
+                getbin = fpfnTD{1,dPARAMS.lab}(prevEntryCase(iF),:);
+                %if bin was a false positive
+                if getbin(:,2) == 1 && getbin(:,3) == 0
+                    disp(['duplicate bin from type ',num2str(dPARAMS.lab),' is fp, looking for fn...'])
+                    %look for current bin in other places
+                    binhere = [];
+                    %for each type
+                    for iB = 1:size(fpfnTD,2)
+                        %if the type isn't the currrent type and isn't empty
+                        if iB ~= dPARAMS.lab && ~isempty(fpfnTD{iB})
+                            %get times stored in that bin
+                            testBins = fpfnTD{iB};
+                            [bintime,binidx,~] = intersect(testBins(:,1),getbin(:,1));
+                            %if you find the time, check if it's a false
+                            %negative bin and if click times match
+                            if ~isempty(bintime)&& testBins(binidx,2) == 0 && ...
+                                    testBins(binidx,3) == 1 && testBins(binidx,5) == getbin(:,5)
+                                %if everything matches, remove the false
+                                %negative bin
+                                fpfnTD{1,iB}(binidx,:) = [];
+                                disp(['Removing corresponding fn bin from type ',num2str(iB)])
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        %remove the original repeated bin
         fpfnTD{1,dPARAMS.lab}(prevEntries,:) = [];
     end
-     %%%%%%% NO WAY TO ALSO REMOVE FROM cMat %%%%%%%%
+    %%%%%%% NO WAY TO ALSO REMOVE FROM cMat %%%%%%%%
     
     for i = 1:length(BT) % for each test bin
         %FN = [];
@@ -320,48 +353,52 @@ if any(btidx)
                 ICI = histcounts(diff(dPARAMS.t(m(ia))*60*60*24),0:.01:1);
                 % calculate mean waveform
                 meanWav = norm_wav(mean(dPARAMS.csnJ(m(ia),:),1));
-
+                
             end
             % plot all unlabeled clicks in this bin
-            figure(99);clf
-            subplot(1,3,1)
-            hold on
-            plot(dPARAMS.fmsp,specNorm,'LineWidth',1.5);
-            hold off
-            xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
-            xlabel('Frequency (kHz)');
-            ylabel('Normalized Amplitude');
-            legend(string(labs),'Location','southeast');
-            subplot(1,3,2)
-            hold on
-            bar(.01:.01:1,ICI,'FaceAlpha',0.75);
-            hold off
-            grid on
-            xticks([0 0.25 0.5 0.75 1]);
-            xlabel('ICI (s)');
-            ylabel('Counts');
-            title(['Bin ',num2str(i),', Unlabeled Clicks']);
-            subplot(1,3,3)
-            hold on
-            plot(meanWav);
-            hold off
-            xlabel('Sample Number');
-            ylabel('Normalized Amplitude');
-            
-            while isempty(b)
-                % check for false negative(s)
-                b = input(['Should these clicks have been labeled as ',dPARAMS.lab,'? Enter 1 for yes, 0 for no: ']);
-                if ~isempty(b) && b~=1 && b~=0
-                    fprintf('WARNING: Entry not allowed\n');
-                    b = [];
-                elseif ~isempty(b) && b==1 %&& ~ismember(b,FN)
-                    fpfnTD{1,dPARAMS.lab} = [fpfnTD{1,dPARAMS.lab};BT(i),0,1,-1,numClicks];
-                    %FN = [FN,b];
-                    for k = 1:length(p.mySpID)+1
-                        cMat{dPARAMS.lab,k}(1) = cMat{dPARAMS.lab,k}(1)+1;
+            if ~isempty(specNorm)
+                figure(99);clf
+                subplot(1,3,1)
+                hold on
+                plot(dPARAMS.fmsp,specNorm,'LineWidth',1.5);
+                hold off
+                xlim([dPARAMS.fmsp(1) dPARAMS.fmsp(end)]);
+                xlabel('Frequency (kHz)');
+                ylabel('Normalized Amplitude');
+                legend(string(labs),'Location','southeast');
+                subplot(1,3,2)
+                hold on
+                bar(.01:.01:1,ICI,'FaceAlpha',0.75);
+                hold off
+                grid on
+                xticks([0 0.25 0.5 0.75 1]);
+                xlabel('ICI (s)');
+                ylabel('Counts');
+                title(['Bin ',num2str(i),', Unlabeled Clicks']);
+                subplot(1,3,3)
+                hold on
+                plot(meanWav);
+                hold off
+                xlabel('Sample Number');
+                ylabel('Normalized Amplitude');
+                
+                while isempty(b)
+                    % check for false negative(s)
+                    b = input(['Should these clicks have been labeled as ',dPARAMS.lab,'? Enter 1 for yes, 0 for no: ']);
+                    if ~isempty(b) && b~=1 && b~=0
+                        fprintf('WARNING: Entry not allowed\n');
+                        b = [];
+                    elseif ~isempty(b) && b==1 %&& ~ismember(b,FN)
+                        fpfnTD{1,dPARAMS.lab} = [fpfnTD{1,dPARAMS.lab};BT(i),0,1,-1,numClicks];
+                        %FN = [FN,b];
+                        for k = 1:length(p.mySpID)+1
+                            cMat{dPARAMS.lab,k}(1) = cMat{dPARAMS.lab,k}(1)+1;
+                        end
+                        cMat{dPARAMS.lab,end}(2) = cMat{dPARAMS.lab,end}(2)+1;
                     end
-                    cMat{dPARAMS.lab,end}(2) = cMat{dPARAMS.lab,end}(2)+1;
                 end
+            else
+                disp('no unlabelled clicks in bin above 120 dB, skipping bin')
             end
         end
         % remove bin indicators from time series plots

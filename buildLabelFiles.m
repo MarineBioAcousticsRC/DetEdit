@@ -24,6 +24,8 @@ function [zFD, zID,fNameList]= buildLabelFiles(matchingFile, p)
 
 zFD = [];
 zID = [];
+%setup matching file for situation where ID file has diff name
+matchingFileID = [p.IDfilePrefix,'_TPWS',p.iterationNum,'.mat'];
 
 % Name and build false detection file
 ffn = strrep(matchingFile,'TPWS','FD');
@@ -36,18 +38,18 @@ if (AFD ~= 2) % if it doesn't exist, make it
 end
 
 % Name true detection file
-tfn = strrep(matchingFile,'TPWS','TD');
+tfn = strrep(matchingFileID,'TPWS','TD');
 fNameList.TD = fullfile(p.tpwsDir,tfn);
 % NOTE: TD file is made elsewhere because it depends on a later variable
 
 
 % Name and build ID file
-idfn = strrep(matchingFile,'TPWS','ID');
+idfn = strrep(matchingFileID,'TPWS','ID');
 fNameList.ID = fullfile(p.tpwsDir,idfn);
 AID = exist(fNameList.ID,'file');
 if (AID ~= 2)% if it doesn't exist, make it
     zID = [];
     mySpID = p.mySpID;
-    save(fNameList.ID,'zID','mySpID','-append');
+    save(fNameList.ID,'zID','mySpID');%,'-append');
     disp('Made new ID file');  
 end

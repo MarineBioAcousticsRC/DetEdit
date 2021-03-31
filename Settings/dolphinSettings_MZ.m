@@ -5,7 +5,10 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'Hawaii17K_newTF_disk01b_Delphin'; % TPWS file name to match. 
+filePrefix = 'KAUAI01_newTF_disk04_Delphin'; % TPWS file name to match.
+IDfilePrefix = []; %file prefix for ID file, if using...
+%neural net specific ID file. set to empty if not needed 
+
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,7 +17,7 @@ sampleRate = 200; % replace with your sample rate
 sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'G:\reProcessed\Hawaii\Hawaii17K\TPWS_newTF'; % identify folder containing TPWS files
+tpwsDir = 'G:\reProcessed\Kauai\Kauai01\TPWS_newTF'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
@@ -29,7 +32,7 @@ ltsaDir = 'J:\USWTR02B\LTSAs'; % identify folder containing
 % initDefaultParams.m and initSpParams.m)
 
 %% Bout preferences
-% paramsUser.threshRL = 115; % minimum RL threshold in dB peak-to-peak
+% paramsUser.threshRL = 120; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 paramsUser.minBout = 0;% minimum bout duration in seconds
 
@@ -75,21 +78,35 @@ paramsUser.rmsHi = 40;
 
 %% Other settings
 paramsUser.nTestBins = 25; %number of bins for fpfn tests 
-paramsUser.minClicks = 10; %minimum number of clicks to include a bin for testing, can set to 0 if not needed 
+paramsUser.minClicks = 5; %minimum number of clicks to include a bin for testing, can set to 0 if not needed 
 % Colors to use for classification - ID signal types
-colorTab = [204, 204, 255; ... % Blainville's, lilac
-            255, 128, 0; ... % Cuvier's, orange
-            102, 255, 178; ... % FKW, seafoam
-            0, 153, 0; ... % LF1, crayola green
-            0, 128, 255; ... % SFPW1, medium blue
-            51, 255, 51; ... % SFPW2, bright green
-            25,25,112; ... % Sten1/2, dark blue 
-%                        102, 178, 255; ... % Sten1/2, periwinkle
-            0, 255, 255; ... % Sten3, cyan
-                        255, 0, 255; ... % bott/MHW, magenta
-%             255, 204, 153; ... % bott/MHW, tan
-            245, 194, 66;... % kogia, mustard yellow
-            249, 177, 211]./255; % noise, light pink
+% colorTab = [204, 204, 255; ... % Blainville's, lilac
+%             255, 128, 0; ... % Cuvier's, orange
+%             102, 255, 178; ... % FKW, seafoam
+%             0, 153, 0; ... % LF1, crayola green
+%             0, 128, 255; ... % SFPW1, medium blue
+%             51, 255, 51; ... % SFPW2, bright green
+%             25,25,112; ... % Sten1/2, dark blue 
+% %                        102, 178, 255; ... % Sten1/2, periwinkle
+%             0, 255, 255; ... % Sten3, cyan
+%                         255, 0, 255; ... % bott/MHW, magenta
+% %             255, 204, 153; ... % bott/MHW, tan
+%             245, 194, 66;... % kogia, mustard yellow
+%             249, 177, 211]./255; % noise, light pink
+%         
+        %colorTab for manual editing 
+        colorTab = [.85,.7, 1; ... % Blainville's, lilac
+            .93, .69, 0.13; ... % Cuvier's, orange
+            .47,.67,.19; ... % FKW, light green
+            0, 0.5, 0; ... % LF1, dark green
+            0, .45, .74; ... % SFPW1, medium blue
+            1,.84,0; ... % SFPW2, gold
+            .08,.17,.55; ... % Sten1/2, dark blue 
+            0, 1,1; ... % Sten3, cyan
+            1, 0, 1; ... % bott/MHW, magenta
+            .64,.08,.18;... % kogia,dark red
+            1,.6,.78]; % noise, light pink
+        
         %             255, 0, 0;... % HFA, red
 %             153, 51, 255; ... % Kogia, purple
 %             255, 0, 0;... % MFA, red

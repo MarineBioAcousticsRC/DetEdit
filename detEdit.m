@@ -170,13 +170,13 @@ save(fNameList.FD,'zFD');
 % Make ID file intersect with MTT
 load(fNameList.ID)  % identified detection times zID
 zID = rmUnmatchedDetections(MTT, zID);
-if exist('labels','var')
-    % a label struct was fount in ID file. Add it to p. This will overwrite
-    % whatever was in mySpID before.
-    p.mySpID = labels;
-elseif exist('mySpID','var')
-    p.mySpID = mySpID;
-end
+% if exist('labels','var')
+%     % a label struct was fount in ID file. Add it to p. This will overwrite
+%     % whatever was in mySpID before.
+%     p.mySpID = labels;
+% elseif exist('mySpID','var')
+%     p.mySpID = mySpID;
+% end
 save(fNameList.ID,'zID','-append');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -231,6 +231,7 @@ end
 % select clicks for each label to test for False Det
 ixfd = {};
 dPARAMS.testClickIdx = {};
+if ~isempty(zID)
 for i = 1:length(p.mySpID)
     thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
     [C iCT iLabT] = intersect(dPARAMS.clickTimes(trueClickIDx),thisLabTimes);
@@ -241,6 +242,7 @@ for i = 1:length(p.mySpID)
         ixfd{i} = iCT;
     end
     dPARAMS.testClickIdx{i} = trueClickIDx(ixfd{i});
+end
 end
 % 
 % A6 = exist(fNameList.TD,'file');
@@ -272,6 +274,7 @@ end
 %% Set up False Positive & False Negative Bin Tests
 
 A6 = exist(fNameList.TD,'file');
+savep = p;
 if (A6 ~= 2)
     cMat = {};
     fpfnTD = {};
@@ -295,6 +298,7 @@ else
         return
     end
 end
+p = savep;
 global cMat fpfnTD
 
 % divide entire TPWS into bins aligned with cluster_bins 
@@ -302,9 +306,14 @@ dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))'
 dPARAMS.ftb = {};
 
 % divy all clicks into bins
-[Ntot,~] = histcounts(dPARAMS.clickTimes,dPARAMS.binTimes);
+% remove clicks below necessary MPP threshold (w/e was set in cluster bins)
+dPARAMS.clickTimesforBinning = dPARAMS.clickTimes(MPP>=120);
+
+[Ntot,~] = histcounts(dPARAMS.clickTimesforBinning,dPARAMS.binTimes);
+%remove bins without sufficient # clicks
 binsWithClicks = find(Ntot>p.minClicks);
 
+if ~isempty(zID)
 for i = 1:length(p.mySpID) % for each label
     ftb = [];
     % divy clicks with this label into bins
@@ -312,6 +321,7 @@ for i = 1:length(p.mySpID) % for each label
     [N,~] = histcounts(thisLabTimes,dPARAMS.binTimes);
     thisClickBins = find(N>0);
     notThisClickBins = setdiff(binsWithClicks,thisClickBins);
+    
     
     % randomly select test bins across TPWS from those bins which DO and DO
     % NOT contain clicks with this label
@@ -327,12 +337,14 @@ for i = 1:length(p.mySpID) % for each label
         end
     dPARAMS.ftb{1,i} = sort(ftb);
 end
+end
 %% Set up Label Certainty Evaluation 
 
 % divide entire TPWS into bins aligned with cluster_bins
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';
 dPARAMS.ixtb = {};
 
+if ~isempty(zID)
 for i = 1:length(p.mySpID) %for each label
     % divvy labeled clicks into bins
     thisLabTimes = zID(zID(:,2)==p.mySpID(i).zID_Label,1);
@@ -348,7 +360,7 @@ for i = 1:length(p.mySpID) %for each label
     end
     
 end
-
+end
 
 %% Compute Spectra Plot Parameters
 % max and min for LTSA frequency

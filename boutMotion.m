@@ -4,11 +4,13 @@ global dPARAMS p fNameList zID zTD zFD dHANDLES fpfnTD cMat
 
 
 disp([' BEGIN SESSION: ',num2str(dPARAMS.k)]);
+%make sure p doesnt get overwritten
+savep = p;
 % load in FD, ID and TD each session in case these have been modified
 load(fNameList.FD); % brings in zFD
 load(fNameList.ID); % brings in zID
 load(fNameList.TD); % brings in zTD
-
+p = savep;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,7 +34,7 @@ end
 % dPARAMS.XFD = find(dPARAMS.clickTimes(dPARAMS.testClickIdx) >= dPARAMS.sb(dPARAMS.k) &...
 %     dPARAMS.clickTimes(dPARAMS.testClickIdx) <= dPARAMS.eb(dPARAMS.k));
 % zTD(dPARAMS.k,1) = length(dPARAMS.XFD);
-
+if ~isempty(dPARAMS.testClickIdx)
 for i = 1:length(p.mySpID)
     %thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
     %             l = find(dPARAMS.clickTimes(dPARAMS.testClickIdx{i})>=dPARAMS.sb(j));
@@ -41,6 +43,7 @@ for i = 1:length(p.mySpID)
     dPARAMS.XFD{i} = find(dPARAMS.clickTimes(dPARAMS.testClickIdx{i})>=dPARAMS.sb(dPARAMS.k) & ...
         dPARAMS.clickTimes(dPARAMS.testClickIdx{i})<dPARAMS.eb(dPARAMS.k));
     zTD{dPARAMS.k,i+1}(1) = length(dPARAMS.XFD{i});
+end
 end
 % save(fNameList.TD,'zTD','p','cMat')
 
@@ -59,7 +62,7 @@ if ~isempty(J) % if there are detection in this session
     disp([' Detection times:',num2str(length(dPARAMS.t))]);
     for i = 1:length(p.mySpID)
         %thisLabField = sprintf('Label_%d', p.mySpID(i).zID_Label);
-        if (~isempty(dPARAMS.XFD{i}))
+        if (~isempty(dPARAMS.XFD))&&(~isempty(dPARAMS.XFD{i}))
             dPARAMS.xt{i} = dPARAMS.clickTimes(dPARAMS.testClickIdx{i}(dPARAMS.XFD{i}));  %times to test for False Detection
             dPARAMS.xPP{i} = dPARAMS.clickLevels(dPARAMS.testClickIdx{i}(dPARAMS.XFD{i}));   %amplitude for test False Detection
             %disp(['Label ',num2str(i),' Test False Detection times:',num2str(zTD{dPARAMS.k,i+1}(1))]),

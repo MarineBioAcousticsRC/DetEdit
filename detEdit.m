@@ -270,7 +270,7 @@ end
 % end
 
 %% Set up False Positive & False Negative Bin Tests
-
+global cMat fpfnTD
 A6 = exist(fNameList.TD,'file');
 if (A6 ~= 2)
     cMat = {};
@@ -295,7 +295,6 @@ else
         return
     end
 end
-global cMat fpfnTD
 
 % divide entire TPWS into bins aligned with cluster_bins 
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';

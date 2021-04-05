@@ -15,9 +15,9 @@
 clearvars
 
 % Setup variables:
-baseDir = 'D:\DTmetadata\DT_postDecompFix\DT08'; % directory containing de_detector output
-outDir = 'D:\DTmetadata\DT_postDecompFix\LTSAs'; % directory where you want to save your TPWS file
-siteName = 'GofMX_DT08'; % site name, used to name the output file
+baseDir = 'I:\HAT_B_01-03\Detector_Metadata'; % directory containing de_detector output
+outDir = 'I:\HAT_B_01-03\TPWS\New_TPWS'; % directory where you want to save your TPWS file
+siteName = 'HAT_B_03_01'; % site name, used to name the output file
 ppThresh = 120; % minimum RL in dBpp. If detections have RL below this
 % threshold, they will be excluded from the output file. Useful if you have
 % an unmanageable number of detections.
@@ -45,12 +45,13 @@ for itr0 = 1:length(dirSet)
         specClickTfVec = [];
         tsVecStore = [];
         subTP = 1;
+        subTPb = 1;
 
         for itr2 = 1:lfs
             thisFile = fileSet.mat(itr2);
             
             load(char(fullfile(inDir,thisFile)),'-mat','clickTimes','hdr',...
-                'ppSignal','specClickTf','yFiltBuff','f','durClick')
+                'ppSignal','specClickTf','yFiltBuff','f')
             if ~isempty(clickTimes)&& size(specClickTf,2)>1
                 % specClickTf = specClickTfHR;
                 keepers = find(ppSignal >= ppThresh);
@@ -128,10 +129,14 @@ for itr0 = 1:length(dirSet)
                     fprintf('Done with directory %d of %d \n',itr0,length(dirSet))
                     subTP = 1;
                 else
-                    
-                    ttppOutName = [fullfile(outDir,dirSet(itr0).name),char(letterCode(subTP)),'_Delphin_TPWS1','.mat'];
-                    subTP = subTP+1;
-                    letterFlag = 1;
+                    if subTP<=size(letterCode,2)
+                        ttppOutName = [fullfile(outDir,dirSet(itr0).name),char(letterCode(subTP)),'_Delphin_TPWS1','.mat'];
+                        subTP = subTP+1;
+                        letterFlag = 1;
+                    else
+                        ttppOutName = [fullfile(outDir,dirSet(itr0).name),char(letterCode(end)),char(letterCode(subTPb)),'_Delphin_TPWS1','.mat'];
+                            subTPb = subTPb+1;
+                    end
                 end
                 f = fSave;
                 save(ttppOutName,'MTT','MPP','MSP','MSN','f','-v7.3')

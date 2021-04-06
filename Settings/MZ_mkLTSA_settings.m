@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'KAUAI01'; % TPWS file name to match. 
+filePrefix = 'Hawaii28'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,15 +14,15 @@ sampleRate = 200; % replace with your sample rate
 sp = ''; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'G:\reProcessed\Kauai\Kauai01\TPWS_newTF'; % identify folder containing TPWS files
+tpwsDir = 'G:\reProcessed\Hawaii\Hawaii28'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'G:\reProcessed\Kauai\Kauai01\LTSAs'; % identify folder containing ltsa files (.ltsa)
+ltsaDir = 'G:\reProcessed\Hawaii\Hawaii28'; % identify folder containing ltsa files (.ltsa)
 % REQUIRED to run mkLTSAsessions.m
-outdir = 'G:\reProcessed\Kauai\Kauai01\TPWS_newTF';
+outdir = 'G:\reProcessed\Hawaii\Hawaii28';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Setting preferences to override defaults parameters for the interface

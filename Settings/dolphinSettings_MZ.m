@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'KAUAI01_newTF_disk04_Delphin'; % TPWS file name to match.
+filePrefix = 'KAUAI02_disk04a_Delphin'; % TPWS file name to match.
 IDfilePrefix = []; %file prefix for ID file, if using...
 %neural net specific ID file. set to empty if not needed 
 
@@ -17,7 +17,7 @@ sampleRate = 200; % replace with your sample rate
 sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'G:\reProcessed\Kauai\Kauai01\TPWS_newTF'; % identify folder containing TPWS files
+tpwsDir = 'G:\reProcessed\Kauai\Kauai02\TPWS'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
@@ -98,8 +98,8 @@ paramsUser.minClicks = 5; %minimum number of clicks to include a bin for testing
         colorTab = [.85,.7, 1; ... % Blainville's, lilac
             .93, .69, 0.13; ... % Cuvier's, orange
             .47,.67,.19; ... % FKW, light green
-            0, 0.5, 0; ... % LF1, dark green
-            0, .45, .74; ... % SFPW1, medium blue
+            0.11, 0.31, 0.21; ... % LF1, dark green
+            0, .75, .75; ... % SFPW1,turquoise
             1,.84,0; ... % SFPW2, gold
             .08,.17,.55; ... % Sten1/2, dark blue 
             0, 1,1; ... % Sten3, cyan

@@ -49,10 +49,12 @@ params.filePrefix = filePrefix;
 params.iterationNum = iterationNum;
 params.sampleRate = sampleRate;
 params.tpwsDir = tpwsDir;
-if ~isempty(IDfilePrefix)
-params.IDfilePrefix = IDfilePrefix; 
-else
-    params.IDfilePrefix = filePrefix;
+if exist('IDfilePrefix')
+    if ~isempty(IDfilePrefix)
+        params.IDfilePrefix = IDfilePrefix;
+    else
+        params.IDfilePrefix = filePrefix;
+    end
 end
 params.tfName = tfName;
 params.ltsaDir = ltsaDir;

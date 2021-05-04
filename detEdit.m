@@ -281,18 +281,37 @@ if (A6 ~= 2)
             zTD{j,i+1} = -1.*ones(1,6);
             fpfnTD{1,i} = [];
             for k = 1:length(p.mySpID)+1
-               cMat{i,k} = zeros(1,2); 
+                cMat{i,k} = zeros(1,2);
             end
         end
     end
-
+    
     save(fNameList.TD,'zTD','cMat','fpfnTD');    % create new TD
     disp(' Make new TD file');
 else
     load(fNameList.TD)
+    qqq = [];
     if (~exist('zTD') || ~exist('cMat') || ~exist('fpfnTD')) || (size(zTD,1) ~= dPARAMS.nb) || size(zTD,2) < length(p.mySpID)+1
         disp([' Problem with existing TD file: ',fNameList.TD]);
-        return
+        qqq = input('Enter 1 to overwrite existing TD file, or 0 to exit: ');
+        if qqq==0
+            return
+        elseif qqq==1
+            cMat = {};
+            fpfnTD = {};
+            for j = 1:dPARAMS.nb
+                for i = 1:length(p.mySpID)
+                    zTD{j,1} = j;
+                    zTD{j,i+1} = -1.*ones(1,6);
+                    fpfnTD{1,i} = [];
+                    for k = 1:length(p.mySpID)+1
+                        cMat{i,k} = zeros(1,2);
+                    end
+                end
+            end
+            
+            save(fNameList.TD,'zTD','cMat','fpfnTD');    % overwrite existing TD
+        end
     end
 end
 

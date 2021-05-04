@@ -5,7 +5,7 @@
 % for different species or sites.
 
 % Define input/output locations.REQUIRED
-filePrefix = 'HAT_B_03_01'; % TPWS file name to match. 
+filePrefix = 'WAT_BC_03_disk01a'; % TPWS file name to match. 
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -14,13 +14,13 @@ sampleRate = 200; % replace with your sample rate
 sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'I:\HAT_B_01-03\TPWS\New_TPWS'; % identify folder containing TPWS files
+tpwsDir = 'I:\WAT_BC_03\TPWS'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'I:\HAT_B_01-03\LTSAs'; % identify folder containing 
+ltsaDir = 'I:\WAT_BC_03\LTSAs'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

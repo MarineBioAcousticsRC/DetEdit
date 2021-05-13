@@ -176,7 +176,7 @@ if exist('labels','var')
     % whatever was in mySpID before.
     p.mySpID = labels;
 end
-if sum(zID(:,2)==0)>0
+if ~isempty(zID) && sum(zID(:,2)==0)>0
     disp('WARNING: Found zeros in ID labels, removing bad rows.')
     zID(zID(:,2)==0,:) = [];
 end

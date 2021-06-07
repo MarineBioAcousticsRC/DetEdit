@@ -48,6 +48,7 @@ AID = exist(fNameList.ID,'file');
 if (AID ~= 2)% if it doesn't exist, make it
     zID = [];
     mySpID = p.mySpID;
-    save(fNameList.ID,'zID','mySpID','-append');
+    
+    save(fNameList.ID,'zID','mySpID');
     disp('Made new ID file');  
 end

@@ -14,6 +14,7 @@ if iColor == 99
     set(dHANDLES.ICIFD201,'Visible',dPARAMS.FD_Toggle)
     set(dHANDLES.RLFD51,'Visible',dPARAMS.FD_Toggle)
     set(dHANDLES.RMSFD53,'Visible',dPARAMS.FD_Toggle)
+
     fprintf('Toggled False %s\n',dPARAMS.FD_Toggle)
 elseif iColor == 0
     % toggle unlabeled
@@ -43,6 +44,8 @@ else
         set(dHANDLES.ICIID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.RLID51{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.RMSID53{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+        set(dHANDLES.SpecID50{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+
         fprintf('Toggled %s %s\n',get(dHANDLES.h10handles.spLabel{iColor},'String'),...
             dPARAMS.ID_Toggle{iColor})
     end

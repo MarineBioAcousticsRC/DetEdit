@@ -177,6 +177,8 @@ if exist('labels','var')
     p.mySpID = labels;
 elseif exist('mySpID','var')
     p.mySpID = mySpID;
+elseif exist('typeNames','var')
+    p.mySpID = typeNames;
 end
 save(fNameList.ID,'zID','-append');
 

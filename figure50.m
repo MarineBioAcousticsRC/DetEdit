@@ -18,11 +18,13 @@ if dPARAMS.ff2 % average false click spec
 end
 if dPARAMS.ff3  % average id click spec
     hold(dHANDLES.h50, 'on')
-    hID = plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.specID_norm,'Linewidth',4);
-    
-    for iC = 1:length(hID) % set colors
-        
-        set(hID(iC),'Color',p.colorTab(dPARAMS.specIDs(iC),:))
+       
+    for iC = 1:length(dPARAMS.specIDs) % set colors
+         dHANDLES.SpecID50{iC} = plot(dHANDLES.h50,dPARAMS.ft,...
+             dPARAMS.specID_norm(iC,:),'Linewidth',4);
+
+        set(dHANDLES.SpecID50{iC},'Color',p.colorTab(dPARAMS.specIDs(iC),:),...
+            'Visible',dPARAMS.ID_Toggle{iC})
     end
     hold(dHANDLES.h50, 'off')
 end

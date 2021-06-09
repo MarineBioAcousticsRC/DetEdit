@@ -61,9 +61,13 @@ endVar = find(~cellfun(@isempty,regexp(effTable.Properties.VariableNames,'End.*E
 effTable.Properties.VariableNames{startVar} = 'Start';
 effTable.Properties.VariableNames{endVar} = 'End';
 
-Start = datetime(x2mdate(effTable.Start),'ConvertFrom','datenum');
-End = datetime(x2mdate(effTable.End),'ConvertFrom','datenum');
-
+try
+    Start = datetime(x2mdate(effTable.Start),'ConvertFrom','datenum');
+    End = datetime(x2mdate(effTable.End),'ConvertFrom','datenum');
+catch
+    Start = datetime(ones(size(effTable.Start)).*datenum('30-Dec-1899') + effTable.Start,'ConvertFrom','datenum');
+    End = datetime(ones(size(effTable.End)).*datenum('30-Dec-1899') + effTable.End,'ConvertFrom','datenum');
+end
 effort = timetable(Start,End);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

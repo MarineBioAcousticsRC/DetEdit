@@ -149,10 +149,13 @@ if any(tbidx)
             xH201b.XData = [];xH201b.YData = [];
             xH201c.XData = [];xH201c.YData = [];
             xH201d.XData = [];xH201d.YData = [];
+        else
+         fprintf('Whoops, test bin not in this session, proceeding to next bin/session\n');   
         end
     end
     
     % remove redundancies, sort and save labelCertainty
+    if ~isempty(labelCertainty{1,dPARAMS.lab})
     [~,uniqueID] = unique(labelCertainty{1,dPARAMS.lab}(:,1));
     labelCertainty{1,dPARAMS.lab} = labelCertainty{1,dPARAMS.lab}(uniqueID,:);
     [labelCertainty{1,dPARAMS.lab}, sortInd] = sortrows(labelCertainty{1,dPARAMS.lab});
@@ -161,6 +164,7 @@ if any(tbidx)
     RL{2,dPARAMS.lab} = RL{2,dPARAMS.lab}(uniqueID);
     RL{2,dPARAMS.lab} = RL{2,dPARAMS.lab}(sortInd);
     save(strrep(fNameList.TPWS,'TPWS1','labCert'),'labelCertainty','RL','p');
+    end
     
     % advance to next bout with test bins for this label (if there is one)
     if dPARAMS.k < dPARAMS.nb

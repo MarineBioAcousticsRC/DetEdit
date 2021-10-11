@@ -14,13 +14,12 @@ sampleRate = 200; % replace with your sample rate
 sp = []; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'I:\WAT_BC_03\TPWS'; % identify folder containing TPWS files
-
+tpwsDir = 'J:\WAT_BC_03\TPWS';
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'I:\WAT_BC_03\LTSAs'; % identify folder containing 
+ltsaDir = 'J:\WAT_BC_03\LTSAs'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,8 +43,8 @@ paramsUser.nTestBins = 100;
 %% Panel LTSA and time series
 paramsUser.rlLow = 115; % PP plot window low limit
 paramsUser.rlHi = 165; % PP plot window high limit
-paramsUser.ltsaContrast = 118; % ltsa contrast
-paramsUser.ltsaBright = 53; % ltsa brightness
+paramsUser.ltsaContrast = 116; % ltsa contrast
+paramsUser.ltsaBright = 55; % ltsa brightness
 % paramsUser.ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
 paramsUser.ltsaMax = 6; % ltsa maximum duration per session
 paramsUser.dtHi = 1; % max yaxis value for ICI display in sec
@@ -94,7 +93,7 @@ paramsUser.colorTab = [204, 204, 255; ... % Blainville's, lilac
             249, 177, 211]./255; % True's, light pink
 paramsUser.colorTab = round(paramsUser.colorTab.*100)/100;      
 
-paramsUser.mySpID = {'Blainvilles','Boats','CT11','CT2+CT9','CT3+CT7','CT4/6+CT10',...
-    'CT5','CT8','Cuviers','Gervais','GoM_Gervais','HFA','Kogia','MFA',...
+paramsUser.mySpID = {'Blainvilles','Boats','UD36','UD26','UD28','UD19',...
+    'UD47','UD38','Cuviers','Gervais','GoM_Gervais','HFA','Kogia','MFA',...
     'MultiFreq_Sonar','Rissos','Snapping_Shrimp','Sowerbys','Sperm_Whale',...
     'Trues'};

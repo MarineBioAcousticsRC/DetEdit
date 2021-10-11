@@ -15,9 +15,9 @@
 clearvars
 
 % Setup variables:
-baseDir = 'I:\HAT_B_01-03\Detector_Metadata'; % directory containing de_detector output
-outDir = 'I:\HAT_B_01-03\TPWS\New_TPWS'; % directory where you want to save your TPWS file
-siteName = 'HAT_B_03_01'; % site name, used to name the output file
+baseDir = 'H:\WAT_BS_03\Detector_metadata'; % directory containing de_detector output
+outDir = 'H:\WAT_BS_03'; % directory where you want to save your TPWS file
+siteName = 'WAT_BS_03'; % site name, used to name the output file
 ppThresh = 120; % minimum RL in dBpp. If detections have RL below this
 % threshold, they will be excluded from the output file. Useful if you have
 % an unmanageable number of detections.

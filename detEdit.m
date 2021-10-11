@@ -204,8 +204,9 @@ else
     if (sltsa(2) ~= dPARAMS.nb)
         disp(['Error: Number of LTSA sessions calculated here doesn''t match ',...
             'input LTSA file. Check ltsaMax parameter.'])
-        dPARAMS.pwr = pwr(1:dPARAMS.nb);
-        dPARAMS.pt = pt(1:dPARAMS.nb);
+        dPARAMS.pwr = pwr;%(1:dPARAMS.nb);
+        dPARAMS.pt = pt;%(1:dPARAMS.nb);
+        dPARAMS.nb = size(pwr,2);
         % return
     end
     
@@ -345,7 +346,7 @@ for i = 1:length(p.mySpID) % for each label
         end
     dPARAMS.ftb{1,i} = sort(ftb);
 end
-%% Set up Label Certainty Evaluation 
+%% Set up Label Certainty Evaluation (FP only)
 
 % divide entire TPWS into bins aligned with cluster_bins
 dPARAMS.binTimes = (floor(MTT(1)):datenum([0,0,0,0,p.binDur,0]):ceil(MTT(end)))';

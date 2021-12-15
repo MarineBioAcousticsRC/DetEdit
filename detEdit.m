@@ -207,8 +207,13 @@ else
     if (sltsa(2) ~= dPARAMS.nb)
         disp(['Error: Number of LTSA sessions calculated here doesn''t match ',...
             'input LTSA file. Check ltsaMax parameter.'])
-        dPARAMS.pwr = pwr(1:dPARAMS.nb);
-        dPARAMS.pt = pt(1:dPARAMS.nb);
+        if dPARAMS.nb<length(pwr)
+            dPARAMS.pwr = pwr(1:dPARAMS.nb);
+            dPARAMS.pt = pt(1:dPARAMS.nb);
+        else
+            dPARAMS.pwr = pwr;
+            dPARAMS.pt = pt;
+        end
         % return
     end
     

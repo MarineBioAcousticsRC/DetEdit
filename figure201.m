@@ -81,7 +81,7 @@ if ldt > 0
     axis(dHANDLES.LTSAsubs(3),[dPARAMS.PT(1) dPARAMS.PT(end) 0 p.dtHi])
     datetick(dHANDLES.LTSAsubs(3),'x',15,'keeplimits')
     Ytick = 0:p.dtHi/10:p.dtHi;
-    set(dHANDLES.LTSAsubs(3),'YTick',Ytick)
+    set(dHANDLES.LTSAsubs(3),'YTick',Ytick,'YTickLabelMode','auto')
     datetick(dHANDLES.LTSAsubs(3),'x',15,'keeplimits')
     grid(dHANDLES.LTSAsubs(3),'on')
     ylabel(dHANDLES.LTSAsubs(3),'Time between detections (s)')

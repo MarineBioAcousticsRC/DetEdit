@@ -39,7 +39,13 @@ if size(unique(diffRF_s), 2) > 1
             numaves2pad = ceil(tdt/hdr.ltsa.tave);
             pwrpad = ones(size(pwr,1),numaves2pad).*-128;
             gaveidx = length(pt); % last average before gap
-            pwr = [ pwr(:,1:gaveidx), pwrpad, pwr(:,gaveidx+1:end)];
+            try
+                pwr = [ pwr(:,1:gaveidx), pwrpad, pwr(:,gaveidx+1:end)];
+            catch
+                warning('unknown error padding LTSA time gap, ouput may be incorrect')
+                rf = rf+1;
+                continue
+            end
             padavetimes = pt(end)+dt_dnum:dt_dnum:rfStarts(rf)-dt_dnum;
             pt = [ pt, padavetimes ];
         end
@@ -47,6 +53,11 @@ if size(unique(diffRF_s), 2) > 1
         tpt = rfStarts(rf):dt_dnum:rfStarts(rf)+rfdt_dnum;
         pt = [ pt, tpt ];
         rf = rf+1;
+    end
+    if size(pt,2)>size(pwr,2)
+        % if size still doesn't match add zeros to pwr.        
+        pwr = [pwr,zeros(size(pwr,1),size(pt,2)-size(pwr,2))];
+
     end
 else
     pt = [t1:dt_dnum:t1 + (nbin-1)*dt_dnum];

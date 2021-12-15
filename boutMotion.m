@@ -273,16 +273,18 @@ if ~p.loadMSP
         end
     end
 end
-
-figure201
+if isfield(dHANDLES,'hID')
+    % bring legend to top
+    figure(dHANDLES.hID)
+end
 
 figure51
 figure53
 
 figure50
 figure52
+figure201
 
-if isfield(dHANDLES,'hID')
-    % bring legend to top
-    figure(dHANDLES.hID)
-end
+
+
+

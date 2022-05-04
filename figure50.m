@@ -5,30 +5,31 @@ global dPARAMS dHANDLES p
 figure(dHANDLES.spectrafig);clf
 dHANDLES.h50 = gca;
 
-if ~isempty(dPARAMS.trueTimes)
-    % plot average true click spectrum
-    plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',4)
-end
-
-if dPARAMS.ff2 % average false click spec
-    % plot average false click spectrum
+if p.specploton
     hold(dHANDLES.h50, 'on')
-    plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.SPEC2,'r','Linewidth',4)
-    hold(dHANDLES.h50, 'off')
-end
-if dPARAMS.ff3  % average id click spec
-    hold(dHANDLES.h50, 'on')
-       
-    for iC = 1:length(dPARAMS.specIDs) % set colors
-         dHANDLES.SpecID50{iC} = plot(dHANDLES.h50,dPARAMS.ft,...
-             dPARAMS.specID_norm(iC,:),'Linewidth',4);
-
-        set(dHANDLES.SpecID50{iC},'Color',p.colorTab(dPARAMS.specIDs(iC),:),...
-            'Visible',dPARAMS.ID_Toggle{iC})
+    if ~isempty(dPARAMS.trueTimes)% average true spec in blue
+        dHANDLES.SPE50 = plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.trueSpec,'Linewidth',4,...
+            'Visible',dPARAMS.NoLabel_Toggle);
+    end
+    
+    dHANDLES.SPEFD50 = [];
+    if dPARAMS.ff2 % average false spec in red
+        dHANDLES.SPEFD50 = plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.SPEC2,'r',...
+            'Linewidth',4,'Visible',dPARAMS.FD_Toggle);
+    end
+    
+    dHANDLES.SPEID50 = cell(size(p.colorTab,1),1);
+    if dPARAMS.ff3  % average id click spec
+        for iC = 1:length(dPARAMS.specIDs) % set colors
+            iColor = dPARAMS.specIDs(iC);
+            dHANDLES.SPEID50{iColor} = plot(dHANDLES.h50,dPARAMS.ft,...
+                dPARAMS.specID_norm(iC,:),'Linewidth',4);
+            set(dHANDLES.SPEID50{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC),:),...
+                'Visible',dPARAMS.ID_Toggle{iColor})
+        end
     end
     hold(dHANDLES.h50, 'off')
 end
-
 
 % add figure labels
 xlabel(dHANDLES.h50,'Frequency (kHz)');

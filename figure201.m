@@ -55,7 +55,7 @@ image(dPARAMS.PT,dPARAMS.f/1000,c,'parent',dHANDLES.LTSAsubs(2))
 set(dHANDLES.LTSAsubs(2),'yDir','normal')
 axis(dHANDLES.LTSAsubs(2),[dPARAMS.PT(1) dPARAMS.PT(end) p.ltsaLims])%v2(4)
 ylabel(dHANDLES.LTSAsubs(2),'Frequency (kHz)')
-datetick(dHANDLES.LTSAsubs(2),'keeplimits')
+datetick(dHANDLES.LTSAsubs(2),'x',15,'keeplimits')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bottom panel, Figure 201: Inter-Detection Interval

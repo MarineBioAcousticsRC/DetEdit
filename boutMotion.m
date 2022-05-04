@@ -179,8 +179,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Number detection per spectral bin in LTSA
 % make a spectra in figure 50
-dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ;
-dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k); % start end times for plots
+dPARAMS.PT(1) = dPARAMS.pt{dPARAMS.k}(1); %dPARAMS.sb(dPARAMS.k) ;
+dPARAMS.PT(2) = dPARAMS.pt{dPARAMS.k}(end); %dPARAMS.eb(dPARAMS.k); % start end times for plots
 dPARAMS.pwr1 = dPARAMS.pwr{1,dPARAMS.k};  % LTSA power vector
 nbinS = length(dPARAMS.pwr1 );
 if (nbinS == 0)

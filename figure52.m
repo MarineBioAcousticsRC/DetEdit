@@ -7,27 +7,28 @@ clf;
 dHANDLES.h52 = gca;
 
 if p.specploton
-    if ~isempty(dPARAMS.trueTimes)
-        % average true click waveform
-        plot(dHANDLES.h52, dPARAMS.wtrue);
+    hold(dHANDLES.h52, 'on')
+    if ~isempty(dPARAMS.trueTimes) % average true waveform in blue
+        dHANDLES.WAV52 = plot(dHANDLES.h52, dPARAMS.wtrue,'Visible',dPARAMS.NoLabel_Toggle);
     end
-    if dPARAMS.ff2   % average false click spec
-        % plot average false click waveform
-        hold(dHANDLES.h52, 'on')
-        plot(dHANDLES.h52,dPARAMS.wavFD + 0.5 ,'r');
-        hold(dHANDLES.h52, 'off')
+    
+    dHANDLES.WAVFD52 = [];
+    if dPARAMS.ff2   % average false waveform in red
+        dHANDLES.WAVFD52 = plot(dHANDLES.h52,dPARAMS.wavFD + 0.5 ,'r',...
+            'Visible',dPARAMS.FD_Toggle);
     end
-    if dPARAMS.ff3
-        % plot average ID'd click waveform(s)
-        hold(dHANDLES.h52, 'on')
-        hID2 = plot(dHANDLES.h52,(dPARAMS.wavID' +...,
-            -ones(size(dPARAMS.wavID,1),1)'.*rand(1,min(size(dPARAMS.wavID,1)))));
-        
+    
+    dHANDLES.WAVID52 = cell(size(p.colorTab,1),1);
+    if dPARAMS.ff3 % average waveform ID'd in associated color
         for iC = 1:size(dPARAMS.wavID,1) % set colors
-            set(hID2(iC),'Color',p.colorTab(dPARAMS.specIDs(iC),:))
+            iColor = dPARAMS.specIDs(iC);
+            dHANDLES.WAVID52{iColor} = plot(dHANDLES.h52,(dPARAMS.wavID(iC,:)' +...,
+                -ones(size(dPARAMS.wavID(iC,:),1),1)'.*rand(1,min(size(dPARAMS.wavID(iC,:),1)))));
+            set(dHANDLES.WAVID52{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC),:),...
+                'Visible',dPARAMS.ID_Toggle{iColor})
         end
-        hold(dHANDLES.h52, 'off')
     end
+    hold(dHANDLES.h52, 'off')
 end
 
 xlabel(dHANDLES.h52,sprintf('Samples (%0.1fms @ %0.0fkHz)',...

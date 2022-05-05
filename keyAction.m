@@ -83,7 +83,7 @@ elseif strcmp(dPARAMS.cc,'t') %assign ALL as true
         [~,iCID] = setdiff(zID(:,1),dPARAMS.t);
         zID = zID(iCID,:);
     end
-
+    
     
 elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for random False Detect
     if ~isempty(dPARAMS.XFD)
@@ -223,6 +223,48 @@ elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
     % 0, remove those from the ID set.
     accidentalZeros = zID(:,2)==0;
     zID(accidentalZeros,:)=[];
+elseif strcmp(dPARAMS.cc,'o') % put all toggles on
+    % toggle falses
+    FDoff = find(strcmp(dPARAMS.FD_Toggle, 'off'), 1);
+    if ~isempty(FDoff)
+        dPARAMS.FD_Toggle = 'on';
+        set(dHANDLES.RLFD201,'Visible',dPARAMS.FD_Toggle)
+        set(dHANDLES.ICIFD201,'Visible',dPARAMS.FD_Toggle)
+        set(dHANDLES.RLFD51,'Visible',dPARAMS.FD_Toggle)
+        set(dHANDLES.RMSFD53,'Visible',dPARAMS.FD_Toggle)
+        set(dHANDLES.SPEFD50,'Visible',dPARAMS.FD_Toggle)
+        set(dHANDLES.WAVFD52,'Visible',dPARAMS.FD_Toggle)
+        fprintf('Toggled False %s\n',dPARAMS.FD_Toggle)
+    end
+    
+    % toggle unlabeled
+    NoLabloff = find(strcmp(dPARAMS.NoLabel_Toggle, 'off'), 1);
+    if ~isempty(NoLabloff)
+        dPARAMS.NoLabel_Toggle = 'on';
+        set(dHANDLES.RL201,'Visible',dPARAMS.NoLabel_Toggle)
+        set(dHANDLES.ICI201,'Visible',dPARAMS.NoLabel_Toggle)
+        set(dHANDLES.RL51,'Visible',dPARAMS.NoLabel_Toggle)
+        set(dHANDLES.RMS53,'Visible',dPARAMS.NoLabel_Toggle)
+        set(dHANDLES.SPE50,'Visible',dPARAMS.NoLabel_Toggle)
+        set(dHANDLES.WAV52,'Visible',dPARAMS.NoLabel_Toggle)
+        fprintf('Toggled Unlabeled %s\n',dPARAMS.NoLabel_Toggle)
+    end
+    
+    iCoff = find(strcmp(dPARAMS.ID_Toggle, 'off'));
+    if ~isempty(iCoff)
+        for iC = 1:size(iCoff,1)
+            iColor = iCoff(iC);
+            dPARAMS.ID_Toggle{iColor}  = 'on';
+            set(dHANDLES.RLID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+            set(dHANDLES.ICIID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+            set(dHANDLES.RLID51{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+            set(dHANDLES.RMSID53{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+            set(dHANDLES.SPEID50{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+            set(dHANDLES.WAVID52{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+            fprintf('Toggled %s %s\n',get(dHANDLES.h10handles.spLabel{iColor},'String'),...
+                dPARAMS.ID_Toggle{iColor})
+        end
+    end
 else
     if dPARAMS.k == dPARAMS.nb
         uZFD = [];  ia = []; ic = [];

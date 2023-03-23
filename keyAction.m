@@ -4,6 +4,11 @@ global zID zFD zTD fNameList p dPARAMS dHANDLES
 
 disp('Key action detected')
 dPARAMS.cc = get(gcf,'CurrentCharacter');
+val = input('If you have a double digit ID, type it here');
+if val > 9
+    dPARAMS.cc = num2str(val);
+end
+
 dPARAMS.yell = [];
 % if brush selected get key
 % if strcmp(dPARAMS.cc,'p')

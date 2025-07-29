@@ -6,7 +6,7 @@ function brushOff(varargin)
 % brush back on after command is recieved.
 figH = varargin{3};
 hManager = uigetmodemanager(figH);
-set(hManager.CurrentMode,'keyPressFcn',@keyAction)
+set(hManager.CurrentMode,'KeyPressFcn',@keyAction)
 %%% solution from:
 %%% https://undocumentedmatlab.com/blog/enabling-user-callbacks-during-zoom-pan
 % Overrides default behavior to allow listening

@@ -32,9 +32,12 @@ end
 % Set parameters according to sp code
 
 %%% Delphinids
-if  strcmpi(sp,'De')
-    spParams.speName = 'Delphin';  
-  
+if  strcmpi(sp,'De')|| strcmpi(sp,'DeS')
+    if strcmpi(sp,'De')
+        spParams.speName = 'Delphin';  
+    elseif strcmpi(sp,'DeS')
+        spParams.speName = 'Delphin_subset';
+    end
     % Bout parameters 
     spParams.threshRL = 118;
     spParams.c4fd = 5000; 

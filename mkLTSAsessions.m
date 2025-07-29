@@ -11,7 +11,7 @@ function mkLTSAsessions(userFunc)
 tic % start timer
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Load Settings preferences
+%% Load Settings preferences 
 % Get parameter settings worked out between user preferences, defaults, and
 % species-specific settings:
 
@@ -209,6 +209,8 @@ for iD = 1:length(fileMatchIdx)
             if isempty(Ks) || isempty(Ke)
                 disp('Error: Ks or Ke are empty')
                 k = k+1;
+                pwr{k} = [];
+                pt{k} = [];
                 continue
             end
             

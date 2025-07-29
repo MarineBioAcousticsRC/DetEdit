@@ -160,7 +160,7 @@ if p.specploton && p.loadMSP
     dPARAMS.csn = dPARAMS.csn(ib1,:);
     dPARAMS.csp = dPARAMS.csp(ib1,:);
 else
-    dPARAMS.keepers = ia1;
+    dPARAMS.keepers = ia1; 
 end
 
 %% Make FD file intersect with MTT
@@ -224,6 +224,13 @@ else
 
 end
 
+%%
+p.showAltLabels = 0;
+if p.showAltLabels
+    dPARAMS.altLabels = load(p.altLabelFile);
+else
+    dPARAMS.altLabels = [];
+end
 %% Set up Tests for False Detections
 % The false positive estimate tool picks every Nth click to test. If you
 % have false positives in zFD, you can pick out only the true ones to

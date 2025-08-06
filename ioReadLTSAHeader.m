@@ -20,46 +20,36 @@ type = fread(fid,4,'char');                    % 4 bytes - file ID type
 global PARAMS
 % hdr = init_ltsaparams(PARAMS);
 
+hdr.ltsa.ver = fread(fid,1,'uint8');           % 1 byte - version number
+ver = ioVersionInfoLTSA(hdr.ltsa.ver);  % Retrieve LTSA version
+
 % Populate base directory and LTSA filename
 [hdr.ltsa.inpath, fname, ext] = fileparts(Filename);
 hdr.ltsa.infile = [fname, ext];
 
-hdr.ltsa.ver = fread(fid,1,'uint8');           % 1 byte - version number
-ver = ioVersionInfoLTSA(hdr.ltsa.ver);  % Retrieve LTSA version
-
+% LTSA Header - 64 bytes
 spare = fread(fid,3,'char');                   % 3 bytes - spare
-
 hdr.ltsa.dirStartLoc = fread(fid,1,'uint32');           % 4 bytes - directory start location [bytes]
 hdr.ltsa.dataStartLoc = fread(fid,1,'uint32');          % 4 bytes - data start location [bytes]
 hdr.ltsa.tave = fread(fid,1,'float32');     % 4 bytes - time bin average for spectra [seconds]
 hdr.ltsa.dfreq = fread(fid,1,'float32');    % 4 bytes - frequency bin size [Hz]
 hdr.ltsa.fs = fread(fid,1,'uint32');        % 4 bytes - sample rate [Hz]
 hdr.ltsa.nfft = fread(fid,1,'uint32');      % 4 bytes - number of samples per fft
-hdr.ltsa.nrftot = fread(fid,1,'uint16');    % 2 bytes - total number of raw files from all xwavs
-hdr.ltsa.nxwav = fread(fid,1,'uint16');     % 2 bytes - total number of xwavs files used
-hdr.ltsa.nch = fread(fid,1,'uint8');        % 1 byte - number channels
-hdr.ltsa.ch = fread(fid, 1, 'uint8');       % 1 byte - channel LTSA'd
-% 36 bytes used, up to here
 
-if ver.version == 255 % null version
-  % Read regular expressions for parsing dates
-  REString = char(fread(fid, ver.date_regexp, 'char*1')');
-  % Each expression is NULL terminated.  The final expression is
-  % terminated by two consecutive NULLs.
-  NULL = char(0);
-  NULLsAt = find(REString == NULL);
-  %  LastNULL = 0;
-  nidx = 1;
-  Start = 1;
-  while NULLsAt(nidx) - Start > 0
-    % take string from current posn to just before NULL
-    restrings{nidx} = REString(Start:NULLsAt(nidx)-1);
-    % Next start just after NULL
-    Start = NULLsAt(nidx)+1;
-    nidx = nidx + 1;
-  end
-  hdr.ltsa.fnameTimeRegExp = restrings;
+if hdr.ltsa.ver == 1 || hdr.ltsa.ver == 2
+    hdr.ltsa.nrftot = fread(fid,1,'uint16');    % 2 bytes - total number of raw files from all xwavs
+    sk = 27;
+elseif hdr.ltsa.ver == 3 || hdr.ltsa.ver == 4
+    hdr.ltsa.nrftot = fread(fid,1,'uint32');    % 4 bytes - total number of raw files from all xwavs
+    sk = 25;
+else
+    disp_msg(['Error: incorrect version number ',num2str(PARAMS.ltsa.ver)])
+    return
 end
+hdr.ltsa.nxwav = fread(fid,1,'uint16');     % 2 bytes - total number of xwavs files used
+hdr.ltsa.ch = fread(fid,1,'uint8');         % 1 byte - channel number ltsa'ed
+% fseek(fid,sk,0);                  % 1 bytes x 27 = 27 bytes - 0 padding / spare
+% 64 bytes used - up to here
        
 fseek(fid, ver.dir_start_posn, 'bof');     % Seek to start of directory entries
 

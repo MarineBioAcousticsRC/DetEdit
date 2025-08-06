@@ -8,12 +8,12 @@ function hdr = ioReadLTSAHeader(Filename)
 
 fid = fopen(Filename,'r');      % open input ltsa file
 if fid == -1
-  error('Unable to open %s', Filename);
+    error('Unable to open %s', Filename);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% LTSA Header - 
+% LTSA Header -
 %
 type = fread(fid,4,'char');                    % 4 bytes - file ID type
 
@@ -50,7 +50,7 @@ hdr.ltsa.nxwav = fread(fid,1,'uint16');     % 2 bytes - total number of xwavs fi
 hdr.ltsa.ch = fread(fid,1,'uint8');         % 1 byte - channel number ltsa'ed
 % fseek(fid,sk,0);                  % 1 bytes x 27 = 27 bytes - 0 padding / spare
 % 64 bytes used - up to here
-       
+
 fseek(fid, ver.dir_start_posn, 'bof');     % Seek to start of directory entries
 
 

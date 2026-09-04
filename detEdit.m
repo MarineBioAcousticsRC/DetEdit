@@ -180,7 +180,12 @@ elseif exist('mySpID','var')
 elseif exist('typeNames','var')
     p.mySpID = typeNames;
 end
-save(fNameList.ID,'zID','-append');
+if ~isempty(zID) && sum(zID(:,2)==0)>0
+    disp('WARNING: Found zeros in ID labels, removing bad rows.')
+    zID(zID(:,2)==0,:) = [];
+end
+save(fNameList.ID,'zID');
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Calculate bout starts and ends

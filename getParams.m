@@ -51,6 +51,8 @@ params.sampleRate = sampleRate;
 params.tpwsDir = tpwsDir;
 params.tfName = tfName;
 params.ltsaDir = ltsaDir;
+params.labelDir = labelDir;
+params.labelItr = labelItr;
 
 %% create struct to return parameters
 switch analysis

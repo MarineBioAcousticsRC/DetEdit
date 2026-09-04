@@ -39,7 +39,7 @@ bd = (eb - sb);      % duration of bout in days
 
 % find bouts longer than the minimum
 if ~isempty(p.minBout)
-    bdI = find(bd > (p.minBout / (60*60*24)));
+    bdI = find(bd >= (p.minBout / (60*60*24)));
     bd = bd(bdI);
     sb = sb(bdI);
     eb = eb(bdI);

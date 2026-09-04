@@ -6,6 +6,13 @@
 sampleRate = 200;
 speName = '';
 ltsaDir = '';
+labelDir = '';   % directory holding FD/TD/ID label files. Empty = beside the
+                 % TPWS files, which is the historical behaviour. Set this to
+                 % keep several label versions without copying files around.
+labelItr = '';   % iteration number used in FD/TD/ID file names, independent of
+                 % the TPWS iteration. Empty = same as the TPWS file. Set this
+                 % to pair e.g. ID2 with TPWS1, so a new label set does not
+                 % require duplicating a multi-gigabyte TPWS file.
 tfName = '';
 effortTimes = '';
 referenceTime = '';

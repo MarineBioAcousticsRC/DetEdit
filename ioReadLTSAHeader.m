@@ -36,6 +36,7 @@ hdr.ltsa.dfreq = fread(fid,1,'float32');    % 4 bytes - frequency bin size [Hz]
 hdr.ltsa.fs = fread(fid,1,'uint32');        % 4 bytes - sample rate [Hz]
 hdr.ltsa.nfft = fread(fid,1,'uint32');      % 4 bytes - number of samples per fft
 
+
 if hdr.ltsa.ver == 1 || hdr.ltsa.ver == 2
     hdr.ltsa.nrftot = fread(fid,1,'uint16');    % 2 bytes - total number of raw files from all xwavs
     sk = 27;

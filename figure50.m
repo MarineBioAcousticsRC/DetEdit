@@ -28,8 +28,8 @@ if p.specploton
                 'Visible',dPARAMS.ID_Toggle{iColor})
         end
 
-    plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.SPEC2,'r','Linewidth',4)
-    hold(dHANDLES.h50, 'off')
+    %plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.SPEC2,'r','Linewidth',4)
+    %hold(dHANDLES.h50, 'off')
     end
 end
 if dPARAMS.ff3  % average id click spec

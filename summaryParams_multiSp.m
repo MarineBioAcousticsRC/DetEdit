@@ -40,7 +40,7 @@ if isempty(fileMatchIdx)
 end
 
 matchingFile = fileList{fileMatchIdx};
-
+p.filePrefix = p.filePrefix(1:end-8);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Handle Transfer Function
 if (p.tfSelect > 0)
@@ -53,7 +53,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Get effort times matching prefix file
 allEfforts = readtable(p.effortTimes);
-effTable = allEfforts(ismember(allEfforts.Sites,p.filePrefix),:);
+effTable = allEfforts(ismember(allEfforts.Deployments,p.filePrefix),:);
 
 % make Variable Names consistent
 startVar = find(~cellfun(@isempty,regexp(effTable.Properties.VariableNames,'Start.*Effort'))>0,1,'first');
@@ -68,7 +68,7 @@ catch
     Start = datetime(ones(size(effTable.Start)).*datenum('30-Dec-1899') + effTable.Start,'ConvertFrom','datenum');
     End = datetime(ones(size(effTable.End)).*datenum('30-Dec-1899') + effTable.End,'ConvertFrom','datenum');
 end
-effort = timetable(Start,End);
+effort = [Start,End];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Concatenate matrices
@@ -86,7 +86,7 @@ for idsk = 1 : length(fileMatchIdx)
     
     % find times outside effort (sometimes there are detections
     % which are from the audio test at the beggining of the wav file)
-    within = cell2mat(arrayfun(@(x)sum(isbetween(x,datenum(effort.Start),datenum(effort.End))),D.MTT,'uni',false));
+    within = cell2mat(arrayfun(@(x)sum(isbetween(x,datenum(effort(:,1)),datenum(effort(:,2)))),D.MTT,'uni',false));
     goodIdx = find(within ~= 0);
     MTT = D.MTT(goodIdx); % only keep the good detections
     MPP = D.MPP(goodIdx) + tf;

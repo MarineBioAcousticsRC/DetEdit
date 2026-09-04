@@ -27,6 +27,21 @@ if p.specploton
             set(dHANDLES.SPEID50{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC),:),...
                 'Visible',dPARAMS.ID_Toggle{iColor})
         end
+
+    plot(dHANDLES.h50,dPARAMS.ft,dPARAMS.SPEC2,'r','Linewidth',4)
+    hold(dHANDLES.h50, 'off')
+    end
+end
+if dPARAMS.ff3  % average id click spec
+    hold(dHANDLES.h50, 'on')
+       
+    for iC = 1:length(dPARAMS.specIDs) % set colors
+         thisIdx = dPARAMS.specIDs(iC);
+         dHANDLES.SpecID50{thisIdx} = plot(dHANDLES.h50,dPARAMS.ft,...
+             dPARAMS.specID_norm(iC,:),'Linewidth',4);
+
+        set(dHANDLES.SpecID50{thisIdx},'Color',p.colorTab(thisIdx,:),...
+            'Visible',dPARAMS.ID_Toggle{thisIdx})
     end
     hold(dHANDLES.h50, 'off')
 end

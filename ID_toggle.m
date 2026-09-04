@@ -30,9 +30,11 @@ elseif iColor == 0
     set(dHANDLES.ICI201,'Visible',dPARAMS.NoLabel_Toggle)
     set(dHANDLES.RL51,'Visible',dPARAMS.NoLabel_Toggle)
     set(dHANDLES.RMS53,'Visible',dPARAMS.NoLabel_Toggle)
+
     set(dHANDLES.SPE50,'Visible',dPARAMS.NoLabel_Toggle)
     set(dHANDLES.WAV52,'Visible',dPARAMS.NoLabel_Toggle)
     
+
     fprintf('Toggled Unlabeled %s\n',dPARAMS.NoLabel_Toggle)
 else
     % toggle ID
@@ -48,8 +50,13 @@ else
         set(dHANDLES.ICIID201{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.RLID51{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.RMSID53{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+
         set(dHANDLES.SPEID50{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
         set(dHANDLES.WAVID52{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+        try
+            set(dHANDLES.SpecID50{iColor},'Visible',dPARAMS.ID_Toggle{iColor})
+        catch
+        end
 
         fprintf('Toggled %s %s\n',get(dHANDLES.h10handles.spLabel{iColor},'String'),...
             dPARAMS.ID_Toggle{iColor})

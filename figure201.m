@@ -43,6 +43,18 @@ axis(dHANDLES.LTSAsubs(2),[dPARAMS.PT(1) dPARAMS.PT(end) p.ltsaLims])%v2(4)
 ylabel(dHANDLES.LTSAsubs(2),'Frequency (kHz)')
 datetick(dHANDLES.LTSAsubs(2),'keeplimits')
 
+hold on
+if ~isempty(dPARAMS.altLabels)
+    largeEnough = dPARAMS.altLabels.times(:,2)>=dPARAMS.PT(1);
+    smallEnough = dPARAMS.altLabels.times(:,1)<=dPARAMS.PT(end);
+    myLabelIdx = dPARAMS.altLabels(largeEnough & smallEnough);
+    for iP = 1:length(myLabelIdx)
+        plot(dPARAMS.altLabels(myLabelIdx(iP)).times,ones(1,2)*...
+            (p.ltsaLims(2)-(dPARAMS.altLabels(myLabelIdx(iP)).label*3)),...
+            '<-', 'color',lines(dPARAMS.altLabels(myLabelIdx(iP)).label))
+    end
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bottom panel, Figure 201: Inter-Detection Interval
 % make two copies of dt points for brush

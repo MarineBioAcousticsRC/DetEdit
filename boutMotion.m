@@ -179,10 +179,40 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Number detection per spectral bin in LTSA
 % make a spectra in figure 50
-dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ;
-dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k); % start end times for plots
-try
-    
+% dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k) ;
+% dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k); % start end times for plots
+
+% accounting for single click bouts, and providing padding for those sessions
+% Set the time window (x-axis extent) for the figure 201 panels.
+
+% Does this session actually have LTSA data? 
+hasLTSA = dPARAMS.k <= numel(dPARAMS.pt) && ~isempty(dPARAMS.pt{dPARAMS.k});
+
+if hasLTSA
+    % Use the LTSA's own time vector. This matches the extent of the data in
+    % pwr{k}, so the spectrogram lands on the correct times, and it picks up
+    % any p.minDur padding mkLTSAsessions applied to short bouts.
+    dPARAMS.PT(1) = dPARAMS.pt{dPARAMS.k}(1);
+    dPARAMS.PT(2) = dPARAMS.pt{dPARAMS.k}(end);
+else
+    % No LTSA for this session - fall back to the bout's own start and end
+    % so nothing errors. pwr1 will be empty and gets replaced by the uniform
+    % fill below, so there is no real spectrogram to misalign here.
+    dPARAMS.PT(1) = dPARAMS.sb(dPARAMS.k);
+    dPARAMS.PT(2) = dPARAMS.eb(dPARAMS.k);
+end
+
+% Guarantee a non-zero window. A single-click bout has sb == eb, and a
+% one-element pt{k} gives pt(1) == pt(end), either of which leaves PT with
+% equal limits - MATLAB's axis() rejects that. Widen symmetrically so the
+% detection stays centred.
+if dPARAMS.PT(2) <= dPARAMS.PT(1)
+    halfWin = 2.5/(60*24);                  % half of a 5-minute window, in days
+    dPARAMS.PT(1) = dPARAMS.PT(1) - halfWin;
+    dPARAMS.PT(2) = dPARAMS.PT(2) + halfWin;
+end
+
+try    
     dPARAMS.pwr1 = dPARAMS.pwr{1,dPARAMS.k};  % LTSA power vector
 catch 
     dPARAMS.pwr1  = [];

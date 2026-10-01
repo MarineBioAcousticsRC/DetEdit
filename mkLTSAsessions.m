@@ -178,11 +178,35 @@ for iD = 1:length(fileMatchIdx)
         % find which rawfiles to plot ltsa
         if ~isempty(K) && length(K) == 1
             L = [];
-            if eb(k) -sb(k) < p.rawFileDur/ (60*60*24)
+
+            % A bout shorter than one raw file - including a single-click
+            % bout, where sb == eb - can fall between raw file start times, so
+            % the window search below finds nothing. Treat it as a point and
+            % take the raw file containing it instead.
+            %
+            % p.rawFileDur defaults to empty, and `0 < []` evaluates to empty,
+            % which `if` treats as false, so without this guard a zero-width
+            % bout silently takes the wrong branch and ends up with no LTSA.
+            % Fall back to the spacing between raw file start times, which is
+            % the raw file duration.
+            if isfield(p,'rawFileDur') && ~isempty(p.rawFileDur)
+                rfDur = p.rawFileDur;
+            else
+                rfDur = median(diff(rfTime{K}))*24*60*60;   % [s]
+            end
+
+            if eb(k) -sb(k) < rfDur/ (60*60*24)
                 L = find(rfTime{K} >= sb(k),1,'first');
             else
                 L = find(rfTime{K} >= sb(k) & rfTime{K} <= eb(k));
             end
+
+            % Last resort: the bout falls after the final raw file start, or
+            % between two of them - take the raw file it sits inside.
+            if isempty(L)
+                L = find(rfTime{K} <= sb(k),1,'last');
+            end
+
             if ~isempty(L)
                 if L ~= 1
                     L = [L(1)-1,L]; % get rawfile from before sb(k)

@@ -184,7 +184,7 @@ if ~isempty(zID) && sum(zID(:,2)==0)>0
     disp('WARNING: Found zeros in ID labels, removing bad rows.')
     zID(zID(:,2)==0,:) = [];
 end
-save(fNameList.ID,'zID');
+save(fNameList.ID,'zID','-append');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

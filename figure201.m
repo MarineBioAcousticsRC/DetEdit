@@ -98,7 +98,7 @@ if ldt > 0
     grid(dHANDLES.LTSAsubs(3),'on')
     ylabel(dHANDLES.LTSAsubs(3),'Time between detections (s)')
     xlabel(dHANDLES.LTSAsubs(3),'Time (GMT)')
-    
+
     %%% plot FD, ID
     hold(dHANDLES.LTSAsubs(3),'on')
     dHANDLES.ICIFD201 = [];
@@ -131,7 +131,20 @@ if ldt > 0
     end
     hold(dHANDLES.LTSAsubs(3),'off')
 else
-    plot(0,0);
+    % ldt == 0, so there are no ICIs to plot. A session
+    % with a single detection has none by definition (dt = diff(t) is empty),
+    % which is the normal case here rather than a failure. Draw the panel on
+    % the same time axis as the ones above it and say why it is blank.
+    cla(dHANDLES.LTSAsubs(3))
+    axis(dHANDLES.LTSAsubs(3),[dPARAMS.PT(1) dPARAMS.PT(end) 0 p.dtHi])
+    datetick(dHANDLES.LTSAsubs(3),'x',15,'keeplimits')
+    grid(dHANDLES.LTSAsubs(3),'on')
+    ylabel(dHANDLES.LTSAsubs(3),'Time between detections (s)')
+    xlabel(dHANDLES.LTSAsubs(3),'Time (GMT)')
+    text(mean(dPARAMS.PT), p.dtHi/2, 'single detection - no ICI', ...
+        'Parent', dHANDLES.LTSAsubs(3), ...
+        'HorizontalAlignment','center', ...
+        'Color',[0.4 0.4 0.4], 'FontAngle','italic')
 end
 
 if p.specploton && ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)

@@ -86,6 +86,10 @@ plotCorrect_incorrect = false; % if true, ID'd points are drawn as circles:
 % thick outline = predicted label color (zID col 2), filled center =
 % ground truth color (zID col 4). Center is left empty when there's no
 % ground truth (0/NaN, or no 4th column).
+plotLabels = 'model'; % when plotCorrect_incorrect is off: color points by the
+% model output ('model', zID col 2) or by ground truth ('gt', zID col 4).
+% With 'gt', hand labeling edits the ground truth. Ignored when
+% plotCorrect_incorrect is on.
 
 
 %% Parameters for modDet (if specified to compute)

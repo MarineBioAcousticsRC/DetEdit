@@ -54,7 +54,9 @@ grid(dHANDLES.LTSAsubs(1),'on')
 tstr(1) = {fNameList.TPWS};
 tstr(2) = {['Session: ',num2str(dPARAMS.k),'/',num2str(dPARAMS.nb),' Start Time ',...
     datestr(dPARAMS.sb(dPARAMS.k)),' Detect = ',num2str(dPARAMS.nd)]};
-if isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'model')
+if isfield(dPARAMS,'plotGTonly') && dPARAMS.plotGTonly
+    tstr{2} = [tstr{2},'   |   Showing + editing GROUND TRUTH labels'];
+elseif isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'model')
     tstr{2} = [tstr{2},'   |   Labels edit: MODEL ONLY'];
 elseif isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'gt')
     tstr{2} = [tstr{2},'   |   Labels edit: GT ONLY'];

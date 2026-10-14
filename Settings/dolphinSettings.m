@@ -4,11 +4,12 @@
 % interface. You can make different versions of this, with different names
 % for different species or sites.
 % Define input/output locations.REQUIRED
-%"C:\Users\Kasey\Desktop\forDetEdit_NFC\NFC01A_disk01a_CombinedBWD_ID1.mat"
-%NFC_A_02_disk01a_combinedBWD_ID1.mat"
-%C:\Users\Kasey\Desktop\forDetEdit_JAXD16_Model
+
 paramsUser.plotCorrect_incorrect = true;
+%paramsUser.plotLabels = 'gt';    % color everything by ground truth (column 4)
+%paramsUser.plotLabels = 'model'; % color by model output (column 2), the default
 %paramsUser.minLabelConfidence = 0.7;
+
 filePrefix = 'JAX_D_16_disk01a_combinedBWD'; % TPWS file name to match. _disk08c_CombinedBWD
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.

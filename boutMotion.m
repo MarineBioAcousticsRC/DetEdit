@@ -81,13 +81,30 @@ if ~isempty(J) % if there are detection in this session
     dPARAMS.labelConf = []; % label confidence scores
     dPARAMS.gtCode = []; % ground truth codes (zID col 4), NaN if none
     dPARAMS.showGT = false; % draw outline=prediction / fill=ground truth
+    % Which label column colors the plots when plotCorrect_incorrect is off:
+    % p.plotLabels = 'model' (zID col 2, default) or 'gt' (zID col 4).
+    % zIDplot is only used for display; zID on disk is untouched.
+    zIDplot = zID;
+    dPARAMS.plotGTonly = false;
+    if ~(isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect) && ...
+            isfield(p,'plotLabels') && strcmpi(p.plotLabels,'gt')
+        if size(zID,2) >= 4
+            keepGT = ~isnan(zID(:,4)) & zID(:,4) > 0; % no gt = unlabeled
+            zIDplot = zID(keepGT,:);
+            zIDplot(:,2) = zIDplot(:,4); % color by ground truth
+            zIDplot(:,3) = NaN; % model confidence doesn't apply to ground truth
+            dPARAMS.plotGTonly = true;
+        else
+            disp(' plotLabels = ''gt'' but ID file has no 4th (gt) column: showing model labels')
+        end
+    end
     IDidx = [];
-    if ~isempty(zID)
-        [dPARAMS.tID,dPARAMS.K3,IDidx] = intersect(dPARAMS.t,zID(:,1));
+    if ~isempty(zIDplot)
+        [dPARAMS.tID,dPARAMS.K3,IDidx] = intersect(dPARAMS.t,zIDplot(:,1));
         dPARAMS.rlID = dPARAMS.RL(dPARAMS.K3);
-        if size(zID,2)>2
+        if size(zIDplot,2)>2
             % store label confidence if available, otherwise fill with na.
-            dPARAMS.labelConf = round(zID(IDidx,3)*1000)/1000;
+            dPARAMS.labelConf = round(zIDplot(IDidx,3)*1000)/1000;
         else
             dPARAMS.labelConf = nan(length(IDidx),1);
         end
@@ -100,7 +117,7 @@ if ~isempty(J) % if there are detection in this session
     end
     if ~isempty(dPARAMS.K3)
         dPARAMS.ff3 = 1;
-        dPARAMS.spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
+        dPARAMS.spCodeSet = zIDplot(IDidx,2); % get ID codes for everything in this session
         dPARAMS.specIDs = unique(dPARAMS.spCodeSet); % get unique ID codes
 
         % ground truth labels (4th column of zID), 0 or NaN = no ground truth

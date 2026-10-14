@@ -13,7 +13,9 @@ else
     colCount = 3;
     w = [.3,.2,.5];
 end
-allRows = rowCount+6; % includes the 'Labels edit' row
+% 'Labels edit' menu only when comparing model vs ground truth
+showEditMenu = isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect;
+allRows = rowCount+5+showEditMenu;
 h = 1/allRows;% +1 to save room for title
 
 % Set up window placement & size on screen
@@ -41,6 +43,9 @@ else
 end
 % Write heading
 labelStr = 'ID Color Legend';
+if isfield(dPARAMS,'plotGTonly') && dPARAMS.plotGTonly
+    labelStr = 'ID Legend (ground truth)';
+end
 txtPos = [0 1-h 1 h];
 dHANDLES.h10handles.headTxt = uicontrol(dHANDLES.hID, ...
     'Style','text', ...
@@ -220,7 +225,8 @@ dHANDLES.h10handles.labelConfEdTxt = uicontrol(dHANDLES.hID,...
     'Callback',{@ID_toggle,'editMinConf'});
 
 % What hand labeling edits: model output (col 2), ground truth (col 4), or
-% both (see set_ID_labels.m)
+% both (see set_ID_labels.m). Only shown with plotCorrect_incorrect on.
+if showEditMenu
 iColor = iColor+1;
 if ~isfield(dPARAMS,'editTarget') || isempty(dPARAMS.editTarget)
     dPARAMS.editTarget = 'both';
@@ -244,3 +250,4 @@ dHANDLES.h10handles.editTargetMenu = uicontrol(dHANDLES.hID,...
     'String',{'Model + GT','Model only','GT only'},...
     'Value',max(1,find(strcmp(editTargets,dPARAMS.editTarget),1)),...
     'Callback',@edit_target_select);
+end

@@ -90,6 +90,7 @@ switch analysis
         params.autoFalse = autoFalse;
         params.minLabelConfidence = minLabelConfidence;
         params.plotCorrect_incorrect = plotCorrect_incorrect;
+        params.plotLabels = plotLabels;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));

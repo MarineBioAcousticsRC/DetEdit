@@ -76,4 +76,6 @@ paramsUser.fLow = 1; % Minimum frequency of interest
 % Assign an ID to colors
 % paramsUser.plotCorrect_incorrect = true; % ID points as circles: outline =
 % prediction, fill = ground truth (zID col 4; empty center if no gt)
+% paramsUser.plotLabels = 'gt'; % with plotCorrect_incorrect off: color by
+% ground truth ('gt') instead of model output ('model', the default)
 % paramsUser.mySpID = {'Label1','Label2','Label3', 'Label4', 'Label5', 'Label6', 'Label7', 'Label8', 'Label9', 'Label10'};

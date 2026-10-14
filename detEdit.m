@@ -354,6 +354,10 @@ dPARAMS.cc = ' ';  % avoids crash when first bout too short
 dPARAMS.altDigits = ''; % ALT + digits label code being typed
 dPARAMS.pendingCC = '';
 dPARAMS.editTarget = 'both'; % what hand labels edit (ID legend 'Labels edit:')
+if ~(isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect) && ...
+        isfield(p,'plotLabels') && strcmpi(p.plotLabels,'gt')
+    dPARAMS.editTarget = 'gt'; % showing ground truth: hand labels edit it
+end
 dPARAMS.yell = [];
 dPARAMS.blag = 0;
 

@@ -13,7 +13,10 @@ function plot_highlight_bins(kind)
 % When p.plotCorrect_incorrect is on, each label is further split by
 % ground truth (zID col 4):
 %   solid  - ground truth matches the prediction
-%   dotted - ground truth differs from the prediction (drawn on top)
+%   dotted - ground truth differs from the prediction (drawn on top); one
+%            line per ground truth label, each with its own dotted pattern /
+%            width (still in the predicted label's color), and the legend
+%            says which ground truth it was
 %   dashed - no ground truth for those clicks
 %
 % The window only opens once something is highlighted; it is cleared when
@@ -59,7 +62,8 @@ if ~figExists
     oldFig = get(0,'CurrentFigure');
     dHANDLES.(figField) = figure(figNum);
     set(dHANDLES.(figField),'name',figName,...
-        'NumberTitle','off','KeyPressFcn',@keyAction)
+        'NumberTitle','off','KeyPressFcn',@keyAction,...
+        'KeyReleaseFcn',@keyRelease)
     if ~isempty(oldFig) && ishghandle(oldFig)
         set(0,'CurrentFigure',oldFig) % don't steal focus from the main windows
     end
@@ -76,6 +80,7 @@ RLy = dPARAMS.RL(yell); RLy = RLy(:);
 % matchType: 1 = correct, 2 = no ground truth, 3 = wrong, 0 = n/a
 predCode = zeros(nClicks,1);
 matchType = zeros(nClicks,1);
+gtSel = zeros(nClicks,1); % ground truth code, only kept for wrong ones
 isFD = false(nClicks,1);
 if dPARAMS.ff2
     isFD = ismember(yell,dPARAMS.K2);
@@ -92,6 +97,9 @@ if dPARAMS.ff3
         mt(gt == predCode(isID)) = 1;
         mt(isnan(gt)) = 2;
         matchType(isID) = mt;
+        gtWrong = zeros(size(gt));
+        gtWrong(mt == 3) = gt(mt == 3);
+        gtSel(isID) = gtWrong;
     end
 end
 
@@ -102,6 +110,10 @@ nBins = length(bins);
 
 defaultColor = get(groot,'defaultAxesColorOrder');
 lineStyles = {'-','-','--',':'}; % index = matchType+1
+% wrong lines: within each predicted label in a panel, the 1st ground
+% truth gets pattern 1, the 2nd pattern 2, ... (the legend names the ground
+% truth). Solid (correct) and thick dashed (no ground truth) aren't used.
+wrongStyles = {':',1.2; '-.',1.2; ':',2.4; '-.',2.4; '--',0.8};
 styleNames = {'','',' (no gt)',' (wrong)'};
 
 % layout: near-square grid of panels (each keeps the wide shape of the
@@ -138,29 +150,27 @@ for iB = 1:nBins
     hold(ax,'on')
     inBin = binLow == bins(iB);
 
-    % groups of (prediction, match type) in this bin; wrong ones last (on top)
-    groups = unique([predCode(inBin), matchType(inBin)],'rows');
+    % groups of (prediction, match type, ground truth if wrong) in this
+    % bin; wrong ones last (on top)
+    groups = unique([predCode(inBin), matchType(inBin), gtSel(inBin)],'rows');
     [~,order] = sort(groups(:,2) == 3);
     groups = groups(order,:);
     hLines = []; lineNames = {};
+    nWrongSoFar = containers.Map('KeyType','double','ValueType','double');
 
     for iG = 1:size(groups,1)
         thisCode = groups(iG,1);
         thisMatch = groups(iG,2);
-        idx = inBin & predCode == thisCode & matchType == thisMatch;
+        thisGT = groups(iG,3);
+        idx = inBin & predCode == thisCode & matchType == thisMatch & gtSel == thisGT;
         if thisCode == 0
-            thisColor = defaultColor(1,:); thisName = 'Unlabeled';
+            thisColor = defaultColor(1,:);
         elseif thisCode == 99
-            thisColor = [1,0,0]; thisName = 'False';
+            thisColor = [1,0,0];
         else
             thisColor = p.colorTab(thisCode,:);
-            if iscell(p.mySpID) && thisCode <= numel(p.mySpID) && ...
-                    ischar(p.mySpID{thisCode}) && ~isempty(p.mySpID{thisCode})
-                thisName = p.mySpID{thisCode};
-            else
-                thisName = num2str(thisCode);
-            end
         end
+        thisName = label_name(thisCode);
         if strcmp(kind,'spectra')
             xData = dPARAMS.ft;
             yData = norm_spec_simple(dPARAMS.cspJ(yell(idx),:),...
@@ -172,13 +182,25 @@ for iB = 1:nBins
                 waveSpacing*(size(groups,1) - iG);
             xData = 1:length(yData);
         end
-        lw = 2;
         if thisMatch == 3
-            lw = 1.2; % thinner = smaller, tighter dots (MATLAB scales dot size + gap with width)
+            % wrong: dotted-type line; k-th wrong ground truth for this
+            % predicted label in this panel gets the k-th pattern/width
+            if isKey(nWrongSoFar,thisCode)
+                nWrongSoFar(thisCode) = nWrongSoFar(thisCode) + 1;
+            else
+                nWrongSoFar(thisCode) = 1;
+            end
+            iStyle = mod(nWrongSoFar(thisCode)-1,size(wrongStyles,1))+1;
+            hLines(end+1) = plot(ax,xData,yData,'Color',thisColor,...
+                'LineStyle',wrongStyles{iStyle,1},...
+                'LineWidth',wrongStyles{iStyle,2}); %#ok<AGROW>
+            lineNames{end+1} = sprintf('%s (n=%d, gt=%s)',thisName,sum(idx),...
+                label_name(thisGT)); %#ok<AGROW>
+        else
+            hLines(end+1) = plot(ax,xData,yData,'Color',thisColor,...
+                'LineStyle',lineStyles{thisMatch+1},'LineWidth',2); %#ok<AGROW>
+            lineNames{end+1} = sprintf('%s%s (n=%d)',thisName,styleNames{thisMatch+1},sum(idx)); %#ok<AGROW>
         end
-        hLines(end+1) = plot(ax,xData,yData,'Color',thisColor,...
-            'LineStyle',lineStyles{thisMatch+1},'LineWidth',lw); %#ok<AGROW>
-        lineNames{end+1} = sprintf('%s%s (n=%d)',thisName,styleNames{thisMatch+1},sum(idx)); %#ok<AGROW>
     end
     hold(ax,'off')
 
@@ -203,6 +225,20 @@ for iB = 1:nBins
         xlabel(ax,xText)
     end
 end
+
+    function name = label_name(code)
+        % display name for a label code (legend text)
+        if code == 0
+            name = 'Unlabeled';
+        elseif code == 99
+            name = 'False';
+        elseif iscell(p.mySpID) && code <= numel(p.mySpID) && ...
+                ischar(p.mySpID{code}) && ~isempty(p.mySpID{code})
+            name = p.mySpID{code};
+        else
+            name = num2str(code);
+        end
+    end
 
     function [w,h] = panel_size(nC,nR)
         % panel size (normalized) for an nC x nR grid, held to targetAspect

@@ -1,8 +1,12 @@
-function [brushDate, brushColor, bFlag] = get_brushed(hFig)
+function [brushDate, brushColor, bFlag, brushXY] = get_brushed(hFig)
+
+% brushXY - [x y] plot coordinates of the brushed points (used to box the
+%           exact ICI points brushed in the bottom LTSA panel)
 
 
 brushDate = [];
 brushColor = [];
+brushXY = zeros(0,2);
 
 % Find brushed axes
 hBrushAll = get(hFig,'Children');
@@ -34,6 +38,9 @@ for iB = 1:size(brushedLine,2)
         % Get vector of dates associated with these points
         markerDates = hBrush(iB).UserData;
         brushDate = [brushDate;markerDates(brushID)];
+        xd = get(hBrush(iB),'XData'); yd = get(hBrush(iB),'YData');
+        xd = xd(:); yd = yd(:);
+        brushXY = [brushXY; xd(brushID), yd(brushID)]; %#ok<AGROW>
 
     end
     

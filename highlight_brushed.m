@@ -7,7 +7,8 @@ function highlight_brushed(ax,x,y,yellIdx)
 %      same style they normally have (unlabeled / false / ID'd, including
 %      outline = prediction, fill = ground truth when plotCorrect_incorrect
 %      is on), respecting the legend on/off toggles
-%   2) put a small black dot in the center of each one
+%   2) draw one thick black box around all of them (so the points' own
+%      outline/fill colors stay fully visible)
 %
 % The redrawn copies use the 'o' marker and a 'yellFront' tag, so brushing
 % (get_brushed) ignores them.
@@ -27,7 +28,8 @@ holdState = ishold(ax);
 hold(ax,'on')
 
 dotSize = max(round(p.sizePoints/2.5),3); % 'o' about the size of a '.' point
-centerDotSize = 2; % small enough to sit inside the ring markers
+boxLineWidth = 2; % thickness of the box around the selection
+boxPad = 0.015; % padding around the selection, as a fraction of the axis range
 
 % sort points into false / ID'd / unlabeled, the same way boutMotion does
 isFD = false(size(yellIdx));
@@ -75,10 +77,20 @@ if any(isID)
     end
 end
 
-% small black center dots on top ('o' marker so brushing ignores them)
-plot(ax,x,y,'o','MarkerSize',centerDotSize,'MarkerEdgeColor','k',...
-    'MarkerFaceColor','k','LineWidth',0.5,...
-    'LineStyle','none','Tag','yellFront');
+% thick black box around all highlighted points (no markers, so brushing
+% ignores it). Padding is relative to the current axis limits.
+% Only points inside the visible plot area count, so an off-scale point
+% can't stretch the box off the plot.
+xl = get(ax,'XLim'); yl = get(ax,'YLim');
+inView = x >= xl(1) & x <= xl(2) & y >= yl(1) & y <= yl(2);
+if any(inView)
+    xPad = boxPad*diff(xl); yPad = 2*boxPad*diff(yl);
+    bx = [min(x(inView))-xPad, max(x(inView))+xPad];
+    by = [min(y(inView))-yPad, max(y(inView))+yPad];
+    plot(ax,bx([1,2,2,1,1]),by([1,1,2,2,1]),'k-','LineWidth',boxLineWidth,...
+        'Marker','none','Tag','yellFront');
+end
+set(ax,'XLim',xl,'YLim',yl) % don't let the box change the axis limits
 
 if ~holdState
     hold(ax,'off')

@@ -351,6 +351,9 @@ dPARAMS.k = input('Starting Session:  ');
 disp('Press ''b'' key to go backward ')
 disp('Press any other key to go forward')
 dPARAMS.cc = ' ';  % avoids crash when first bout too short
+dPARAMS.altDigits = ''; % ALT + digits label code being typed
+dPARAMS.pendingCC = '';
+dPARAMS.editTarget = 'both'; % what hand labels edit (ID legend 'Labels edit:')
 dPARAMS.yell = [];
 dPARAMS.blag = 0;
 
@@ -375,7 +378,7 @@ dPARAMS.ID_Toggle = idToggleInit;
 % end
 dHANDLES.LTSAfig = figure(201); colormap(dHANDLES.LTSAfig, jet)
 set(dHANDLES.LTSAfig,'name','LTSA and time series',...
-    'KeyPressFcn',{@keyAction})
+    'KeyPressFcn',{@keyAction},'KeyReleaseFcn',@keyRelease)
 % if ~existLTSA
 %     defaultPosLTSA=[.30,0,.55,1];
 %     set(dHANDLES.LTSAfig,'Units','normalized')
@@ -388,27 +391,24 @@ set(dHANDLES.hbLTSA,'ActionPostCallback',{@brushOff,dHANDLES.LTSAfig})
 % 
 dHANDLES.RMSvPPfig = figure(51);
 set(dHANDLES.RMSvPPfig,'name','RL pp vs. RL rms',...
-    'KeyPressFcn',@keyAction)
+    'KeyPressFcn',@keyAction,'KeyReleaseFcn',@keyRelease)
 dHANDLES.hbRMSvPP = brush(dHANDLES.RMSvPPfig);
 set(dHANDLES.hbRMSvPP,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvPP,'ActionPostCallback',{@brushOff,dHANDLES.RMSvPPfig})
 
 dHANDLES.RMSvFreqfig = figure(53);
 set(dHANDLES.RMSvFreqfig,'name','RL rms vs. Peak freq.',...
-    'KeyPressFcn',@keyAction)
+    'KeyPressFcn',@keyAction,'KeyReleaseFcn',@keyRelease)
 dHANDLES.hbRMSvFreq = brush(dHANDLES.RMSvFreqfig);
 set(dHANDLES.hbRMSvFreq,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvFreq,'ActionPostCallback',{@brushOff,dHANDLES.RMSvFreqfig})
 
 dHANDLES.spectrafig = figure(50);
 set(dHANDLES.spectrafig,'name','Frequency Spectra',...
-        'KeyPressFcn',@keyAction)
-
+        'KeyPressFcn',@keyAction,'KeyReleaseFcn',@keyRelease)
 dHANDLES.wavefig = figure(52);
 set(dHANDLES.wavefig,'name','Waveform',...
-        'KeyPressFcn',@keyAction)
-
-
+        'KeyPressFcn',@keyAction,'KeyReleaseFcn',@keyRelease)
 if exist('plotaxes','var')
     dPARAMS.plotaxes = plotaxes;
 end
@@ -433,8 +433,7 @@ boutMotion % run it once to set up first view. After that it will be
 % put it at end so it can reference an existing figure for default colors
 ID_legend
 set(dHANDLES.hID,'name','Legend',...
-        'KeyPressFcn',@keyAction)
-
+        'KeyPressFcn',@keyAction,'KeyReleaseFcn',@keyRelease)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

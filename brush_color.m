@@ -55,10 +55,11 @@ function [yell,zFD,zID,bFlag] = brush_color(hFig,cc,zFD,zID,colorTab,t)
 %
 %   bFlag - Logical,track if brush is on record
 
+global dPARAMS dHANDLES
 yell = [];
 
 % Find brushed axes
-[brushDate, brushColor, bFlag] = get_brushed(hFig);
+[brushDate, brushColor, bFlag, brushXY] = get_brushed(hFig);
 
 if ~isempty(brushDate)
     
@@ -102,6 +103,13 @@ if ~isempty(brushDate)
         % Yellow paintbrush or 'y' = Highlight Detections
         disp(['Start time selected data: ',datestr(brushDate(1),'dd-mm-yyyy HH:MM:SS.FFF')]);
         [~,yell] = intersect(t, brushDate);
+        % if the brushing was done in the ICI panel, remember the exact
+        % points so that panel boxes just those (see figure201)
+        dPARAMS.yellICIxy = [];
+        if isfield(dHANDLES,'LTSAsubs') && numel(dHANDLES.LTSAsubs) >= 3 && ...
+                isequal(hFig,dHANDLES.LTSAsubs(3))
+            dPARAMS.yellICIxy = brushXY;
+        end
         
     else
         % Find color code to assign ID signal type
@@ -113,18 +121,9 @@ if ~isempty(brushDate)
             disp(['Number of ID Detections = ',num2str(length(brushDate))])
             [newIDtimes,~] = intersect(t, brushDate);
             
-            % check if already brushed
-            if ~isempty(zID)
-                [~,oldIDtimes] = intersect(zID(:,1), newIDtimes);
-                if ~isempty(oldIDtimes)
-                    % remove any old labels for these times
-                    zID(oldIDtimes, :) = [];
-                end
-            end
-            
-            % manual label: confidence = 1, ground truth = new label
-            newID = make_manual_ID_rows(newIDtimes,specID,size(zID,2));
-            zID = [zID;newID];
+            % manual label: model output and/or ground truth, depending on
+            % the "Edit:" choice in the ID legend
+            zID = set_ID_labels(zID,newIDtimes,specID);
         else
             bFlag = 0;
         end

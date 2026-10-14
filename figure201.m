@@ -54,6 +54,11 @@ grid(dHANDLES.LTSAsubs(1),'on')
 tstr(1) = {fNameList.TPWS};
 tstr(2) = {['Session: ',num2str(dPARAMS.k),'/',num2str(dPARAMS.nb),' Start Time ',...
     datestr(dPARAMS.sb(dPARAMS.k)),' Detect = ',num2str(dPARAMS.nd)]};
+if isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'model')
+    tstr{2} = [tstr{2},'   |   Labels edit: MODEL ONLY'];
+elseif isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'gt')
+    tstr{2} = [tstr{2},'   |   Labels edit: GT ONLY'];
+end
 title(dHANDLES.LTSAsubs(1),tstr);
 ylabel(dHANDLES.LTSAsubs(1),'Received Level (dB_p_p re 1\muPa)')
 
@@ -158,10 +163,28 @@ if p.specploton && ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
         'LineWidth',1,'Tag','yellFront');
     hold(dHANDLES.LTSAsubs(2),'off')
 
-    % bottom panel: for diffs, yell can't exceed length dt, which could
-    % happen if you grabbed the last point in the vector, so:
-    yellDT = dPARAMS.yell(dPARAMS.yell<length(dPARAMS.dt));
-    highlight_brushed(dHANDLES.LTSAsubs(3),dPARAMS.t(yellDT),...
-        dPARAMS.dt(yellDT),yellDT);
+    % bottom panel: if the points were brushed in this panel, box exactly
+    % those. Otherwise mark the intervals (ICIs) *between* selected clicks.
+    % Brushing one ICI point selects the two clicks on either end of it;
+    % click j's own interval dt(j) runs to click j+1, so only keep j when
+    % j+1 is selected too. Otherwise the second click's interval to the
+    % next (unselected) click would be marked, which can be far off-scale.
+    % If no two selected clicks are neighbours (e.g. single clicks picked
+    % in the top panel), fall back to each click's interval to the next.
+    if isfield(dPARAMS,'yellICIxy') && ~isempty(dPARAMS.yellICIxy)
+        % brushed directly in this panel: use exactly the points brushed
+        xy = unique(dPARAMS.yellICIxy,'rows');
+        [onT,iT] = ismember(xy(:,1),dPARAMS.t);
+        highlight_brushed(dHANDLES.LTSAsubs(3),xy(onT,1),xy(onT,2),iT(onT));
+    else
+        yellSel = dPARAMS.yell(:);
+        nDT = length(dPARAMS.dt);
+        yellDT = yellSel(ismember(yellSel+1,yellSel) & yellSel <= nDT);
+        if isempty(yellDT)
+            yellDT = yellSel(yellSel <= nDT);
+        end
+        highlight_brushed(dHANDLES.LTSAsubs(3),dPARAMS.t(yellDT),...
+            dPARAMS.dt(yellDT),yellDT);
+    end
 
 end

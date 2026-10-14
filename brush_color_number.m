@@ -52,18 +52,9 @@ if ~isempty(brushDate)
     disp(['Number of ID Detections = ',num2str(length(brushDate))])
     [newIDtimes,~] = intersect(t, brushDate);
     
-    % check if already brushed
-    if ~isempty(zID)
-        [~,oldIDtimes] = intersect(zID(:,1), newIDtimes);
-        if ~isempty(oldIDtimes)
-            % remove any old labels for these times
-            zID(oldIDtimes, :) = [];
-        end
-    end
-    
-    % manual label: confidence = 1, ground truth = new label
-    newID = make_manual_ID_rows(newIDtimes,cc,size(zID,2));
-    zID = [zID;newID];
+    % manual label: model output and/or ground truth, depending on the
+    % "Edit:" choice in the ID legend
+    zID = set_ID_labels(zID,newIDtimes,cc);
 end
 
 % Remove any ID from FD

@@ -2,9 +2,43 @@ function keyAction(varargin)
 
 global zID zFD zTD fNameList p dPARAMS dHANDLES
 
+% --- ALT + digits: type a multi-digit label code (e.g. hold ALT, press 1
+% then 2) and it's applied to the brushed points when ALT is released
+% (see keyRelease.m). Use the number row: on Windows ALT + numpad digits
+% are intercepted as ALT codes.
+evtKey = ''; evtMods = {};
+if nargin >= 2 && ~isempty(varargin{2})
+    try
+        evtKey = varargin{2}.Key;
+        evtMods = varargin{2}.Modifier;
+    catch
+    end
+end
+if ~isfield(dPARAMS,'altDigits')
+    dPARAMS.altDigits = '';
+end
+if strcmp(evtKey,'alt')
+    return % ALT on its own does nothing (don't move to the next session)
+end
+if any(strcmp(evtMods,'alt'))
+    digitTok = regexp(evtKey,'^(?:numpad)?(\d)$','tokens','once');
+    if ~isempty(digitTok)
+        dPARAMS.altDigits = [dPARAMS.altDigits, digitTok{1}];
+        fprintf('Label code so far: %s (release ALT to apply)\n',dPARAMS.altDigits);
+    end
+    return % ignore any other ALT combination
+end
+
 disp('Key action detected')
-dPARAMS.cc = get(gcf,'CurrentCharacter');
+if isfield(dPARAMS,'pendingCC') && ~isempty(dPARAMS.pendingCC)
+    % multi-digit code handed over by keyRelease (ALT released)
+    dPARAMS.cc = dPARAMS.pendingCC;
+    dPARAMS.pendingCC = '';
+else
+    dPARAMS.cc = get(gcf,'CurrentCharacter');
+end
 dPARAMS.yell = [];
+dPARAMS.yellICIxy = []; % exact ICI points brushed (set by brush_color)
 % if brush selected get key
 % if strcmp(dPARAMS.cc,'p')
 %     h = brush;
@@ -32,18 +66,12 @@ elseif strcmp(dPARAMS.cc,'j')% jump to non-consecutive session
 elseif strcmp(dPARAMS.cc,'l')% jump to non-consecutive session
     prompt = 'Set all in window to: ';
     newType = input(prompt);
-    if ~isempty(zID)
-        %[newFD,~] = setdiff(t,zID(:,1)); % remove from zID
-        [~,iCID] = setdiff(zID(:,1),dPARAMS.t); % remove from zID
-        zID = zID(iCID,:);
-    end
-    % manual label: confidence = 1, ground truth = new label
-    nCols = size(zID,2);
+    % manual label for everything in the window: model output and/or
+    % ground truth, depending on the "Edit:" choice in the ID legend
     if isempty(zID)
-        nCols = max(nCols,3); % keep the old default of 3 columns
+        zID = zeros(0,3); % keep the old default of 3 columns
     end
-    newID = make_manual_ID_rows(dPARAMS.t,newType,nCols);
-    zID = [zID; newID]; % Add everything to zID
+    zID = set_ID_labels(zID,dPARAMS.t,newType);
     
 elseif ~isempty(str2num(dPARAMS.cc))
     
@@ -204,6 +232,7 @@ elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
     oldID = input(' Enter the ID you want to overwrite:  ');
     newID  = input(' Enter the ID you want to change it to (0 = no ID, 99 = False):  ');
     addFlag = 0; % flag gets turned to 1 if we have to append to zID rather than change existing IDs
+    editGT = false; % set below when overwriting ground truth labels
     if oldID == 0 %get everything that's unlabeled
         addFlag = 1;
         [dates2Append,~] = setdiff(tEdit,[dPARAMS.tfd;dPARAMS.tID]);
@@ -214,10 +243,19 @@ elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
         zFD(iCFD) = [];
     else
         [~,iCID] = intersect(zID(:,1),tEdit);
-        oldIDLocs = find(zID(iCID,2)==oldID);
+        % in "GT only" edit mode, the ID to overwrite is a ground truth label
+        editGT = isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'gt') ...
+            && size(zID,2) >= 4;
+        if editGT
+            oldIDLocs = find(zID(iCID,4)==oldID);
+        else
+            oldIDLocs = find(zID(iCID,2)==oldID);
+        end
     end
     
-    if newID == 0  && ~addFlag % user wants previously ID'd thing changed to unlabeled
+    if newID == 0  && ~addFlag && editGT % GT only: clear the ground truth
+        zID(iCID(oldIDLocs),4) = NaN;
+    elseif newID == 0  && ~addFlag % user wants previously ID'd thing changed to unlabeled
         zID(iCID(oldIDLocs),:) = [];
     elseif newID == 99 && ~addFlag % user wants previously ID'd thing changed to false
         zFD = [zFD;zID(iCID(oldIDLocs),1)];
@@ -230,17 +268,12 @@ elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
         % nothing needs to happen, because they've already been removed
         % from zFD above.
     else
+        % manual label: model output and/or ground truth, depending on the
+        % "Edit:" choice in the ID legend
         if addFlag % user wants previously false or unlabeled thing changed to ID
-            % manual label: confidence = 1, ground truth = new label
-            zID = [zID; make_manual_ID_rows(dates2Append,newID,size(zID,2))];
-        else  % user wants previously ID'dthing changed to different ID
-            zID(iCID(oldIDLocs),2) = newID;
-            if size(zID,2) >= 3
-                zID(iCID(oldIDLocs),3) = 1; % confidence
-            end
-            if size(zID,2) >= 4
-                zID(iCID(oldIDLocs),4) = newID; % ground truth
-            end
+            zID = set_ID_labels(zID,dates2Append,newID);
+        else  % user wants previously ID'd thing changed to different ID
+            zID = set_ID_labels(zID,zID(iCID(oldIDLocs),1),newID);
         end
     end
     

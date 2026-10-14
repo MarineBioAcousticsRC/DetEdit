@@ -7,6 +7,11 @@ function brushOff(varargin)
 figH = varargin{3};
 hManager = uigetmodemanager(figH);
 set(hManager.CurrentMode,'KeyPressFcn',@keyAction)
+try
+    % so ALT + digits label codes also work while brushing
+    set(hManager.CurrentMode,'KeyReleaseFcn',@keyRelease)
+catch
+end
 %%% solution from:
 %%% https://undocumentedmatlab.com/blog/enabling-user-callbacks-during-zoom-pan
 % Overrides default behavior to allow listening

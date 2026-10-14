@@ -61,14 +61,8 @@ if ~isempty(brushDate)
         end
     end
     
-    spLabels = ones(size(newIDtimes)).*cc;
-    if size(zID,2)>2
-        % if there's extra info stored in zID, pad that with nans
-        nanPad = nan(size(newIDtimes,1),size(zID,2)-2);
-        newID = [newIDtimes,spLabels,nanPad];
-    else
-        newID = [newIDtimes,spLabels];
-    end
+    % manual label: confidence = 1, ground truth = new label
+    newID = make_manual_ID_rows(newIDtimes,cc,size(zID,2));
     zID = [zID;newID];
 end
 

@@ -12,6 +12,9 @@ if iscell(selLine)
     selLine(lenAx > 1) = {false};
     selLine = cell2mat(selLine);
 end
+% also brush ID points drawn as circles (plotCorrect_incorrect mode)
+isIDring = arrayfun(@(x) strcmp(get(hBrushAll(x),'Tag'),'IDring'), 1:length(hBrushAll));
+selLine = selLine | isIDring;
 brushedLine = find(selLine);%,1,'last');
 hBrush = hBrushAll(brushedLine);
 
@@ -34,4 +37,4 @@ for iB = 1:size(brushedLine,2)
 
     end
     
-end
+end

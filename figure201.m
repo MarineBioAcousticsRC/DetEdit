@@ -29,13 +29,23 @@ dHANDLES.RLID201 = cell(size(p.colorTab,1),1);
 if dPARAMS.ff3 % plot ID'd detections in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         iColor = dPARAMS.specIDs(iC2);
-        dHANDLES.RLID201{iColor} = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(dPARAMS.thisIDset{iC2}),...
-            dPARAMS.rlID(dPARAMS.thisIDset{iC2}),'.',...
-            'MarkerSize',p.sizePoints,'UserData',...
-            dPARAMS.tID(dPARAMS.thisIDset{iC2}));
-        set(dHANDLES.RLID201{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
-            'Visible',dPARAMS.ID_Toggle{iColor})
+        thisSet = dPARAMS.thisIDset{iC2};
+        if dPARAMS.showGT % outline = prediction, fill = ground truth
+            dHANDLES.RLID201{iColor} = plot_misclass_rings(dHANDLES.LTSAsubs(1),...
+                dPARAMS.tID(thisSet),dPARAMS.rlID(thisSet),dPARAMS.tID(thisSet),...
+                dPARAMS.gtCode(thisSet),p.colorTab(iColor,:),p.colorTab,...
+                p.sizePoints,dPARAMS.ID_Toggle{iColor});
+        else
+            dHANDLES.RLID201{iColor} = plot(dHANDLES.LTSAsubs(1),dPARAMS.tID(thisSet),...
+                dPARAMS.rlID(thisSet),'.',...
+                'MarkerSize',p.sizePoints,'UserData',dPARAMS.tID(thisSet));
+            set(dHANDLES.RLID201{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
+                'Visible',dPARAMS.ID_Toggle{iColor})
+        end
     end
+end
+if dPARAMS.ff3 && dPARAMS.showGT
+    stack_ID_rings(dHANDLES.LTSAsubs(1)) % wrong on top, correct on bottom
 end
 hold(dHANDLES.LTSAsubs(1),'off')
 axis(dHANDLES.LTSAsubs(1),[dPARAMS.PT(1) dPARAMS.PT(end) p.rlLow p.rlHi])
@@ -111,11 +121,22 @@ if ldt > 0
             iddt2 = [dPARAMS.dtID(thisIDset(1:end-1));...
                 dPARAMS.dtID(thisIDset(1:end-1))];
             
-            dHANDLES.ICIID201{iColor} = plot(dHANDLES.LTSAsubs(3),idt2,...
-                 iddt2,'.','MarkerSize',p.sizePoints,'UserData',idt2);
-            set(dHANDLES.ICIID201{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC3),:),...
-                'Visible',dPARAMS.ID_Toggle{iColor})
+            if dPARAMS.showGT % outline = prediction, fill = ground truth
+                igt2 = [dPARAMS.gtCode(thisIDset(1:end-1));...
+                    dPARAMS.gtCode(thisIDset(2:end))];
+                dHANDLES.ICIID201{iColor} = plot_misclass_rings(dHANDLES.LTSAsubs(3),...
+                    idt2,iddt2,idt2,igt2,p.colorTab(iColor,:),p.colorTab,...
+                    p.sizePoints,dPARAMS.ID_Toggle{iColor});
+            else
+                dHANDLES.ICIID201{iColor} = plot(dHANDLES.LTSAsubs(3),idt2,...
+                     iddt2,'.','MarkerSize',p.sizePoints,'UserData',idt2);
+                set(dHANDLES.ICIID201{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC3),:),...
+                    'Visible',dPARAMS.ID_Toggle{iColor})
+            end
         end
+    end
+    if dPARAMS.ff3 && dPARAMS.showGT
+        stack_ID_rings(dHANDLES.LTSAsubs(3)) % wrong on top, correct on bottom
     end
     hold(dHANDLES.LTSAsubs(3),'off')
 else
@@ -123,18 +144,24 @@ else
 end
 
 if p.specploton && ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
-    hold(dHANDLES.LTSAsubs(1),'on')
-    plot(dHANDLES.LTSAsubs(1),dPARAMS.t(dPARAMS.yell),dPARAMS.RL(dPARAMS.yell),...
-        'ko','MarkerSize',p.sizeBack,'UserData',dPARAMS.t(dPARAMS.yell));
-    hold(dHANDLES.LTSAsubs(1),'off');
-    
-    
-    % for diffs, yell can't exceed length dt, which could happen if you
-    % grabbed the last point in the vector, so:
+    % top panel: bring highlighted points to the front and circle them
+    highlight_brushed(dHANDLES.LTSAsubs(1),dPARAMS.t(dPARAMS.yell),...
+        dPARAMS.RL(dPARAMS.yell),dPARAMS.yell);
+
+    % LTSA: thin box spanning the highlighted points, +/- 2 minutes
+    tPad = 2/(24*60); % 2 minutes in days
+    tBox = [min(dPARAMS.t(dPARAMS.yell))-tPad, max(dPARAMS.t(dPARAMS.yell))+tPad];
+    fLim = get(dHANDLES.LTSAsubs(2),'YLim');
+    fBox = fLim + [1,-1]*0.02*diff(fLim); % inset slightly so top/bottom edges show
+    hold(dHANDLES.LTSAsubs(2),'on')
+    plot(dHANDLES.LTSAsubs(2),tBox([1,2,2,1,1]),fBox([1,1,2,2,1]),'-','Color',[1,1,1],...
+        'LineWidth',1,'Tag','yellFront');
+    hold(dHANDLES.LTSAsubs(2),'off')
+
+    % bottom panel: for diffs, yell can't exceed length dt, which could
+    % happen if you grabbed the last point in the vector, so:
     yellDT = dPARAMS.yell(dPARAMS.yell<length(dPARAMS.dt));
-    hold(dHANDLES.LTSAsubs(3),'on')
-    plot(dHANDLES.LTSAsubs(3),dPARAMS.t(yellDT),dPARAMS.dt(yellDT),'ko','MarkerSize',...
-        p.sizeBack,'UserData',dPARAMS.t(dPARAMS.yell));
-    hold(dHANDLES.LTSAsubs(3),'off')
-    
-end
+    highlight_brushed(dHANDLES.LTSAsubs(3),dPARAMS.t(yellDT),...
+        dPARAMS.dt(yellDT),yellDT);
+
+end

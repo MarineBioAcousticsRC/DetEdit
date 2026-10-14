@@ -182,6 +182,25 @@ elseif exist('typeNames','var')
 end
 save(fNameList.ID,'zID','-append');
 
+% make sure every label has its own color (no white, no duplicates),
+% adding colors if there are more labels than rows in colorTab
+nNeeded = size(p.colorTab,1);
+if iscell(p.mySpID)
+    nNeeded = max(nNeeded,numel(p.mySpID));
+end
+if ~isempty(zID)
+    labelCodes = zID(:,2);
+    if size(zID,2) >= 4
+        labelCodes = [labelCodes; zID(:,4)]; % ground truth codes too
+    end
+    labelCodes = labelCodes(isfinite(labelCodes) & labelCodes > 0 & ...
+        labelCodes < 99 & labelCodes == round(labelCodes));
+    if ~isempty(labelCodes)
+        nNeeded = max(nNeeded,max(labelCodes));
+    end
+end
+p.colorTab = fix_colorTab(p.colorTab,nNeeded);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Calculate bout starts and ends
 % TODO: this is calculated in mkLTSA, we should save it there instead of

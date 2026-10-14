@@ -79,6 +79,8 @@ if ~isempty(J) % if there are detection in this session
     dPARAMS.ff3 = 0; % becomes positive if you have ID's detections in this session
     dPARAMS.tID = []; % times of ID'd detections
     dPARAMS.labelConf = []; % label confidence scores
+    dPARAMS.gtCode = []; % ground truth codes (zID col 4), NaN if none
+    dPARAMS.showGT = false; % draw outline=prediction / fill=ground truth
     IDidx = [];
     if ~isempty(zID)
         [dPARAMS.tID,dPARAMS.K3,IDidx] = intersect(dPARAMS.t,zID(:,1));
@@ -100,6 +102,34 @@ if ~isempty(J) % if there are detection in this session
         dPARAMS.ff3 = 1;
         dPARAMS.spCodeSet = zID(IDidx,2); % get ID codes for everything in this session
         dPARAMS.specIDs = unique(dPARAMS.spCodeSet); % get unique ID codes
+
+        % ground truth labels (4th column of zID), 0 or NaN = no ground truth
+        dPARAMS.gtCode = nan(length(IDidx),1);
+        if isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect
+            dPARAMS.showGT = true;
+            if size(zID,2) >= 4
+                dPARAMS.gtCode = zID(IDidx,4);
+                dPARAMS.gtCode(dPARAMS.gtCode == 0) = NaN;
+                hasGT = ~isnan(dPARAMS.gtCode);
+                disp([' Labels with ground truth:',num2str(sum(hasGT)),...
+                    ', disagreeing:',num2str(sum(hasGT & dPARAMS.gtCode ~= dPARAMS.spCodeSet))])
+            else
+                disp(' plotCorrect_incorrect is on, but ID file has no 4th (gt) column')
+            end
+        end
+
+        % add colors if a label code has none yet (e.g. a new code typed
+        % in with 'e' or 'l' during this session)
+        gtCodes = dPARAMS.gtCode(dPARAMS.gtCode < 99 & dPARAMS.gtCode == round(dPARAMS.gtCode));
+        maxCode = max([dPARAMS.specIDs(:); gtCodes(:)]);
+        nColors = size(p.colorTab,1);
+        if maxCode > nColors
+            p.colorTab = fix_colorTab(p.colorTab,maxCode);
+            [dPARAMS.ID_Toggle{nColors+1:maxCode,1}] = deal('on');
+            if isfield(dHANDLES,'hID') && isvalid(dHANDLES.hID)
+                ID_legend % redraw legend with the new colors
+            end
+        end
 
         disp([' Labels above confidence limit:',num2str(sum(dPARAMS.labelConfIdx))])
 
@@ -288,6 +318,8 @@ figure53
 
 figure50
 figure52
+figure54 % spectra of highlighted clicks by received level
+figure55 % waveforms of highlighted clicks by received level
 figure201
 
 

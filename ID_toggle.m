@@ -65,4 +65,16 @@ elseif strcmp(iColor,'editMinConf')
     fprintf('Update minimum confidence threshold to: %0.3f\n',p.minLabelConfidence')
     boutMotion
     
-end 
+end
+
+% Give keyboard focus back to the plots, so detEdit's key commands
+% (s, m, d, b, ...) work again right after using the legend. Otherwise the
+% legend button / edit box keeps focus and swallows the key presses.
+if ~isempty(hObject) && ishghandle(hObject) && strcmp(get(hObject,'Type'),'uicontrol')
+    set(hObject,'Enable','off');
+    drawnow;
+    set(hObject,'Enable','on');
+end
+if isfield(dHANDLES,'LTSAfig') && ishghandle(dHANDLES.LTSAfig)
+    figure(dHANDLES.LTSAfig)
+end

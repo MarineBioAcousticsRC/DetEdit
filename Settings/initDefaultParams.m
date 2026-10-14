@@ -55,9 +55,11 @@ threshHiFreq = 0; % default for ^ command, high freq cutoff for clicks
 autoFalse = false; % Apply automatic false thresholds to entire file. 
  
 % Colors to use for classification - ID signal types
+% (edit freely: at startup fix_colorTab.m replaces white, duplicate or
+% reserved red/green/yellow rows and adds colors if there are more labels)
 colorTab = [191, 191, 0; ... % type 1 green
             191, 0, 191; ... % type 2 purple
-            0, 127, 0; ... % type 2 purple
+            0, 127, 0; ... % type 3 dark-green
            
             0, 191, 191; ... % type 4 light-blue
             20, 43, 140; ... % type 5 dark-blue
@@ -66,9 +68,9 @@ colorTab = [191, 191, 0; ... % type 1 green
             222,  125, 0; ... % type 8 orange
             255,  153, 199; ... % type 9 pink
             153, 51,   0; ... % type 10  brown
-            255,18,166; 0, 127, 0; ... % type 3 dark-green
+            255,18,166; 90, 90, 90; ... % type 11 hot pink, type 12 charcoal (was dark green, same as type 3)
             255,255,18;99,212,18;
-            255,255,255;0,0,255]./255;
+            210,180,140;0,0,255]./255; % type 15 tan (was white), type 16 blue
         
         
         
@@ -77,8 +79,13 @@ colorTab = round(colorTab.*100)/100;
 mySpID = {'Sperm Whale','Dolphin','Beaked Whale', 'Echosounder', 'Ship',...
     '','','','Stenella spp.'};
 
-minLabelConfidence = 0; % minimum classifciation confidence threshold for 
+minLabelConfidence = 0; % minimum classifciation confidence threshold for
 % displaying signal labels
+
+plotCorrect_incorrect = false; % if true, ID'd points are drawn as circles:
+% thick outline = predicted label color (zID col 2), filled center =
+% ground truth color (zID col 4). Center is left empty when there's no
+% ground truth (0/NaN, or no 4th column).
 
 
 %% Parameters for modDet (if specified to compute)

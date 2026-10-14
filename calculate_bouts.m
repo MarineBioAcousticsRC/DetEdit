@@ -71,4 +71,4 @@ while ib <= nb
     ib = ib + 1;
 end
 
-disp(['Number Bouts : ',num2str(nb)])
+%disp(['Number Bouts : ',num2str(nb)])

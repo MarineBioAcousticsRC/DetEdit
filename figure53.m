@@ -52,15 +52,26 @@ dHANDLES.RMSID53 =  cell(size(p.colorTab,1),1);
 if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         iColor = dPARAMS.specIDs(iC2);
-        dHANDLES.RMSID53{iColor} = plot(dHANDLES.h53,dPARAMS.transfRMS(dPARAMS.K3(dPARAMS.thisIDset{iC2})),...
-            dPARAMS.freq(dPARAMS.K3(dPARAMS.thisIDset{iC2})),'.',...
-            'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(dPARAMS.K3(dPARAMS.thisIDset{iC2})));
-        set(dHANDLES.RMSID53{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
-            'Visible',dPARAMS.ID_Toggle{iColor});
+        thisK3 = dPARAMS.K3(dPARAMS.thisIDset{iC2});
+        if dPARAMS.showGT % outline = prediction, fill = ground truth
+            dHANDLES.RMSID53{iColor} = plot_misclass_rings(dHANDLES.h53,...
+                dPARAMS.transfRMS(thisK3),dPARAMS.freq(thisK3),dPARAMS.t(thisK3),...
+                dPARAMS.gtCode(dPARAMS.thisIDset{iC2}),p.colorTab(iColor,:),...
+                p.colorTab,p.sizePoints,dPARAMS.ID_Toggle{iColor});
+        else
+            dHANDLES.RMSID53{iColor} = plot(dHANDLES.h53,dPARAMS.transfRMS(thisK3),...
+                dPARAMS.freq(thisK3),'.',...
+                'MarkerSize',p.sizePoints,'UserData',dPARAMS.t(thisK3));
+            set(dHANDLES.RMSID53{iColor},'Color',p.colorTab(dPARAMS.specIDs(iC2),:),...
+                'Visible',dPARAMS.ID_Toggle{iColor});
+        end
     end
 end
 
 
+if dPARAMS.ff3 && dPARAMS.showGT
+    stack_ID_rings(dHANDLES.h53) % wrong on top, correct on bottom
+end
 hold(dHANDLES.h53, 'off')
 if p.threshHiFreq > 0
     ylim(dHANDLES.h53,[p.fLow p.threshHiFreq+10])
@@ -74,9 +85,7 @@ ylabel(dHANDLES.h53,'Peak Frequency (kHz)')
 
 if ~isempty(dPARAMS.yell) && ~isempty(dPARAMS.csnJ)
     
-    hold(dHANDLES.h53,'on')
-    plot(dHANDLES.h53,dPARAMS.transfRMS(dPARAMS.yell),dPARAMS.freq(dPARAMS.yell),'ko',...
-        'MarkerSize',p.sizeBack,...
-        'LineWidth',2,'UserData',dPARAMS.clickTimes(dPARAMS.K2))
-    hold(dHANDLES.h53,'off')
-end
+    % bring highlighted points to the front and circle them
+    highlight_brushed(dHANDLES.h53,dPARAMS.transfRMS(dPARAMS.yell),...
+        dPARAMS.freq(dPARAMS.yell),dPARAMS.yell);
+end

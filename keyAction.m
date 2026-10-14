@@ -37,7 +37,12 @@ elseif strcmp(dPARAMS.cc,'l')% jump to non-consecutive session
         [~,iCID] = setdiff(zID(:,1),dPARAMS.t); % remove from zID
         zID = zID(iCID,:);
     end
-    newID = [dPARAMS.t,repmat(newType,size(dPARAMS.t)),nan(size(dPARAMS.t))];
+    % manual label: confidence = 1, ground truth = new label
+    nCols = size(zID,2);
+    if isempty(zID)
+        nCols = max(nCols,3); % keep the old default of 3 columns
+    end
+    newID = make_manual_ID_rows(dPARAMS.t,newType,nCols);
     zID = [zID; newID]; % Add everything to zID
     
 elseif ~isempty(str2num(dPARAMS.cc))
@@ -226,9 +231,16 @@ elseif strcmp(dPARAMS.cc,'e') % re-code one species ID with another
         % from zFD above.
     else
         if addFlag % user wants previously false or unlabeled thing changed to ID
-            zID = [zID; [dates2Append,ones(size(dates2Append))*newID,ones([size(dates2Append,1),size(zID,2)-2])]];
+            % manual label: confidence = 1, ground truth = new label
+            zID = [zID; make_manual_ID_rows(dates2Append,newID,size(zID,2))];
         else  % user wants previously ID'dthing changed to different ID
             zID(iCID(oldIDLocs),2) = newID;
+            if size(zID,2) >= 3
+                zID(iCID(oldIDLocs),3) = 1; % confidence
+            end
+            if size(zID,2) >= 4
+                zID(iCID(oldIDLocs),4) = newID; % ground truth
+            end
         end
     end
     
@@ -289,4 +301,4 @@ if (dPARAMS.k > dPARAMS.nb) && dPARAMS.bFlag
     
 end
 dPARAMS.bFlag = 0;
-boutMotion
+boutMotion

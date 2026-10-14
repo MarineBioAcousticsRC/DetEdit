@@ -89,6 +89,7 @@ switch analysis
         params.mySpID = mySpID;
         params.autoFalse = autoFalse;
         params.minLabelConfidence = minLabelConfidence;
+        params.plotCorrect_incorrect = plotCorrect_incorrect;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));

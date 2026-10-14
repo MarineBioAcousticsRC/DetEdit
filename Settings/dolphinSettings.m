@@ -3,24 +3,28 @@
 % Example script to define directories and parameter preference for the
 % interface. You can make different versions of this, with different names
 % for different species or sites.
-
 % Define input/output locations.REQUIRED
-filePrefix = 'GofMX_MP04'; % TPWS file name to match. 
+%"C:\Users\Kasey\Desktop\forDetEdit_NFC\NFC01A_disk01a_CombinedBWD_ID1.mat"
+%NFC_A_02_disk01a_combinedBWD_ID1.mat"
+%C:\Users\Kasey\Desktop\forDetEdit_JAXD16_Model
+paramsUser.plotCorrect_incorrect = true;
+%paramsUser.minLabelConfidence = 0.7;
+filePrefix = 'JAX_D_16_disk01a_combinedBWD'; % TPWS file name to match. _disk08c_CombinedBWD
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
 iterationNum = '1'; % iteration number
 sampleRate = 200; % replace with your sample rate
-sp = 'De'; % species code 
+sp = ''; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'L:\GofMX_MP04\GofMX_MP04_TPWS'; % identify folder containing TPWS files
+tpwsDir = 'C:\Users\Kasey\Desktop\forDetEdit_JAXD16_Model'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'L:\GofMX_MP04\GofMX_MP04_LTSA'; % identify folder containing 
+%ltsaDir = '\\frosty.ucsd.edu\LTSA\JAX\D\df1\JAX_D_16'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,7 +33,7 @@ ltsaDir = 'L:\GofMX_MP04\GofMX_MP04_LTSA'; % identify folder containing
 % initDefaultParams.m and initSpParams.m)
 
 %% Bout preferences
-paramsUser.threshRL = 125; % minimum RL threshold in dB peak-to-peak
+paramsUser.threshRL = 120; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 paramsUser.minBout = 0; % minimum bout duration in seconds
 % paramsUser.gth = .5;    % gap time in hrs between sessions
@@ -41,8 +45,8 @@ paramsUser.minBout = 0; % minimum bout duration in seconds
 % paramsUser.c4fd = 1000; % Detections step size to estimate false detection rate
 
 %% Panel LTSA and time series
-% paramsUser.rlLow = 115; % PP plot window low limit
-% paramsUser.rlHi = 165; % PP plot window high limit
+%paramsUser.rlLow = 95; % PP plot window low limit
+%paramsUser.rlHi = 165; % PP plot window high limit
 % paramsUser.ltsaContrast = 400; % ltsa contrast
 % paramsUser.ltsaBright = 150; % ltsa brightness
 % paramsUser.ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
@@ -51,13 +55,13 @@ paramsUser.minBout = 0; % minimum bout duration in seconds
 % paramsUser.minDur = []; % minimum window duration (if specified in minutes)
 
 %% Panel Frequency spectra
-paramsUser.fLow = 1; % Minimum frequency of interest
-% paramsUser.fHi = sampleRate/2; % Maximum frequency of interest
+%paramsUser.fLow = 5000; % Minimum frequency of interest
+%paramsUser.fHi =95000; % Maximum frequency of interest
 
 %% Panel RL rms vs. RL pp | Peak freq.
 % paramsUser.slope = 0.7; % slope for shifting data vertically
-% paramsUser.threshRMS = 0; % default for < command, RMS threshold cutoff
-% paramsUser.threshPP = 0; % default for : command, PP threshold cutoff
+paramsUser.threshRMS = 120; % default for < command, RMS threshold cutoff
+ paramsUser.threshPP = 120; % default for : command, PP threshold cutoff
 % paramsUser.threshHiFreq = 40; % default for ^ command, high freq cutoff for clicks
 
 %%% Setting preferences to override modDet.m defaults

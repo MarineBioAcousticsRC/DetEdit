@@ -2,7 +2,8 @@ function plot_highlight_bins(kind)
 
 % plot_highlight_bins
 %
-% Shared by figure54 (kind = 'spectra') and figure55 (kind = 'waveform').
+% Shared by figure54 (kind = 'spectra'), figure55 (kind = 'waveform') and
+% figure56 (kind = 'ici').
 %
 % Average spectra (or, for waveforms, the single most typical click: the
 % one closest to the median waveform) of the yellow-brushed clicks,
@@ -26,7 +27,8 @@ function plot_highlight_bins(kind)
 global dPARAMS dHANDLES p
 
 binWidth = 5; % dB per bin
-waveSpacing = 1.2; % vertical offset between stacked waveforms
+waveSpacing = 1.2; % vertical offset between stacked waveforms / ICI histograms
+iciNBins = 25; % ICI histogram bins between 0 and p.dtHi
 
 switch kind
     case 'spectra'
@@ -41,8 +43,14 @@ switch kind
         xText = sprintf('Samples (%0.1fms @ %0.0fkHz)',...
             size(dPARAMS.csnJ,2)/p.sampleRate,p.sampleRate);
         yText = 'Normalized amplitude';
+    case 'ici'
+        figField = 'iciBinFig'; figNum = 56; dataSet = 'dt';
+        figName = 'Highlighted ICI by received level';
+        whatText = 'ICI histograms';
+        xText = 'Time between detections (s)';
+        yText = 'Normalized count';
     otherwise
-        error('plot_highlight_bins: kind must be ''spectra'' or ''waveform''')
+        error('plot_highlight_bins: kind must be ''spectra'', ''waveform'' or ''ici''')
 end
 
 figExists = isfield(dHANDLES,figField) && ~isempty(dHANDLES.(figField)) && ...
@@ -187,6 +195,24 @@ for iB = 1:nBins
             yData = grpWav(iMed,:) + waveSpacing*(size(groups,1) - iG);
             xData = 1:length(yData);
         end
+        if strcmp(kind,'ici')
+            % histogram of each click's time to the next detection (same
+            % ICI as the LTSA bottom panel), scaled to a peak of 1 and
+            % stacked one group per row like the waveforms
+            clk = yell(idx);
+            clk = clk(clk <= numel(dPARAMS.dt));
+            edges = linspace(0,p.dtHi,iciNBins+1);
+            cnt = histc(min(dPARAMS.dt(clk(:)),p.dtHi),edges); % values above dtHi go in the last bin
+            cnt = cnt(:).';
+            cnt(end-1) = cnt(end-1) + cnt(end); % histc's last bin is "== last edge"
+            cnt = cnt(1:end-1);
+            if max(cnt) > 0
+                cnt = cnt/max(cnt);
+            end
+            [xData,yData] = stairs(edges,[cnt,cnt(end)]);
+            xData = xData(:).'; 
+            yData = yData(:).' + waveSpacing*(size(groups,1) - iG);
+        end
         if thisMatch == 3
             % wrong: dotted-type line; k-th wrong ground truth for this
             % predicted label in this panel gets the k-th pattern/width
@@ -211,6 +237,8 @@ for iB = 1:nBins
 
     if strcmp(kind,'spectra')
         xlim(ax,[p.fLow,p.fHi])
+    elseif strcmp(kind,'ici')
+        xlim(ax,[0,p.dtHi])
     else
         xlim(ax,[1,size(dPARAMS.csnJ,2)])
     end

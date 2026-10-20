@@ -11,7 +11,7 @@ paramsUser.plotCorrect_incorrect = true;
 %paramsUser.plotLabels = 'model'; % color by model output (column 2), the default
 %paramsUser.minLabelConfidence = 0.7;
 
-filePrefix = 'GOM_GC_12'; % TPWS file name to match. _disk08c_CombinedBWD
+filePrefix = 'HAT03A'; % TPWS file name to match. _disk08c_CombinedBWD
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -20,7 +20,7 @@ sampleRate = 200; % replace with your sample rate
 sp = ''; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'F:\TF_EvalSets_BU\TF1\GOM_GC\combined'; % identify folder containing TPWS files
+tpwsDir = 'F:\TF_EvalSets_BU\TF3\HAT\combined'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 

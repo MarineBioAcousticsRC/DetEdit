@@ -4,7 +4,8 @@ function plot_highlight_bins(kind)
 %
 % Shared by figure54 (kind = 'spectra') and figure55 (kind = 'waveform').
 %
-% Average spectra or waveforms of the yellow-brushed (highlighted) clicks,
+% Average spectra (or, for waveforms, the single most typical click: the
+% one closest to the median waveform) of the yellow-brushed clicks,
 % split into received level bins (dB pp from the top LTSA panel), one panel
 % per bin in a near-square grid, loudest bin first (top left).
 %
@@ -36,7 +37,7 @@ switch kind
     case 'waveform'
         figField = 'waveBinFig'; figNum = 55; dataSet = 'csnJ';
         figName = 'Highlighted waveforms by received level';
-        whatText = 'waveforms';
+        whatText = 'median-click waveforms';
         xText = sprintf('Samples (%0.1fms @ %0.0fkHz)',...
             size(dPARAMS.csnJ,2)/p.sampleRate,p.sampleRate);
         yText = 'Normalized amplitude';
@@ -178,8 +179,12 @@ for iB = 1:nBins
         else
             % each waveform on its own row (first group on top), like
             % the main waveform window, so they don't overlap
-            yData = norm_wav(mean(dPARAMS.csnJ(yell(idx),:),1)) + ...
-                waveSpacing*(size(groups,1) - iG);
+            % show ONE real click: the one whose normalized waveform is
+            % closest to the group's sample-by-sample median waveform
+            grpWav = norm_wav(dPARAMS.csnJ(yell(idx),:));
+            medWav = median(grpWav,1);
+            [~,iMed] = min(sum((grpWav - medWav).^2,2));
+            yData = grpWav(iMed,:) + waveSpacing*(size(groups,1) - iG);
             xData = 1:length(yData);
         end
         if thisMatch == 3

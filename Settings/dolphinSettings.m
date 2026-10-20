@@ -6,12 +6,12 @@
 % Define input/output locations.REQUIRED
 %C:\Users\Kasey\Desktop\forDetEdit_NFC02A_Model
 
-paramsUser.plotCorrect_incorrect = false;
+paramsUser.plotCorrect_incorrect = true;
 %paramsUser.plotLabels = 'gt';    % color everything by ground truth (column 4)
 %paramsUser.plotLabels = 'model'; % color by model output (column 2), the default
 %paramsUser.minLabelConfidence = 0.7;
 
-filePrefix = 'gabeTestDeployment_260807_ch2'; % TPWS file name to match. _disk08c_CombinedBWD
+filePrefix = 'GOM_GC_12'; % TPWS file name to match. _disk08c_CombinedBWD
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -20,13 +20,13 @@ sampleRate = 200; % replace with your sample rate
 sp = ''; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'C:\Users\Kasey\Desktop\forSUBMESOWHALE\DataTPWSCluster\90Th\ID\'; % identify folder containing TPWS files
+tpwsDir = 'F:\TF_EvalSets_BU\TF1\GOM_GC\combined'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 
 % files (.tf). Required if spectra has not been calculated peak to received levels 
 
-ltsaDir = 'C:\Users\Kasey\Desktop\forSUBMESOWHALE\Data\2026_08_07_CopyForLTSA'; % identify folder containing 
+%ltsaDir = 'C:\Users\Kasey\Desktop\forSUBMESOWHALE\Data\2026_08_07_CopyForLTSA'; % identify folder containing 
 % ltsa files (.ltsa). REQUIRED to run mkLTSAsessions.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -35,7 +35,7 @@ ltsaDir = 'C:\Users\Kasey\Desktop\forSUBMESOWHALE\Data\2026_08_07_CopyForLTSA'; 
 % initDefaultParams.m and initSpParams.m)
 
 %% Bout preferences
-paramsUser.threshRL = 90; % minimum RL threshold in dB peak-to-peak
+paramsUser.threshRL = 120; % minimum RL threshold in dB peak-to-peak
 % paramsUser.tfSelect = 0; % freq used for transfer function, leave at 0 if no adjustment
 paramsUser.minBout = 0; % minimum bout duration in seconds
 % paramsUser.gth = .5;    % gap time in hrs between sessions
@@ -55,7 +55,7 @@ paramsUser.minBout = 0; % minimum bout duration in seconds
 % paramsUser.ltsaMax = 6; % ltsa maximum duration per session
 % paramsUser.dtHi = .6; % max yaxis value for ICI display in sec
 % paramsUser.minDur = []; % minimum window duration (if specified in minutes)
-paramsUser.ltsaLims = [0 19.5];
+%paramsUser.ltsaLims = [0 19.5];
 
 %% Panel Frequency spectra
 %paramsUser.fLow = 5000; % Minimum frequency of interest

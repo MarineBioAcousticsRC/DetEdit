@@ -8,6 +8,6 @@ SPEC = prunedSpectra - repmat(mnSPEC,1,size(prunedSpectra,2));  % make low freq 
 mxSPEC = max(SPEC,[],2);
 SPEC = SPEC ./ repmat(mxSPEC,1,size(prunedSpectra,2));  % make high freq part = 1
 
-meanSPEC = 20*log10(nanmean(10.^SPEC./20,1));
+meanSPEC = 20*log10(mean(10.^SPEC./20,1,'omitnan')); % 'omitnan' = nanmean without the Statistics Toolbox
 meanMin = meanSPEC-min(meanSPEC);
 meanSPEC = meanMin./max(meanMin);

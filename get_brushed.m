@@ -10,15 +10,19 @@ brushXY = zeros(0,2);
 
 % Find brushed axes
 hBrushAll = get(hFig,'Children');
- selLine = arrayfun(@(x) hBrushAll(x).Marker == '.', 1:length(hBrushAll), 'UniformOutput', false);
-if iscell(selLine)
-    lenAx = cell2mat(cellfun(@length,selLine,'UniformOutput',false));
-    selLine(lenAx > 1) = {false};
-    selLine = cell2mat(selLine);
+% brushable detection lines: '.' marker, or ID circles tagged 'IDring'
+% (plotCorrect_incorrect mode). Objects without a Marker/BrushData property
+% (images, text, ...) are skipped, which newer MATLAB versions need.
+selLine = false(1,length(hBrushAll));
+for iH = 1:length(hBrushAll)
+    hThis = hBrushAll(iH);
+    if ~isprop(hThis,'BrushData')
+        continue
+    end
+    isDot = isprop(hThis,'Marker') && strcmp(get(hThis,'Marker'),'.');
+    isRing = strcmp(get(hThis,'Tag'),'IDring');
+    selLine(iH) = isDot || isRing;
 end
-% also brush ID points drawn as circles (plotCorrect_incorrect mode)
-isIDring = arrayfun(@(x) strcmp(get(hBrushAll(x),'Tag'),'IDring'), 1:length(hBrushAll));
-selLine = selLine | isIDring;
 brushedLine = find(selLine);%,1,'last');
 hBrush = hBrushAll(brushedLine);
 
@@ -32,8 +36,13 @@ for iB = 1:size(brushedLine,2)
         bFlag = 1;
         
         % Get color info from brush
-        h = get(brush);
-        brushColor = round(h.Color*100)./100;
+        try
+            hb = brush(ancestor(hFig,'figure'));
+            brushColor = round(get(hb,'Color')*100)./100;
+        catch
+            h = get(brush);
+            brushColor = round(h.Color*100)./100;
+        end
         
         % Get vector of dates associated with these points
         markerDates = hBrush(iB).UserData;

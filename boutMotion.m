@@ -179,8 +179,8 @@ if ~isempty(J) % if there are detection in this session
     
     dPARAMS.cspJtrue = dPARAMS.cspJ(iJ,:); % true spectra in this session
     dPARAMS.csnJtrue = dPARAMS.csnJ(iJ,:); % true time series in this session
-    dPARAMS.wtrue = norm_wav(nanmean(dPARAMS.csnJtrue,1)); % mean of true spectra in this session
-    dPARAMS.strue = nanmean(dPARAMS.cspJtrue,1); % mean of true time series in this session
+    dPARAMS.wtrue = norm_wav(mean(dPARAMS.csnJtrue,1,'omitnan')); % mean of true spectra in this session
+    dPARAMS.strue = mean(dPARAMS.cspJtrue,1,'omitnan'); % mean of true time series in this session
     
     disp([' True Detections: ',num2str(length(dPARAMS.trueTimes))])
 else

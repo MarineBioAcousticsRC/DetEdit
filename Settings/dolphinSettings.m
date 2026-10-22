@@ -53,7 +53,7 @@ paramsUser.minBout = 0; % minimum bout duration in seconds
 % paramsUser.ltsaBright = 150; % ltsa brightness
 % paramsUser.ltsaLims = [0,sampleRate/2]; % max and min of LTSA plot
 % paramsUser.ltsaMax = 6; % ltsa maximum duration per session
-% paramsUser.dtHi = .6; % max yaxis value for ICI display in sec
+paramsUser.dtHi = .9; % max yaxis value for ICI display in sec
 % paramsUser.minDur = []; % minimum window duration (if specified in minutes)
 %paramsUser.ltsaLims = [0 19.5];
 
@@ -62,9 +62,11 @@ paramsUser.minBout = 0; % minimum bout duration in seconds
 %paramsUser.fHi =95000; % Maximum frequency of interest
 
 %% Panel RL rms vs. RL pp | Peak freq.
+paramsUser.rmsLow = 95; % min of the RMS received level axis (what 'm' asks first)
+paramsUser.rmsHi  = 135;  % max of the RMS received level axis (what 'm' asks second)
 % paramsUser.slope = 0.7; % slope for shifting data vertically
-paramsUser.threshRMS = 120; % default for < command, RMS threshold cutoff
- paramsUser.threshPP = 120; % default for : command, PP threshold cutoff
+%paramsUser.threshRMS = 120; % default for < command, RMS threshold cutoff
+%paramsUser.threshPP = 120; % default for : command, PP threshold cutoff
 % paramsUser.threshHiFreq = 40; % default for ^ command, high freq cutoff for clicks
 
 %%% Setting preferences to override modDet.m defaults

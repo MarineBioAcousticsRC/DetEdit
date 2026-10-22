@@ -134,11 +134,11 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
         zTD(dPARAMS.k,2) = 0;
         % entering test mode, temporarily disable other callbacks to avoid
         % confusion with keys enered here
-        set(dHANDLES.LTSAfig, 'KeyPressFcn',[])
-        set(dHANDLES.RMSvPPfig, 'KeyPressFcn',[])
-        set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',[])
-        set(dHANDLES.spectrafig, 'KeyPressFcn',[])
-        set(dHANDLES.wavefig, 'KeyPressFcn',[])
+        set_key_fcn(dHANDLES.LTSAfig,[])
+        set_key_fcn(dHANDLES.RMSvPPfig,[])
+        set_key_fcn(dHANDLES.RMSvFreqfig,[])
+        set_key_fcn(dHANDLES.spectrafig,[])
+        set_key_fcn(dHANDLES.wavefig,[])
         for inxfd = 1:zTD(dPARAMS.k,1)
             % update LTSA to show highlighted click
             hold(dHANDLES.LTSAsubs(1),'on')
@@ -210,11 +210,11 @@ elseif (strcmp(dPARAMS.cc,'x') || strcmp(dPARAMS.cc,'z') ) % test click for rand
     end
     dPARAMS.k = dPARAMS.k+1;
     % re-eneable normal callbacks
-    set(dHANDLES.LTSAfig, 'KeyPressFcn',@keyAction)
-    set(dHANDLES.RMSvPPfig, 'KeyPressFcn',@keyAction)
-    set(dHANDLES.RMSvFreqfig, 'KeyPressFcn',@keyAction)
-    set(dHANDLES.spectrafig, 'KeyPressFcn',@keyAction)
-    set(dHANDLES.wavefig, 'KeyPressFcn',@keyAction)
+    set_key_fcn(dHANDLES.LTSAfig,@keyAction)
+    set_key_fcn(dHANDLES.RMSvPPfig,@keyAction)
+    set_key_fcn(dHANDLES.RMSvFreqfig,@keyAction)
+    set_key_fcn(dHANDLES.spectrafig,@keyAction)
+    set_key_fcn(dHANDLES.wavefig,@keyAction)
 elseif (strcmp(dPARAMS.cc,'w') && (zTD(k,2) > 0))  % test 5 min window
     % Test 5 min window
     zTD = test_false_bins(k,zTD,dPARAMS.xt,dPARAMS.xPP,dPARAMS.binCX);
@@ -334,4 +334,12 @@ if (dPARAMS.k > dPARAMS.nb) && dPARAMS.bFlag
     
 end
 dPARAMS.bFlag = 0;
-boutMotion
+boutMotion
+
+function set_key_fcn(fig,fcn)
+% Set a figure's KeyPressFcn without erroring if MATLAB refuses it (newer
+% versions do while a brush/zoom/pan mode is active).
+try
+    set(fig,'KeyPressFcn',fcn)
+catch
+end

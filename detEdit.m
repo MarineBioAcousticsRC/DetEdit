@@ -389,6 +389,14 @@ set(dHANDLES.LTSAfig,'name','LTSA and time series',...
 %     set(dHANDLES.LTSAfig,'Position',defaultPosLTSA)
 % end
 
+% R2018b+ moved zoom/pan/brush off the figure toolbar; put them back
+% (skipped in older versions, e.g. R2016b, where they are already there)
+if exist('addToolbarExplorationButtons','file') || exist('addToolbarExplorationButtons','builtin')
+    try
+        addToolbarExplorationButtons(dHANDLES.LTSAfig);
+    catch
+    end
+end
 dHANDLES.hbLTSA = brush(dHANDLES.LTSAfig);
 set(dHANDLES.hbLTSA,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbLTSA,'ActionPostCallback',{@brushOff,dHANDLES.LTSAfig})
@@ -396,6 +404,14 @@ set(dHANDLES.hbLTSA,'ActionPostCallback',{@brushOff,dHANDLES.LTSAfig})
 dHANDLES.RMSvPPfig = figure(51);
 set(dHANDLES.RMSvPPfig,'name','RL pp vs. RL rms',...
     'KeyPressFcn',@keyAction,'KeyReleaseFcn',@keyRelease)
+% R2018b+ moved zoom/pan/brush off the figure toolbar; put them back
+% (skipped in older versions, e.g. R2016b, where they are already there)
+if exist('addToolbarExplorationButtons','file') || exist('addToolbarExplorationButtons','builtin')
+    try
+        addToolbarExplorationButtons(dHANDLES.RMSvPPfig);
+    catch
+    end
+end
 dHANDLES.hbRMSvPP = brush(dHANDLES.RMSvPPfig);
 set(dHANDLES.hbRMSvPP,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvPP,'ActionPostCallback',{@brushOff,dHANDLES.RMSvPPfig})
@@ -403,6 +419,14 @@ set(dHANDLES.hbRMSvPP,'ActionPostCallback',{@brushOff,dHANDLES.RMSvPPfig})
 dHANDLES.RMSvFreqfig = figure(53);
 set(dHANDLES.RMSvFreqfig,'name','RL rms vs. Peak freq.',...
     'KeyPressFcn',@keyAction,'KeyReleaseFcn',@keyRelease)
+% R2018b+ moved zoom/pan/brush off the figure toolbar; put them back
+% (skipped in older versions, e.g. R2016b, where they are already there)
+if exist('addToolbarExplorationButtons','file') || exist('addToolbarExplorationButtons','builtin')
+    try
+        addToolbarExplorationButtons(dHANDLES.RMSvFreqfig);
+    catch
+    end
+end
 dHANDLES.hbRMSvFreq = brush(dHANDLES.RMSvFreqfig);
 set(dHANDLES.hbRMSvFreq,'Color',[1,1,0],'Enable','off'); % light yellow [.9290 .6940 .1250]
 set(dHANDLES.hbRMSvFreq,'ActionPostCallback',{@brushOff,dHANDLES.RMSvFreqfig})

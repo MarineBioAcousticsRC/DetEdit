@@ -55,15 +55,48 @@ function [yell,zFD,zID,bFlag] = brush_color(hFig,cc,zFD,zID,colorTab,t)
 %
 %   bFlag - Logical,track if brush is on record
 
-global dPARAMS dHANDLES
+global dPARAMS dHANDLES p
 yell = [];
+% accept/reject review: red ('r') = reject, green ('g') = accept (keep label)
+isAR = isfield(p,'plotAcceptReject') && p.plotAcceptReject;
 
 % Find brushed axes
 [brushDate, brushColor, bFlag, brushXY] = get_brushed(hFig);
 
 if ~isempty(brushDate)
     
-    if isequal(brushColor,[1,0,0]) || strcmp(cc,'r')
+    if isAR && (isequal(brushColor,[1,0,0]) || strcmp(cc,'r') || ...
+            isequal(brushColor,[0,1,0]) || strcmp(cc,'g'))
+        % Accept/reject review: red paintbrush or 'r' = REJECT the brushed
+        % labeled detections; green paintbrush or 'g' = ACCEPT them (label
+        % and confidence unchanged). Unlabeled detections have no label to
+        % accept or reject; green still clears them from the false set.
+        doReject = isequal(brushColor,[1,0,0]) || strcmp(cc,'r');
+        if strcmp(cc,'g'), doReject = false; end
+        [selT,~] = intersect(t, brushDate);
+        nLab = 0;
+        if ~isempty(zID)
+            if size(zID,2) < 4
+                zID(:,end+1:4) = 1; % no status column yet: everything accepted
+            end
+            inSel = ismember(zID(:,1),selT);
+            nLab = sum(inSel);
+            zID(inSel,4) = ~doReject;
+        end
+        if doReject
+            fprintf('Rejected %d labeled detection(s)',nLab);
+        else
+            fprintf('Accepted %d labeled detection(s)',nLab);
+            if ~isempty(zFD) % green also means "not false"
+                zFD = setdiff(zFD(:,1),selT);
+            end
+        end
+        if length(selT) > nLab
+            fprintf(' (%d unlabeled detection(s) left as they were)',length(selT)-nLab);
+        end
+        fprintf('\n');
+
+    elseif isequal(brushColor,[1,0,0]) || strcmp(cc,'r')
         % Red paintbrush or 'r' = False Detections
         disp(['Number of False Detections = ',num2str(length(brushDate))])
         % Add false detections to FD matrix

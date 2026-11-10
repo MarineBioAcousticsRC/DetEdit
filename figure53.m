@@ -53,7 +53,12 @@ if dPARAMS.ff3 % ID'd in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         iColor = dPARAMS.specIDs(iC2);
         thisK3 = dPARAMS.K3(dPARAMS.thisIDset{iC2});
-        if dPARAMS.showGT % outline = prediction, fill = ground truth
+        if dPARAMS.showAR % fill = label, outline = label / red (rejected)
+            dHANDLES.RMSID53{iColor} = plot_AR_rings(dHANDLES.h53,...
+                dPARAMS.transfRMS(thisK3),dPARAMS.freq(thisK3),dPARAMS.t(thisK3),...
+                dPARAMS.arStatus(dPARAMS.thisIDset{iC2}),p.colorTab(iColor,:),...
+                p.sizePoints,dPARAMS.ID_Toggle{iColor});
+        elseif dPARAMS.showGT % outline = prediction, fill = ground truth
             dHANDLES.RMSID53{iColor} = plot_misclass_rings(dHANDLES.h53,...
                 dPARAMS.transfRMS(thisK3),dPARAMS.freq(thisK3),dPARAMS.t(thisK3),...
                 dPARAMS.gtCode(dPARAMS.thisIDset{iC2}),p.colorTab(iColor,:),...
@@ -69,7 +74,7 @@ if dPARAMS.ff3 % ID'd in associated color
 end
 
 
-if dPARAMS.ff3 && dPARAMS.showGT
+if dPARAMS.ff3 && (dPARAMS.showGT || dPARAMS.showAR)
     stack_ID_rings(dHANDLES.h53) % wrong on top, correct on bottom
 end
 hold(dHANDLES.h53, 'off')

@@ -20,6 +20,10 @@ function plot_highlight_bins(kind)
 %            width (still in the predicted label's color), and the legend
 %            says which ground truth it was
 %   dashed - no ground truth for those clicks
+% When p.plotAcceptReject is on (accept/reject review), each label is split
+% by your review decision instead (still in the label's color):
+%   solid  - accepted
+%   dotted - rejected (drawn on top)
 %
 % The window only opens once something is highlighted; it is cleared when
 % nothing is highlighted.
@@ -100,7 +104,13 @@ if dPARAMS.ff3
     isID(isID) = dPARAMS.labelConfIdx(idLoc(isID)); % low confidence = unlabeled
     isID = isID & ~isFD;
     predCode(isID) = dPARAMS.spCodeSet(idLoc(isID));
-    if dPARAMS.showGT
+    if isfield(dPARAMS,'showAR') && dPARAMS.showAR
+        % accept/reject review: 1 = accepted (solid), 3 = rejected (dotted)
+        st = dPARAMS.arStatus(idLoc(isID));
+        mt = ones(size(st));
+        mt(st == 0) = 3;
+        matchType(isID) = mt;
+    elseif dPARAMS.showGT
         gt = dPARAMS.gtCode(idLoc(isID));
         mt = 3*ones(size(gt));
         mt(gt == predCode(isID)) = 1;
@@ -213,7 +223,19 @@ for iB = 1:nBins
             xData = xData(:).'; 
             yData = yData(:).' + waveSpacing*(size(groups,1) - iG);
         end
-        if thisMatch == 3
+        isARmode = isfield(dPARAMS,'showAR') && dPARAMS.showAR;
+        if isARmode && thisMatch ~= 0
+            % accept/reject review: solid = accepted, dotted = rejected
+            if thisMatch == 3
+                hLines(end+1) = plot(ax,xData,yData,'Color',thisColor,...
+                    'LineStyle',':','LineWidth',2.4); %#ok<AGROW>
+                lineNames{end+1} = sprintf('%s rejected (n=%d)',thisName,sum(idx)); %#ok<AGROW>
+            else
+                hLines(end+1) = plot(ax,xData,yData,'Color',thisColor,...
+                    'LineStyle','-','LineWidth',2); %#ok<AGROW>
+                lineNames{end+1} = sprintf('%s accepted (n=%d)',thisName,sum(idx)); %#ok<AGROW>
+            end
+        elseif thisMatch == 3
             % wrong: dotted-type line; k-th wrong ground truth for this
             % predicted label in this panel gets the k-th pattern/width
             if isKey(nWrongSoFar,thisCode)

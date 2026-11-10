@@ -30,7 +30,12 @@ if dPARAMS.ff3 % plot ID'd detections in associated color
     for iC2 = 1:length(dPARAMS.specIDs) % set colors
         iColor = dPARAMS.specIDs(iC2);
         thisSet = dPARAMS.thisIDset{iC2};
-        if dPARAMS.showGT % outline = prediction, fill = ground truth
+        if dPARAMS.showAR % fill = label, outline = label (accepted) / red (rejected)
+            dHANDLES.RLID201{iColor} = plot_AR_rings(dHANDLES.LTSAsubs(1),...
+                dPARAMS.tID(thisSet),dPARAMS.rlID(thisSet),dPARAMS.tID(thisSet),...
+                dPARAMS.arStatus(thisSet),p.colorTab(iColor,:),...
+                p.sizePoints,dPARAMS.ID_Toggle{iColor});
+        elseif dPARAMS.showGT % outline = prediction, fill = ground truth
             dHANDLES.RLID201{iColor} = plot_misclass_rings(dHANDLES.LTSAsubs(1),...
                 dPARAMS.tID(thisSet),dPARAMS.rlID(thisSet),dPARAMS.tID(thisSet),...
                 dPARAMS.gtCode(thisSet),p.colorTab(iColor,:),p.colorTab,...
@@ -44,7 +49,7 @@ if dPARAMS.ff3 % plot ID'd detections in associated color
         end
     end
 end
-if dPARAMS.ff3 && dPARAMS.showGT
+if dPARAMS.ff3 && (dPARAMS.showGT || dPARAMS.showAR)
     stack_ID_rings(dHANDLES.LTSAsubs(1)) % wrong on top, correct on bottom
 end
 hold(dHANDLES.LTSAsubs(1),'off')
@@ -60,6 +65,13 @@ elseif isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'model')
     tstr{2} = [tstr{2},'   |   Labels edit: MODEL ONLY'];
 elseif isfield(dPARAMS,'editTarget') && strcmp(dPARAMS.editTarget,'gt')
     tstr{2} = [tstr{2},'   |   Labels edit: GT ONLY'];
+end
+if dPARAMS.showAR
+    nAcc = 0; nRej = 0;
+    if dPARAMS.ff3
+        nAcc = sum(dPARAMS.arStatus == 1); nRej = sum(dPARAMS.arStatus == 0);
+    end
+    tstr{2} = [tstr{2},sprintf('   |   Accepted %d, Rejected %d (red ring)',nAcc,nRej)];
 end
 title(dHANDLES.LTSAsubs(1),tstr);
 ylabel(dHANDLES.LTSAsubs(1),'Received Level (dB_p_p re 1\muPa)')
@@ -128,7 +140,13 @@ if ldt > 0
             iddt2 = [dPARAMS.dtID(thisIDset(1:end-1));...
                 dPARAMS.dtID(thisIDset(1:end-1))];
             
-            if dPARAMS.showGT % outline = prediction, fill = ground truth
+            if dPARAMS.showAR % fill = label, outline = label / red (rejected)
+                ist2 = [dPARAMS.arStatus(thisIDset(1:end-1));...
+                    dPARAMS.arStatus(thisIDset(2:end))];
+                dHANDLES.ICIID201{iColor} = plot_AR_rings(dHANDLES.LTSAsubs(3),...
+                    idt2,iddt2,idt2,ist2,p.colorTab(iColor,:),...
+                    p.sizePoints,dPARAMS.ID_Toggle{iColor});
+            elseif dPARAMS.showGT % outline = prediction, fill = ground truth
                 igt2 = [dPARAMS.gtCode(thisIDset(1:end-1));...
                     dPARAMS.gtCode(thisIDset(2:end))];
                 dHANDLES.ICIID201{iColor} = plot_misclass_rings(dHANDLES.LTSAsubs(3),...
@@ -142,7 +160,7 @@ if ldt > 0
             end
         end
     end
-    if dPARAMS.ff3 && dPARAMS.showGT
+    if dPARAMS.ff3 && (dPARAMS.showGT || dPARAMS.showAR)
         stack_ID_rings(dHANDLES.LTSAsubs(3)) % wrong on top, correct on bottom
     end
     hold(dHANDLES.LTSAsubs(3),'off')

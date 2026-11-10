@@ -63,7 +63,12 @@ if any(isID)
     for thisCode = unique(codes(:))'
         inCode = codes == thisCode;
         thisColor = p.colorTab(thisCode,:);
-        if dPARAMS.showGT
+        if isfield(dPARAMS,'showAR') && dPARAMS.showAR
+            h = plot_AR_rings(ax,idX(inCode),idY(inCode),idT(inCode),...
+                dPARAMS.arStatus(idLocs(inCode)),thisColor,p.sizePoints,...
+                dPARAMS.ID_Toggle{thisCode});
+            set(h,'Tag','yellFront','UserData',[]) % not brushable
+        elseif dPARAMS.showGT
             h = plot_misclass_rings(ax,idX(inCode),idY(inCode),...
                 idT(inCode),dPARAMS.gtCode(idLocs(inCode)),...
                 thisColor,p.colorTab,p.sizePoints,dPARAMS.ID_Toggle{thisCode});

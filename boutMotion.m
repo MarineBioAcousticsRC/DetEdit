@@ -81,6 +81,9 @@ if ~isempty(J) % if there are detection in this session
     dPARAMS.labelConf = []; % label confidence scores
     dPARAMS.gtCode = []; % ground truth codes (zID col 4), NaN if none
     dPARAMS.showGT = false; % draw outline=prediction / fill=ground truth
+    % accept/reject review: fill = label, outline = label (accepted) or red (rejected)
+    dPARAMS.showAR = isfield(p,'plotAcceptReject') && p.plotAcceptReject;
+    dPARAMS.arStatus = []; % 1 = accepted, 0 = rejected (zID col 4), per ID'd detection
     % Which label column colors the plots when plotCorrect_incorrect is off:
     % p.plotLabels = 'model' (zID col 2, default) or 'gt' (zID col 4).
     % zIDplot is only used for display; zID on disk is untouched.
@@ -133,6 +136,18 @@ if ~isempty(J) % if there are detection in this session
             else
                 disp(' plotCorrect_incorrect is on, but ID file has no 4th (gt) column')
             end
+        end
+
+        if dPARAMS.showAR
+            % accept/reject status, zID col 4 (missing/NaN = accepted, e.g. a
+            % row added by hand)
+            dPARAMS.arStatus = ones(length(IDidx),1);
+            if size(zID,2) >= 4
+                st = zID(IDidx,4);
+                dPARAMS.arStatus(st == 0) = 0;
+            end
+            disp([' Accepted labels:',num2str(sum(dPARAMS.arStatus == 1)),...
+                ', rejected:',num2str(sum(dPARAMS.arStatus == 0))])
         end
 
         % add colors if a label code has none yet (e.g. a new code typed

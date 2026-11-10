@@ -303,6 +303,33 @@ else
         disp(['Number of Test Detections & False Detect = ',num2str(sum(zTD(tfinal,:)))])
         disp(' ')
         disp(['Done with file ',fNameList.TPWS])
+        if isfield(p,'plotAcceptReject') && p.plotAcceptReject
+            % accept/reject review: write the final ID (accepted only)
+            % to outDir\checked\
+            if ~isempty(zID)
+                [~,uniqueID] = unique(zID(:,1));
+                zID = zID(uniqueID,:);
+                zID(zID(:,2)==0,:) = [];
+            end
+            save(fNameList.ID,'zID','-append') % working file, up to date
+            save_checked_ID(zID,fNameList);
+            if isfield(p,'pageAll') && p.pageAll
+                % open the next disk (skipping disks without a session file)
+                nxt = p.arIdx + 1;
+                while nxt <= length(p.arFiles) && exist(p.arFiles(nxt).ltsaSess,'file') ~= 2
+                    fprintf('[WARN] No LTSA session file for %s - skipped (run mkLTSAsessions).\n',...
+                        p.arFiles(nxt).label);
+                    nxt = nxt + 1;
+                end
+                if nxt <= length(p.arFiles)
+                    fprintf('\n===== Next disk: %s =====\n',p.arFiles(nxt).label);
+                    userFunc = p.userFunc;
+                    detEdit(userFunc,nxt); % resets everything for the next disk
+                    return
+                end
+                disp('That was the last disk.')
+            end
+        end
         commandwindow
         return
     else

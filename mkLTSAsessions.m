@@ -26,6 +26,13 @@ end
 
 p = getParams(userFunc,'analysis','mkLTSA');
 
+% Accept/reject review: all disks with accepted/rejected labels, across all
+% deployments under ltsaDir, sessions around labeled clicks only
+if isfield(p,'plotAcceptReject') && p.plotAcceptReject
+    mkLTSAsessions_AR(p);
+    return
+end
+
 %% Define subfolder that fit specified iteration
 if p.iterationNum > 1
     for id = 2: str2num(p.iterationNum) % iterate id times according to p.iterationNum

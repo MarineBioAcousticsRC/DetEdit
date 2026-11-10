@@ -90,6 +90,23 @@ plotLabels = 'model'; % when plotCorrect_incorrect is off: color points by the
 % model output ('model', zID col 2) or by ground truth ('gt', zID col 4).
 % With 'gt', hand labeling edits the ground truth. Ignored when
 % plotCorrect_incorrect is on.
+plotAcceptReject = false; % if true, review accept/reject ground truth:
+% labels are read from the accepted / rejected ID files (acceptedDir,
+% rejectedDir below). ID'd points are drawn as circles: filled center =
+% label color, outline = label color if accepted, red if rejected. Sessions
+% are built only around accepted/rejected clicks. Work in progress is kept
+% in outDir\checked\inProgress\, and the final 3-column ID file (accepted
+% labels only) is written to outDir\checked\ when you step past the last
+% session.
+% Overrides plotCorrect_incorrect / plotLabels.
+% Folders for accept/reject review (used when plotAcceptReject is true).
+% Files are matched by deployment + disk (NFC_A_02 + disk01a), not by full
+% name. TPWS, LTSA, accepted and rejected folders are searched recursively.
+acceptedDir = ''; % folder with the accepted ID files
+rejectedDir = ''; % folder with the rejected ID files
+outDir = '';      % LTSA session files, FD/TD files and checked\ go here
+pageAll = false;  % true = when you finish a disk, open the next one
+arMinSession = 10; % minutes: shorter sessions are widened to this length
 
 
 %% Parameters for modDet (if specified to compute)

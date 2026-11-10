@@ -8,7 +8,12 @@ global dPARAMS dHANDLES p
 %   bottom - average spectra by ground truth label (zID col 4)
 % The window is made twice as tall the first time, so each panel keeps
 % about the shape of the original single plot.
-showGTpanel = isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect;
+%
+% With p.plotAcceptReject on (accept/reject review), the two panels are:
+%   top    - average spectra of ACCEPTED clicks, per label
+%   bottom - average spectra of REJECTED clicks, per label
+showAR = isfield(dPARAMS,'showAR') && dPARAMS.showAR;
+showGTpanel = (isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect) || showAR;
 
 figure(dHANDLES.spectrafig);clf
 if showGTpanel
@@ -37,7 +42,41 @@ if p.specploton
     end
 
     dHANDLES.SPEID50 = cell(size(p.colorTab,1),1);
-    if dPARAMS.ff3  % average id click spec
+    if showAR
+        % top: accepted, bottom: rejected (same clicks as the ID'd points:
+        % above the confidence limit)
+        nPanel = [0,0];
+        axAR = [dHANDLES.h50, dHANDLES.h50gt];
+        hold(dHANDLES.h50gt,'on')
+        if dPARAMS.ff3
+            for iC = 1:length(dPARAMS.specIDs)
+                iColor = dPARAMS.specIDs(iC);
+                setIdx = dPARAMS.thisIDset{iC};
+                for iP = 1:2 % 1 = accepted (status 1), 2 = rejected (status 0)
+                    sel = setIdx(dPARAMS.arStatus(setIdx) == 2-iP);
+                    if isempty(sel)
+                        continue
+                    end
+                    arSpec = norm_spec_simple(mean(dPARAMS.cspJ(dPARAMS.K3(sel),:),1),...
+                        dPARAMS.fimint,dPARAMS.fimaxt);
+                    hAR = plot(axAR(iP),dPARAMS.ft,arSpec,'Linewidth',4,...
+                        'Color',p.colorTab(iColor,:),'Visible',dPARAMS.ID_Toggle{iColor});
+                    % legend toggle for this label hides its line in both panels
+                    dHANDLES.SPEID50{iColor} = [dHANDLES.SPEID50{iColor}; hAR];
+                    nPanel(iP) = nPanel(iP) + 1;
+                end
+            end
+        end
+        hold(dHANDLES.h50gt,'off')
+        panelNames = {'Accepted','Rejected'};
+        for iP = 1:2
+            if nPanel(iP) == 0
+                title(axAR(iP),[panelNames{iP},' (none in this session)'])
+            else
+                title(axAR(iP),panelNames{iP})
+            end
+        end
+    elseif dPARAMS.ff3  % average id click spec
         for iC = 1:length(dPARAMS.specIDs) % set colors
             iColor = dPARAMS.specIDs(iC);
             dHANDLES.SPEID50{iColor} = plot(dHANDLES.h50,dPARAMS.ft,...
@@ -49,7 +88,7 @@ if p.specploton
     hold(dHANDLES.h50, 'off')
 
     % bottom panel: average spectra by ground truth label
-    if showGTpanel
+    if showGTpanel && ~showAR
         nGT = 0;
         hold(dHANDLES.h50gt,'on')
         if dPARAMS.ff3 && ~isempty(dPARAMS.gtCode)

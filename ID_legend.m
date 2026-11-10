@@ -45,6 +45,8 @@ end
 labelStr = 'ID Color Legend';
 if isfield(dPARAMS,'plotGTonly') && dPARAMS.plotGTonly
     labelStr = 'ID Legend (ground truth)';
+elseif isfield(p,'plotAcceptReject') && p.plotAcceptReject
+    labelStr = 'ID Legend (red ring = rejected)';
 end
 txtPos = [0 1-h 1 h];
 dHANDLES.h10handles.headTxt = uicontrol(dHANDLES.hID, ...

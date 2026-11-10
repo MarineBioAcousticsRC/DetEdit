@@ -6,12 +6,21 @@
 % Define input/output locations.REQUIRED
 %C:\Users\Kasey\Desktop\forDetEdit_NFC02A_Model
 
-paramsUser.plotCorrect_incorrect = true;
+%paramsUser.plotCorrect_incorrect = true;
+% --- Accept/reject review (see initDefaultParams for details) ---
+paramsUser.plotAcceptReject = true;
+paramsUser.acceptedDir = 'E:\ID_Sets\ATL_IDs\Combined_AllLabels_PostRules_ManualReview2\accepted';
+paramsUser.rejectedDir = 'E:\ID_Sets\ATL_IDs\Combined_AllLabels_PostRules_ManualReview2\rejected';
+paramsUser.outDir = 'C:\Users\Kasey\Desktop\NFC_DE'; % LTSA sessions, FD/TD, checked\
+paramsUser.pageAll = true; % finishing a disk opens the next one
+filePrefix = 'NFC_A_02_disk01a'; % disk to start at ('' = first; 'NFC_A_02' = first of that deployment)
+tpwsDir = 'E:\Reduced_ATL_TPWS\NFC';            % searched recursively
+ltsaDir = '\\frosty.ucsd.edu\LTSA\NFC\A\df1'; % searched recursively, all deployments
 %paramsUser.plotLabels = 'gt';    % color everything by ground truth (column 4)
 %paramsUser.plotLabels = 'model'; % color by model output (column 2), the default
 %paramsUser.minLabelConfidence = 0.7;
 
-filePrefix = 'HAT03A'; % TPWS file name to match. _disk08c_CombinedBWD
+%filePrefix = 'HAT03A'; % TPWS file name to match. _disk08c_CombinedBWD
 % Optional, replace file prefix to a more generic name to specify settings 
 % for mkLTSAsessions or modDet, it will run in multiple files.
 % Example: GofMX_DT03 (will run modDet to all files matching the generic name) 
@@ -20,7 +29,7 @@ sampleRate = 200; % replace with your sample rate
 sp = ''; % species code 
 % Example:  '' (Unknown), 'De' (Dolphin), 'Pm' (sperm whale)
 % (See comments in initSpParams.m for more species codes)
-tpwsDir = 'F:\TF_EvalSets_BU\TF3\HAT\combined'; % identify folder containing TPWS files
+%tpwsDir = 'F:\TF_EvalSets_BU\TF3\HAT\combined'; % identify folder containing TPWS files
 
 % Specific input/output locations (comment them if not in use)
 % tfName = 'E:\MyTFfolder'; % identify folder containing transfer function 

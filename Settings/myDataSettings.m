@@ -78,4 +78,9 @@ paramsUser.fLow = 1; % Minimum frequency of interest
 % prediction, fill = ground truth (zID col 4; empty center if no gt)
 % paramsUser.plotLabels = 'gt'; % with plotCorrect_incorrect off: color by
 % ground truth ('gt') instead of model output ('model', the default)
+% paramsUser.plotAcceptReject = true; % review accept/reject ground truth
+% paramsUser.acceptedDir = ''; % accepted ID files
+% paramsUser.rejectedDir = ''; % rejected ID files
+% paramsUser.outDir = '';      % LTSA sessions, FD/TD files, checked\
+% paramsUser.pageAll = false;  % true = finishing a disk opens the next one
 % paramsUser.mySpID = {'Label1','Label2','Label3', 'Label4', 'Label5', 'Label6', 'Label7', 'Label8', 'Label9', 'Label10'};

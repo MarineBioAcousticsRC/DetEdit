@@ -22,11 +22,38 @@ function zID = set_ID_labels(zID,times,label)
 % Output:
 %   zID   - updated matrix (widened to 4 columns for 'model'/'gt' editing)
 
-global dPARAMS
+global dPARAMS p
 
 editTarget = 'both';
 if isfield(dPARAMS,'editTarget') && ~isempty(dPARAMS.editTarget)
     editTarget = dPARAMS.editTarget;
+end
+
+% Accept/reject review (p.plotAcceptReject): col 4 is the review status
+% (1 = accepted, 0 = rejected), not a ground truth label. Any label set by
+% hand makes the detection ACCEPTED, whatever its status was.
+if isfield(p,'plotAcceptReject') && p.plotAcceptReject
+    times = times(:);
+    if isempty(times)
+        return
+    end
+    if isempty(zID)
+        zID = zeros(0,4);
+    elseif size(zID,2) < 4
+        zID(:,end+1:4) = 1; % no status column yet: everything accepted
+    end
+    [isOld,loc] = ismember(times,zID(:,1));
+    rows = loc(isOld);
+    zID(rows,2) = label;
+    zID(rows,3) = 1; % hand label: confidence 1 (as in the normal detEdit)
+    zID(rows,4) = 1; % accepted
+    newTimes = times(~isOld);
+    if ~isempty(newTimes)
+        newRows = make_manual_ID_rows(newTimes,label,size(zID,2));
+        newRows(:,4) = 1; % accepted
+        zID = [zID; newRows];
+    end
+    return
 end
 
 times = times(:);

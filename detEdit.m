@@ -1,4 +1,4 @@
-function detEdit(userFunc)
+function detEdit(userFunc, arFileIdx)
 
 % detEdit.m
 
@@ -15,6 +15,11 @@ function detEdit(userFunc)
 % detEdit(@yourDataSettings)
 %
 % detEdit
+%
+% Accept/reject review (plotAcceptReject = true in your settings): opens the
+% disk named by filePrefix (e.g. 'NFC_A_02_disk01a'); with pageAll = true,
+% finishing a disk opens the next one. arFileIdx is used for that paging
+% (index of the disk to open, from ar_build_index) - you don't need it.
 clear global
 global dPARAMS p dHANDLES fNameList zID zFD zTD
 
@@ -35,13 +40,15 @@ if typeInput ~= 1
 end
 
 p = getParams(userFunc,'analysis','detEdit');
+p.userFunc = userFunc; % kept so the next disk can be opened (pageAll)
+p.plotAcceptReject = isfield(p,'plotAcceptReject') && p.plotAcceptReject;
 p.sizePoints = 8; % the current points
 p.sizeBack = 5; % the background points
 p.sizeFPR = 8; % the current points
 p.colorPoints = [1 .84 0];
 
 %% Define subfolder that fit specified iteration
-if p.iterationNum > 1
+if p.iterationNum > 1 && ~p.plotAcceptReject
     for id = 2: str2num(p.iterationNum) % iterate id times according to p.iterationNum
         subfolder = ['TPWS',num2str(id)];
         p.tpwsDir = (fullfile(p.tpwsDir,subfolder));
@@ -49,6 +56,20 @@ if p.iterationNum > 1
 end
 
 %% Check if TPWS file exists
+if p.plotAcceptReject
+    % Accept/reject review: disks with accepted/rejected labels, matched to
+    % TPWS / LTSA files by deployment + disk (searched recursively)
+    p.arFiles = ar_build_index(p);
+    if exist('arFileIdx','var') && ~isempty(arFileIdx)
+        p.arIdx = arFileIdx;
+    else
+        p.arIdx = ar_pick_start(p.arFiles,p.filePrefix);
+    end
+    p.arEntry = p.arFiles(p.arIdx);
+    fprintf('\nDisk %d of %d: %s\n  TPWS: %s\n',p.arIdx,length(p.arFiles),...
+        p.arEntry.label,p.arEntry.tpws);
+    matchingFile = p.arEntry.tpwsName;
+else
 % Concatenate parts of file name
 if isempty(p.speName)
     detfn = [p.filePrefix,'_','TPWS',p.iterationNum,'.mat'];
@@ -68,11 +89,17 @@ elseif length(fileMatchIdx)>1
 end
 
 matchingFile = fileList{fileMatchIdx};
+end
 
 %% Handle Transfer Function
 % add in transfer function if desired
 if p.tfSelect > 0
-    [dPARAMS.tf,tffreq,tfuppc] = getTransfunc(p.filePrefix, p.tfName,p);
+    if p.plotAcceptReject
+        tfPrefix = p.arEntry.depRaw; % this disk's deployment (NFC_A_02)
+    else
+        tfPrefix = p.filePrefix;
+    end
+    [dPARAMS.tf,tffreq,tfuppc] = getTransfunc(tfPrefix, p.tfName,p);
 else
     dPARAMS.tf = 0;
     disp('No TF Applied');
@@ -80,10 +107,22 @@ end
 %% Generate FD, TD, and ID files if needed
 [zFD,zID,fNameList] = buildLabelFiles(matchingFile, p);
 
+% Accept/reject review: labels come from tpwsDir\accepted + \rejected,
+% combined in a working ID file (zID col 4 = 1 accepted / 0 rejected)
+if p.plotAcceptReject
+    p.plotCorrect_incorrect = false; % col 4 holds accept/reject status here,
+    p.plotLabels = 'model';          % not a ground truth label
+    fNameList = setup_accept_reject(fNameList, p);
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load detections and false detections
 % MTT = time MPP = peak-peak % MSN = waveform %MSP = spectra
-fNameList.TPWS = fullfile(p.tpwsDir,matchingFile);
+if p.plotAcceptReject
+    fNameList.TPWS = p.arEntry.tpws;
+else
+    fNameList.TPWS = fullfile(p.tpwsDir,matchingFile);
+end
 load(fNameList.TPWS,'MTT','MPP')
 
 if isrow(MTT); MTT = MTT'; end
@@ -190,7 +229,7 @@ if iscell(p.mySpID)
 end
 if ~isempty(zID)
     labelCodes = zID(:,2);
-    if size(zID,2) >= 4
+    if size(zID,2) >= 4 && ~p.plotAcceptReject
         labelCodes = [labelCodes; zID(:,4)]; % ground truth codes too
     end
     labelCodes = labelCodes(isfinite(labelCodes) & labelCodes > 0 & ...
@@ -206,12 +245,26 @@ p.colorTab = fix_colorTab(p.colorTab,nNeeded);
 % TODO: this is calculated in mkLTSA, we should save it there instead of
 % recalculating here but would create backward compatibility issues
 
-[dPARAMS.nb,dPARAMS.eb,dPARAMS.sb,dPARAMS.bd] = calculate_bouts(dPARAMS.clickTimes,p);
+if p.plotAcceptReject
+    % sessions only around clicks with an accepted/rejected label (same as
+    % mkLTSAsessions); all clicks are still shown in each session
+    boutTimes = ar_bout_times(dPARAMS.clickTimes,dPARAMS.clickLevels,p.threshRL,p.arEntry);
+    if isempty(boutTimes)
+        error('detEdit:acceptReject',['%s has no accepted/rejected click above ',...
+            'threshRL (%g dB) - no sessions to show.'],p.arEntry.label,p.threshRL);
+    end
+    [dPARAMS.nb,dPARAMS.eb,dPARAMS.sb,dPARAMS.bd] = ar_calculate_bouts(boutTimes,p);
+else
+    [dPARAMS.nb,dPARAMS.eb,dPARAMS.sb,dPARAMS.bd] = calculate_bouts(dPARAMS.clickTimes,p);
+end
 dPARAMS.bFlag = 0;
 
 %% Make LTSA session file
 lsfn = strrep(matchingFile,'TPWS','LTSA');
 fNameList.LTSA = fullfile(p.tpwsDir,lsfn);
+if p.plotAcceptReject
+    fNameList.LTSA = p.arEntry.ltsaSess; % in outDir (mkLTSAsessions)
+end
 Altsa = exist(fNameList.LTSA,'file');
 if Altsa ~= 2
     disp(['Error: LTSA Sessions File Does Not Exist: ',fNameList.LTSA])
@@ -346,7 +399,12 @@ if p.autoFalse
     apply_auto_thresh
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-dPARAMS.k = input('Starting Session:  ');
+if p.plotAcceptReject && exist('arFileIdx','var') && ~isempty(arFileIdx)
+    dPARAMS.k = 1; % paging to the next disk: start at its first session
+    fprintf('Starting at session 1 of %d\n',dPARAMS.nb);
+else
+    dPARAMS.k = input(sprintf('Starting Session (1-%d):  ',dPARAMS.nb));
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp('Press ''b'' key to go backward ')
 disp('Press any other key to go forward')

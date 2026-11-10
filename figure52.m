@@ -9,7 +9,12 @@ global dPARAMS dHANDLES p
 %            its own row so they don't overlap
 % The window is made twice as tall the first time, so each panel keeps
 % about the shape of the original single plot.
-showGTpanel = isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect;
+%
+% With p.plotAcceptReject on (accept/reject review), the two panels are:
+%   top    - average waveforms of ACCEPTED clicks, per label
+%   bottom - average waveforms of REJECTED clicks, per label, one row each
+showAR = isfield(dPARAMS,'showAR') && dPARAMS.showAR;
+showGTpanel = (isfield(p,'plotCorrect_incorrect') && p.plotCorrect_incorrect) || showAR;
 waveSpacing = 1.2; % vertical offset between stacked ground truth waveforms
 waveLW = 1.5; % waveform line width (MATLAB default is 0.5)
 
@@ -41,7 +46,55 @@ if p.specploton
     end
 
     dHANDLES.WAVID52 = cell(size(p.colorTab,1),1);
-    if dPARAMS.ff3 % average waveform ID'd in associated color
+    nGT = 0;
+    if showAR
+        % top: accepted (drawn like the normal ID'd waveforms), bottom:
+        % rejected, one row per label (same clicks as the ID'd points)
+        nAccLines = 0;
+        rejCodes = []; rejWav = [];
+        if dPARAMS.ff3
+            for iC = 1:length(dPARAMS.specIDs)
+                iColor = dPARAMS.specIDs(iC);
+                setIdx = dPARAMS.thisIDset{iC};
+                accSel = setIdx(dPARAMS.arStatus(setIdx) == 1);
+                rejSel = setIdx(dPARAMS.arStatus(setIdx) == 0);
+                if ~isempty(accSel)
+                    accWav = norm_wav(mean(dPARAMS.csnJ(dPARAMS.K3(accSel),:),1));
+                    hAR = plot(dHANDLES.h52,accWav' - rand(1),...
+                        'Color',p.colorTab(iColor,:),'LineWidth',waveLW,...
+                        'Visible',dPARAMS.ID_Toggle{iColor});
+                    dHANDLES.WAVID52{iColor} = [dHANDLES.WAVID52{iColor}; hAR];
+                    nAccLines = nAccLines + 1;
+                end
+                if ~isempty(rejSel)
+                    rejCodes(end+1) = iColor; %#ok<AGROW>
+                    rejWav(end+1,:) = norm_wav(mean(dPARAMS.csnJ(dPARAMS.K3(rejSel),:),1)); %#ok<AGROW>
+                end
+            end
+        end
+        hold(dHANDLES.h52, 'off')
+        nGT = length(rejCodes); % rows in the bottom panel
+        hold(dHANDLES.h52gt,'on')
+        for iG = 1:nGT
+            hAR = plot(dHANDLES.h52gt,rejWav(iG,:) + waveSpacing*(nGT - iG),...
+                'Color',p.colorTab(rejCodes(iG),:),'LineWidth',waveLW,...
+                'Visible',dPARAMS.ID_Toggle{rejCodes(iG)});
+            dHANDLES.WAVID52{rejCodes(iG)} = [dHANDLES.WAVID52{rejCodes(iG)}; hAR];
+        end
+        hold(dHANDLES.h52gt,'off')
+        if nAccLines == 0
+            title(dHANDLES.h52,'Accepted (none in this session)')
+        else
+            title(dHANDLES.h52,'Accepted')
+        end
+        if nGT == 0
+            title(dHANDLES.h52gt,'Rejected (none in this session)')
+        else
+            title(dHANDLES.h52gt,'Rejected')
+            ylim(dHANDLES.h52gt,[-.05, waveSpacing*nGT + 1.05]) % room for highlight row
+            set(dHANDLES.h52gt,'YTick',[]) % stacked rows: amplitude ticks don't apply
+        end
+    elseif dPARAMS.ff3 % average waveform ID'd in associated color
         for iC = 1:size(dPARAMS.wavID,1) % set colors
             iColor = dPARAMS.specIDs(iC);
             dHANDLES.WAVID52{iColor} = plot(dHANDLES.h52,(dPARAMS.wavID(iC,:)' +...,
@@ -53,8 +106,7 @@ if p.specploton
     hold(dHANDLES.h52, 'off')
 
     % bottom panel: average waveforms by ground truth label, one row each
-    nGT = 0;
-    if showGTpanel
+    if showGTpanel && ~showAR
         hold(dHANDLES.h52gt,'on')
         if dPARAMS.ff3 && ~isempty(dPARAMS.gtCode)
             % same clicks as the top panel's ID lines: above the confidence limit

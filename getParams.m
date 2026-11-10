@@ -91,6 +91,12 @@ switch analysis
         params.minLabelConfidence = minLabelConfidence;
         params.plotCorrect_incorrect = plotCorrect_incorrect;
         params.plotLabels = plotLabels;
+        params.plotAcceptReject = plotAcceptReject;
+        params.acceptedDir = acceptedDir;
+        params.rejectedDir = rejectedDir;
+        params.outDir = outDir;
+        params.pageAll = pageAll;
+        params.arMinSession = arMinSession;
         % apply species default parameters
         if ~isempty(spParams)
             idx = ismember(fieldnames(spParams),fieldnames(params));

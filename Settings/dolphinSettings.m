@@ -9,16 +9,16 @@
 %paramsUser.plotCorrect_incorrect = true;
 % --- Accept/reject review (see initDefaultParams for details) ---
 paramsUser.plotAcceptReject = true;
-paramsUser.acceptedDir = 'E:\ID_Sets\ATL_IDs\Combined_AllLabels_PostRules_ManualReview2\accepted';
-paramsUser.rejectedDir = 'E:\ID_Sets\ATL_IDs\Combined_AllLabels_PostRules_ManualReview2\rejected';
-paramsUser.outDir = 'C:\Users\Kasey\Desktop\NFC_DE'; % LTSA sessions, FD/TD, checked\
+paramsUser.acceptedDir = 'E:\ID_Sets\ATL_IDs\Combined_AllLabels_PostRules_ManualReview_Pass1\NFC\accepted';
+paramsUser.rejectedDir = 'E:\ID_Sets\ATL_IDs\Combined_AllLabels_PostRules_ManualReview_Pass1\NFC\rejected';
+paramsUser.outDir = 'C:\Users\Kasey\Desktop\NFC_DE_NoFilt'; % LTSA sessions, FD/TD, checked\
 paramsUser.pageAll = true; % finishing a disk opens the next one
-filePrefix = 'NFC_A_02_disk01a'; % disk to start at ('' = first; 'NFC_A_02' = first of that deployment)
+filePrefix = 'NFCA_05_disk01b'; % disk to start at ('' = first; 'NFC_A_02' = first of that deployment)
 tpwsDir = 'E:\Reduced_ATL_TPWS\NFC';            % searched recursively
 ltsaDir = '\\frosty.ucsd.edu\LTSA\NFC\A\df1'; % searched recursively, all deployments
 %paramsUser.plotLabels = 'gt';    % color everything by ground truth (column 4)
 %paramsUser.plotLabels = 'model'; % color by model output (column 2), the default
-%paramsUser.minLabelConfidence = 0.7;
+%paramsUser.minLabelConfidence = 0.8;
 
 %filePrefix = 'HAT03A'; % TPWS file name to match. _disk08c_CombinedBWD
 % Optional, replace file prefix to a more generic name to specify settings 
